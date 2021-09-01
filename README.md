@@ -8,7 +8,7 @@ Package manager manager and SDK manager, because someone had to make the 15th st
 
 ## What?
 
-Installs shit so you don't have to.
+Installs shit so you don't have to, and manages the dependencies of the dependencies so you're not stuck with version mismatches.
 
 ## Like?
 
