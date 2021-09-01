@@ -1,5 +1,8 @@
-#include<iostream>
+#include <iostream>
 
-int main() {
-    std::cout << "Hello, World!" << std::endl;
+#include "InstallationResolver.hpp"
+
+
+int main(int argc, const char* argv[]) {
+    
 }
