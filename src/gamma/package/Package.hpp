@@ -9,10 +9,18 @@
 namespace gamma {
 
 enum class PackageProvider {
-    GITHUB, OTHER
+    GITHUB,
+    OTHER,
+    /**
+     * Used for when the baseURL is actually a key for another package.
+     * Because I can't be arsed, aliases CANNOT be nested. An alias MUST
+     * point to a proper package.
+     */
+    ALIAS,
 };
 
 struct Package {
+    // Base URL, required if the provider isn't OTHER.
     std::string baseURL;
     PackageProvider provider;
 
@@ -20,15 +28,28 @@ struct Package {
     std::vector<std::string> dependencies;
 
     // Resolves a URL, required if provider is OTHER.
-    std::function<std::string(const std::string& version)> resolver;
+    std::function<PackageResolver::PackageInfo(const std::string& version)> resolver;
 };
 
-std::map<std::string, Package> packages = {
+inline std::map<std::string, Package> packages = {
     { "node.js", {
-        "https://nodejs.org/en/download/current/",
+        "",
         PackageProvider::OTHER,
         {},
         gamma::PackageResolver::ResolveNode
+    }},
+    // python == python3.
+    // There's no reason what so ever to give people an easy way to install python 2.
+    // We're no longer in the dark ages - it's dead. Upgrade already.
+    { "python",{
+        "",
+        PackageProvider::OTHER,
+        {},
+        nullptr // TODO
+    }},
+    {"python3",{
+        "python",
+        PackageProvider::ALIAS
     }},
 };
 

@@ -20,7 +20,9 @@ Through a combination of GitHub repositories, automatic redirection, and good 'o
 
 ## Requirements?
 
-A C++11 compiler.
+A C++17 compiler, and Linux or MacOS. Note that MacOS will have weaker support, because I don't have access to any Mac machines. Please consider contributing to the project if you have access to a Mac.
+
+General UNIXes beyond Linux and MacOS will have varying support, for the same reason MacOS doesn't have full support: I don't have those operating systems, and testing them is a slow and annoying process that I don't want to spend my time on.
 
 ## Initial lineup
 
@@ -37,6 +39,17 @@ The plan for the time being, in no particular order, is:
 
 However, an important point here is to also allow uninstalling. This isn't something that's easily done when installing manually, because it some times installs dependencies in a bunch of different places. This is primarily true for makefile-based programs.
 
-That said, this project may evolve into a glorified "unstable apt", that sources the newest packages, instead of whatever ancient version retrieved when the dinosaurs were still around, that the repos push. We'll see how far this rabbit hole goes.
+That said, this project may evolve into a glorified "unstable apt" that sources the newest packages, instead of whatever ancient version retrieved when the dinosaurs were still around, that the repos push. We'll see how far this rabbit hole goes.
+
+## Advantages
+
+* One package manager
+* ... that's self-managed
+* Exposes binaries through already existing entries in the PATH: no performance loss (unlike nvm, which takes at least 2.6+ seconds to load, blocking my terminal in the process)
+* Manages symlinks, not path entries, and is always on-demand invoked.
+
+## Disadvantages
+
+* Still doesn't modify /usr/bin packages, and consequently may break with programs that hard-code `/usr/bin/<binary>`-paths.
 
 [1]: https://imgs.xkcd.com/comics/standards.png

@@ -1,6 +1,7 @@
 set (SOURCE_FILES
     gamma/Main.cpp
     gamma/package/PackageResolver.cpp
+    gamma/util/StrUtil.cpp
 )
 
 add_executable(projectgamma ${SOURCE_FILES})
