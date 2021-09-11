@@ -1,6 +1,6 @@
 # Developers
 
-This document is only for people who intend on extending the code of Project Gamma, or who want to learn more about it. If you're looking to add custom packages (not to be confused with adding packages in general), or just to generally use it, this is not the file you're looking for.
+This document is only for people who intend on extending the code of upm, or who want to learn more about it. If you're looking to add custom packages (not to be confused with adding packages in general), or just to generally use it, this is not the file you're looking for.
 
 ## OS support
 
