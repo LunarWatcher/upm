@@ -4,7 +4,7 @@
 #include <vector>
 #include <cpr/cpr.h>
 
-namespace gamma {
+namespace upm {
 namespace PackageResolver {
 
 enum class PackageType {

@@ -1,6 +1,6 @@
 #include "StrUtil.hpp"
 
-namespace gamma {
+namespace upm {
 
 std::vector<std::string> StrUtil::splitString(std::string input, const std::string& delimiter, int limit) {
     // Special case: no delimiter.

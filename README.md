@@ -1,4 +1,4 @@
-# Project Gamma
+# Upstream Package Manager (upm)
 
 Package manager manager and SDK manager, because someone had to make the 15th standard.
 

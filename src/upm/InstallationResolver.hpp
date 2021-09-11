@@ -3,10 +3,10 @@
 #include <string>
 #include <iostream>
 
-#include "gamma/util/StrUtil.hpp"
+#include "upm/util/StrUtil.hpp"
 #include "package/Package.hpp"
 
-namespace gamma {
+namespace upm {
 
 
 inline void resolve(const std::string& package) {

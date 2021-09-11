@@ -34,7 +34,7 @@ int main(int argc, const char* argv[]) {
     upgrade             Upgrades a package.
     list                Lists installed packages, along with installed versions.
 
-Since Project Gamma allows multiple installed versions of certain programs,
+Since upm allows multiple installed versions of certain programs,
 install and uninstall may require a version to work.
 
 Upgrading versioned packages // TODO: determine how upgrading and installing with versions is actually gonna work.
@@ -45,6 +45,6 @@ Upgrading versioned packages // TODO: determine how upgrading and installing wit
             std::cerr << "What package?" << std::endl;
             return -1;
         }
-        gamma::resolve(arguments[0]);
+        upm::resolve(arguments[0]);
     }
 }

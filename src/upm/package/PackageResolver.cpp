@@ -1,11 +1,11 @@
-#include "gamma/platform/Platform.hpp"
+#include "upm/platform/Platform.hpp"
 #include "PackageResolver.hpp"
 
 #include <stdexcept>
 #include <regex>
 #include <iostream>
 
-namespace gamma {
+namespace upm {
 
 PackageResolver::PackageInfo PackageResolver::ResolveNode(const std::string& version) {
     std::string internalVersion = version;

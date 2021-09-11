@@ -1,13 +1,14 @@
 set (SOURCE_FILES
-    gamma/Main.cpp
-    gamma/package/PackageResolver.cpp
-    gamma/util/StrUtil.cpp
+    upm/Main.cpp
+    upm/package/PackageResolver.cpp
+    upm/util/StrUtil.cpp
+    upm/conf/Config.cpp
 )
 
-add_executable(projectgamma ${SOURCE_FILES})
-target_include_directories(projectgamma PUBLIC ./)
-target_include_directories(projectgamma PUBLIC ${CONAN_INCLUDE_DIRS})
+add_executable(upm ${SOURCE_FILES})
+target_include_directories(upm PUBLIC ./ ../stc/src)
+target_include_directories(upm PUBLIC ${CONAN_INCLUDE_DIRS})
 
-target_link_libraries(projectgamma ${CONAN_LIBS})
+target_link_libraries(upm ${CONAN_LIBS})
 
 # vim:ft=cmake

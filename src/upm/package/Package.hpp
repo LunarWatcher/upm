@@ -6,7 +6,7 @@
 
 #include "PackageResolver.hpp"
 
-namespace gamma {
+namespace upm {
 
 enum class PackageProvider {
     GITHUB,
@@ -36,7 +36,7 @@ inline std::map<std::string, Package> packages = {
         "",
         PackageProvider::OTHER,
         {},
-        gamma::PackageResolver::ResolveNode
+        upm::PackageResolver::ResolveNode
     }},
     // python == python3.
     // There's no reason what so ever to give people an easy way to install python 2.

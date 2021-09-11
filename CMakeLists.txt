@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(ProjectGamma)
+project(upm)
 
 set (CMAKE_CXX_STANDARD 17)
 
@@ -14,9 +14,10 @@ include(${CMAKE_BINARY_DIR}/conan.cmake)
 
 conan_cmake_configure (REQUIRES 
                         cpr/1.6.2
+                        nlohmann_json/3.10.2
                         GENERATORS cmake)
 conan_cmake_autodetect (settings)
-conan_cmake_install (PATH_OR_REFERENCE . BUILD missing REMOTE conan-center SETTINGS ${settings})
+conan_cmake_install (PATH_OR_REFERENCE . BUILD missing SETTINGS ${settings})
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
