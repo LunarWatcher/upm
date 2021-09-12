@@ -1,8 +1,12 @@
 #include <algorithm>
 #include <iostream>
 
+// not even sure if this matters, I'm sure there's an include somewhere else
+// that fails the Windows build.
 #ifdef _WIN32
 #error "Windows isn't supported because of a lack of a universal binary dir."
+#else
+#include <unistd.h>
 #endif
 
 #include "InstallationResolver.hpp"
@@ -43,6 +47,12 @@ Upgrading versioned packages // TODO: determine how upgrading and installing wit
     } else if (command == "install") {
         if (arguments.size() < 1) {
             std::cerr << "What package?" << std::endl;
+            return -1;
+        }
+        if (getuid()) {
+            std::cout << "Please run upm as sudo to install this package.\n"
+                << "If you meant to install it for your user, remember to pass --local"
+                << std::endl;
             return -1;
         }
         upm::resolve(arguments[0]);
