@@ -12,7 +12,28 @@
 
 namespace upm {
 
-inline std::string download(const std::string& url) {
+// TODO: merge into stc, because this fucking sucks to make
+inline std::string syscommand(const std::string& command) {
+    std::array<char, 128> buffer;
+    std::string res;
+
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command.c_str(), "r"));
+    if (!pipe) throw std::runtime_error("Failed to run " + command);
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+        res += buffer.data();
+    }
+    return res;
+}
+
+
+inline bool unpackTar(const fs::path& source, const fs::path& dest) {
+    const std::string ext = source.extension();
+    if (ext == ".tar.gz") {
+        std::cout << syscommand("tar -zf " + source.string())
+    } else if (ext == ".tar.xz")
+}
+
+inline std::path download(const std::string& url) {
     std::cout << "Downloading " << url << "..." << std::endl;
     auto name = url.substr(url.rfind('/') + 1);
     fs::path tmpDir = fs::temp_directory_path();
@@ -34,7 +55,17 @@ inline std::string download(const std::string& url) {
     if (r.status_code != 200) {
         throw std::runtime_error(std::string{"Download failed with status code"} + std::to_string(r.status_code));
     }
-    return p.string();
+    return p;
+}
+
+inline void install(const std::string& url, const std::string& version) {
+    // TODO: check local vs root before determining the install location
+    auto file = download(url);
+    // make sure 
+    if (!fs::exists(fs::path{"/opt"}/ "upm-bin")) {
+        fs::create_directory(fs::path{"/opt"} / "upm-bin");
+    }
+    auto unpacked = unpackTar(file, fs::path{"/opt"} / "upm-bin");
 }
 
 inline void resolve(const std::string& package) {
@@ -53,8 +84,8 @@ inline void resolve(const std::string& package) {
         resolve(packageInfo.baseURL);
         break;
     case PackageProvider::OTHER: {
-        auto resolvedURL = packageInfo.resolver(version);
-        download(resolvedURL.url);
+        auto pInfo = packageInfo.resolver(version);
+        install(pInfo.url, pInfo.resolvedVersion);
         } break;
     case PackageProvider::GITHUB: {
 

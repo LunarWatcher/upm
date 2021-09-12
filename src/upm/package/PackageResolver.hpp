@@ -19,6 +19,7 @@ enum class PackageType {
 typedef struct {
     std::string url;
     PackageType type;
+    std::string resolvedVersion;
 } PackageInfo;
 
 PackageInfo ResolveNode(const std::string& version);

@@ -8,7 +8,6 @@
 namespace upm {
 
 PackageResolver::PackageInfo PackageResolver::ResolveNode(const std::string& version) {
-    std::cout << "Resolving URL for version " << version << std::endl;
     std::string internalVersion = version;
     // TODO: handle binary arch
     if (version == "latest" || version == "lts") {
@@ -56,6 +55,7 @@ PackageResolver::PackageInfo PackageResolver::ResolveNode(const std::string& ver
 #else
         ".tar.gz", PackageType::SOURCE
 #endif
+        , internalVersion
     };
 }
 
