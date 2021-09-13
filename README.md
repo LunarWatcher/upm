@@ -53,10 +53,10 @@ That said, this project may evolve into a glorified "unstable apt" that sources 
 * One package manager
 * ... that's self-managed
 * Exposes binaries through already existing entries in the PATH: no performance loss (unlike nvm, which takes at least 2.6+ seconds to load, blocking my terminal in the process)
-* Manages symlinks, not path entries, and is always on-demand invoked.
+* Manages symlinks, not path entries, and is always on-demand invoked
 
 ## Disadvantages
 
-* Still doesn't modify /usr/bin packages, and consequently may break with programs that hard-code `/usr/bin/<binary>`-paths.
+* Still doesn't modify /usr/bin packages, and consequently may break with programs that hard-code `/usr/bin/<binary>`-paths. This is currently [wontfix] because of the potentially bad side-effects this has.
 
 [1]: https://imgs.xkcd.com/comics/standards.png
