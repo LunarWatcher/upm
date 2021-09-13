@@ -4,6 +4,8 @@
 #include <vector>
 #include <cpr/cpr.h>
 
+#include "stc/FS.hpp"
+
 namespace upm {
 namespace PackageResolver {
 
@@ -26,6 +28,6 @@ typedef struct {
 } PackageInfo;
 
 PackageInfo ResolveNode(const std::string& version);
-
+bool EnableNode(const fs::path& packageDir);
 }
 }

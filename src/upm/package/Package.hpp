@@ -6,6 +6,8 @@
 
 #include "PackageResolver.hpp"
 
+#include "stc/FS.hpp"
+
 namespace upm {
 
 enum class PackageProvider {
@@ -24,6 +26,8 @@ struct Package {
     std::string baseURL;
     PackageProvider provider;
 
+    std::function<bool(const fs::path& packageDir)> enable;
+
     // Optional
     std::vector<std::string> dependencies;
 
@@ -35,6 +39,7 @@ inline std::map<std::string, Package> packages = {
     { "node.js", {
         "",
         PackageProvider::OTHER,
+        upm::PackageResolver::EnableNode,
         {},
         upm::PackageResolver::ResolveNode
     }},
@@ -44,6 +49,7 @@ inline std::map<std::string, Package> packages = {
     { "python",{
         "",
         PackageProvider::OTHER,
+        nullptr,
         {},
         nullptr // TODO
     }},

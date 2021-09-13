@@ -10,6 +10,7 @@
 #endif
 
 #include "InstallationResolver.hpp"
+#include "VersionManager.hpp"
 
 std::string toLower(std::string in) {
     std::transform(in.begin(), in.end(), in.begin(),
@@ -36,6 +37,7 @@ int main(int argc, const char* argv[]) {
     install             Installs one or more packages
     uninstall           Uninstalls one or more packages
     upgrade             Upgrades a package.
+    apply               Applies a specific version of a package
     list                Lists installed packages, along with installed versions.
 
 Since upm allows multiple installed versions of certain programs,
@@ -56,5 +58,17 @@ Upgrading versioned packages // TODO: determine how upgrading and installing wit
             return -1;
         }
         upm::resolve(arguments[0]);
+    } else if (command == "apply") {
+        if (arguments.size() < 1) {
+            std::cerr << "What package?" << std::endl;
+            return -1;
+        }
+        if (getuid()) {
+            std::cout << "Please run upm as sudo to install this package.\n"
+                << "If you meant to install it for your user, remember to pass --local"
+                << std::endl;
+            return -1;
+        }
+        upm::enable(arguments[0]);
     }
 }
