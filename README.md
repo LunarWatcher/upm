@@ -20,9 +20,16 @@ Through a combination of GitHub repositories, automatic redirection, and good 'o
 
 ## Requirements?
 
-A C++17 compiler, and Linux or MacOS. Note that MacOS will have weaker support, because I don't have access to any Mac machines. Please consider contributing to the project if you have access to a Mac.
+A C++17 compiler, and Linux or MacOS, and access to `tar` with a few specs (see the tar section). Note that MacOS will have weaker support, because I don't have access to any Mac machines. Please consider contributing to the project if you have access to a Mac.
 
 General UNIXes beyond Linux and MacOS will have varying support, for the same reason MacOS doesn't have full support: I don't have those operating systems, and testing them is a slow and annoying process that I don't want to spend my time on.
+
+### Tar
+
+* Supports `--strip-components`
+* Supports automatic tar type detection*
+
+\*: may be dropped if it turns out there's a lot of tars that support `--strip-components`, but somehow not automatic type detection. Feedback needed.
 
 ## Initial lineup
 

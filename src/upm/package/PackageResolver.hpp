@@ -20,6 +20,9 @@ typedef struct {
     std::string url;
     PackageType type;
     std::string resolvedVersion;
+    // Only necessary for tars;
+    // saved as an option for compatibility purposes
+    int stripComponents = -1;
 } PackageInfo;
 
 PackageInfo ResolveNode(const std::string& version);

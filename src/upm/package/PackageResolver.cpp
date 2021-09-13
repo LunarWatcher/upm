@@ -55,7 +55,7 @@ PackageResolver::PackageInfo PackageResolver::ResolveNode(const std::string& ver
 #else
         ".tar.gz", PackageType::SOURCE
 #endif
-        , internalVersion
+        , internalVersion, 1
     };
 }
 
