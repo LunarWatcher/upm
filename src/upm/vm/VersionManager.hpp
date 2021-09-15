@@ -1,11 +1,17 @@
-#include "package/Package.hpp"
+#pragma once
+
+#include "upm/Context.hpp"
+#include "upm/package/Package.hpp"
+#include "upm/util/StrUtil.hpp"
+#include <iostream>
+
 #include "stc/FS.hpp"
 
 #include <stdexcept>
 
 namespace upm {
 
-inline void enable(const std::string& package) {
+inline void enable(const std::string& package, Context& ctx) {
     auto split = StrUtil::splitString(package, "@", 1);
     auto name = split[0];
     auto version = split.size() == 1 ? throw std::runtime_error("Not implemented") : split[1];

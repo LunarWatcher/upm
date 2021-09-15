@@ -7,29 +7,16 @@
 
 
 #include "stc/FS.hpp"
+#include "stc/Environment.hpp"
+#include "upm/Context.hpp"
 #include "upm/util/StrUtil.hpp"
 #include "package/Package.hpp"
 #include "cpr/cpr.h"
 
 namespace upm {
 
-// TODO: merge into stc, because this fucking sucks to make
-inline std::string syscommand(const std::string& command) {
-    std::array<char, 128> buffer;
-    std::string res;
-
-    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command.c_str(), "r"), pclose);
-    if (!pipe) throw std::runtime_error("Failed to run " + command);
-    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
-        res += buffer.data();
-    }
-    return res;
-}
-
-
 inline bool unpackTar(const fs::path& source, const fs::path& dest, int stripComponents) {
     std::string ext = source.filename();
-    std::cout << ext << std::endl;
     std::string tarArg = "";
     // Tar on Ubuntu is allegedly supposed to be able to figure out the type on its own.
     // Something about GNU tar or whatever
@@ -52,7 +39,7 @@ inline bool unpackTar(const fs::path& source, const fs::path& dest, int stripCom
     tarArg += " -C " + dest.string();
     std::cout << "Unpacking tar to " << dest.string() << std::endl;
     fs::create_directory(dest);
-    auto res = syscommand("tar " + tarArg);
+    auto res = stc::syscommand("tar " + tarArg);
     std::cout << res << std::endl;
     return res != "";
 
@@ -93,7 +80,7 @@ inline void install(const std::string& url, const std::string& label, int stripC
     auto unpacked = unpackTar(file, fs::path{"/opt"} / "upm-bin" / label, stripComponents);
 }
 
-inline void resolve(const std::string& package) {
+inline void resolve(const std::string& package, Context& ctx) {
     auto split = StrUtil::splitString(package, "@", 1);
     auto name = split[0];
     auto version = split.size() == 1 ? "latest" : split[1];
@@ -106,7 +93,7 @@ inline void resolve(const std::string& package) {
     auto& packageInfo = packages.at(name);
     switch (packageInfo.provider) {
     case PackageProvider::ALIAS:
-        resolve(packageInfo.baseURL);
+        resolve(packageInfo.baseURL, ctx);
         break;
     case PackageProvider::OTHER: {
         auto pInfo = packageInfo.resolver(version);

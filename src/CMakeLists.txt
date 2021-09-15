@@ -1,5 +1,9 @@
 set (SOURCE_FILES
     upm/Main.cpp
+    upm/Context.cpp
+
+    upm/conf/Config.cpp
+
     upm/package/PackageResolver.cpp
     upm/util/StrUtil.cpp
     upm/conf/Config.cpp
