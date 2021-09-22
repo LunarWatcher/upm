@@ -17,7 +17,7 @@
 
 namespace upm {
 
-Context::Context(const std::vector<std::string>& cmd) : input(cmd), isRoot(!getuid()) {
+Context::Context(const std::vector<std::string>& cmd) : input(cmd), isRoot(!getuid()), cfg(this) {
 }
 
 int Context::run() {
@@ -41,6 +41,13 @@ install and uninstall may require a version to work.
 Dependent on issues #1, #4, #6 (read: TBD)
 
 # Updating upm
+
+# License
+
+upm and upm's source code is distributed under the MIT license.
+See GitHub for the full license.
+
+    https://github.com/LunarWatcher/upm/blob/master/LICENSE
 )" << std::endl;
     } else if (command == "install") {
         if (input.size() < 1) {

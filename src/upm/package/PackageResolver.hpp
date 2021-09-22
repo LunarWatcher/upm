@@ -15,7 +15,11 @@ enum class PackageType {
     // Packages containing binaries
     BINARY,
     // Packages containing source code. Must be compiled.
-    SOURCE
+    SOURCE,
+    // Tars that're meant to be unpacked directly into a system folder.
+    // These are a separate category purely because it's easier to keep
+    // track of than raw binaries.
+    BINARY_TAR,
 };
 
 typedef struct {
@@ -28,6 +32,8 @@ typedef struct {
 } PackageInfo;
 
 PackageInfo ResolveNode(const std::string& version);
+
+bool EnableBinary(const fs::path& root);
 bool EnableNode(const fs::path& packageDir);
 }
 }

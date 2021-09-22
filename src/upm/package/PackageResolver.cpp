@@ -5,6 +5,8 @@
 #include <regex>
 #include <iostream>
 
+#include <spdlog/spdlog.h>
+
 namespace upm {
 
 PackageResolver::PackageInfo PackageResolver::ResolveNode(const std::string& version) {
@@ -43,20 +45,36 @@ PackageResolver::PackageInfo PackageResolver::ResolveNode(const std::string& ver
     return {
         std::string("https://nodejs.org/dist/v") + internalVersion + "/node-v" + internalVersion +
 #if defined LINUX && defined X86_64
-        "-linux-x64.tar.xz", PackageType::BINARY
+        "-linux-x64.tar.xz", PackageType::BINARY_TAR
 #elif defined LINUX && defined ARM7
-        "-linux-arm64.tar.xz", PackageType::BINARY
+        "-linux-arm64.tar.xz", PackageType::BINARY_TAR
 #elif defined LINUX && defined ARM64
-        "-linux-armv7l.tar.xz", PackageType::BINARY
+        "-linux-armv7l.tar.xz", PackageType::BINARY_TAR
 #elif defined MACOS && defined ARM64
-       "-darwin-arm64.tar.gz", PackageType::BINARY
+       "-darwin-arm64.tar.gz", PackageType::BINARY_TAR
 #elif defined MACOS && defined X86_64
-        "-darwin-x64.tar.gz", PackageType::BINARY
+        "-darwin-x64.tar.gz", PackageType::BINARY_TAR
 #else
         ".tar.gz", PackageType::SOURCE
 #endif
         , internalVersion, 1
     };
+}
+
+bool PackageResolver::EnableBinary(const fs::path& root) {
+    static const std::vector<std::string> directories = {
+        "bin", "share", "lib", "include"
+    };
+
+    spdlog::info("Enabling...");
+
+    for (auto& dir : directories) {
+        fs::path sourcePath = root / dir;
+        fs::path destPath   = fs::path("/usr/local") / dir;
+    }
+
+    spdlog::info("Successfully enabled package.");
+    return true;
 }
 
 bool PackageResolver::EnableNode(const fs::path& root) {

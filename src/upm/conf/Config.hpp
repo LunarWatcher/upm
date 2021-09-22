@@ -5,11 +5,15 @@
 
 namespace upm {
 
+class Context;
 class Config {
-public:
-    const nlohmann::json data;
-    Config();
+private:
+    Context* ctx;
     
+public:
+    nlohmann::json data;
+
+    Config(Context* ctx);
 };
 
 }

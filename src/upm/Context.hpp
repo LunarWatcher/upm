@@ -10,10 +10,11 @@ namespace upm {
 class Context {
 private:
     std::vector<std::string> input;
+public:
+
+    const bool isRoot;
     Config cfg;
 
-    bool isRoot;
-public:
     Context(const std::vector<std::string>& cmd);
 
     int run();

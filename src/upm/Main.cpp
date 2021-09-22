@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include <spdlog/spdlog.h>
+
 #include "Context.hpp"
 
 std::string toLower(std::string in) {
@@ -13,11 +15,15 @@ std::string toLower(std::string in) {
 
 int main(int argc, const char* argv[]) {
     std::vector<std::string> arguments;
-    if (argc == 1) arguments.push_back("help");
-    else {
         for (int i = 1; i < argc; ++i) {
-            arguments.push_back(argv[i]);
+            if (argv[i] == std::string("--debug")) {
+                spdlog::set_level(spdlog::level::debug);
+            } else {
+                arguments.push_back(argv[i]);
+            }
         }
+    if (arguments.size() == 0) {
+        arguments.push_back("help");
     }
 
     upm::Context ctx(arguments);

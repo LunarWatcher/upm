@@ -15,6 +15,7 @@ include(${CMAKE_BINARY_DIR}/conan.cmake)
 conan_cmake_configure (REQUIRES 
                         cpr/1.6.2
                         nlohmann_json/3.10.2
+                        spdlog/1.9.2
                         GENERATORS cmake)
 conan_cmake_autodetect (settings)
 conan_cmake_install (PATH_OR_REFERENCE . BUILD missing SETTINGS ${settings})
