@@ -71,24 +71,39 @@ bool PackageResolver::EnableBinary(const fs::path& root) {
     for (auto& dir : directories) {
         fs::path sourcePath = root / dir;
         fs::path destPath   = fs::path("/usr/local") / dir;
+        for (auto& path : fs::directory_iterator(sourcePath)) {
+            // returns the path relative to sourcePath
+            // TODO: see if calling .path() is unnecessary
+            std::string fn = path.path().lexically_relative(sourcePath);
+            //std::cout << (sourcePath / fn).string() << " -> " << (destPath / fn).string() << std::endl;
+            try {
+                if (fs::is_directory(sourcePath / fn)) {
+                    spdlog::warn("Fix directory symlinks, Livi");
+                    continue;
+                }
+                fs::create_symlink(sourcePath / fn, destPath / fn);
+            } catch (...) {
+                spdlog::warn("Failed to create symlink: dest already exists: {} -> {}", (sourcePath / fn).string(), (destPath / fn).string());
+            }
+        }
     }
 
     spdlog::info("Successfully enabled package.");
     return true;
 }
 
-bool PackageResolver::EnableNode(const fs::path& root) {
-    fs::path bin = root / "bin";
-    fs::path destBin("/usr/local/bin/");
-    fs::create_symlink(
-        bin / "node",
-        destBin / "node"
-    );
-    fs::create_symlink(
-        bin / "npm",
-        destBin / "npm"
-    );
-    return true;
-}
+//bool PackageResolver::EnableNode(const fs::path& root) {
+    //fs::path bin = root / "bin";
+    //fs::path destBin("/usr/local/bin/");
+    //fs::create_symlink(
+        //bin / "node",
+        //destBin / "node"
+    //);
+    //fs::create_symlink(
+        //bin / "npm",
+        //destBin / "npm"
+    //);
+    //return true;
+//}
 
 }
