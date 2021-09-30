@@ -14,6 +14,7 @@ std::string toLower(std::string in) {
 }
 
 int main(int argc, const char* argv[]) {
+    spdlog::set_pattern("[%^%l%$] %v");
     std::vector<std::string> arguments;
         for (int i = 1; i < argc; ++i) {
             if (argv[i] == std::string("--debug")) {

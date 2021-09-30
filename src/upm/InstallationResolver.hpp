@@ -78,6 +78,11 @@ inline void install(const std::string& url, const std::string& label, int stripC
         fs::create_directory(fs::path{"/opt"} / "upm-bin");
     }
     auto unpacked = unpackTar(file, fs::path{"/opt"} / "upm-bin" / label, stripComponents);
+    if (unpacked) {
+        std::cout << "Successfully installed " << label << std::endl;
+    } else {
+        std::cerr << "Something went wrong when unpacking the tar." << std::endl;
+    }
 }
 
 inline void resolve(const std::string& package, Context& ctx) {

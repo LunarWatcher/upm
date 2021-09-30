@@ -34,6 +34,6 @@ typedef struct {
 PackageInfo ResolveNode(const std::string& version);
 
 bool EnableBinary(const fs::path& root);
-bool EnableNode(const fs::path& packageDir);
+//bool EnableNode(const fs::path& packageDir);
 }
 }

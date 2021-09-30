@@ -39,7 +39,7 @@ inline std::map<std::string, Package> packages = {
     { "node.js", {
         "",
         PackageProvider::OTHER,
-        upm::PackageResolver::EnableNode,
+        upm::PackageResolver::EnableBinary,
         {},
         upm::PackageResolver::ResolveNode
     }},
