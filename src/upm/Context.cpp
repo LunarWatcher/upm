@@ -51,32 +51,30 @@ See GitHub for the full license.
 )" << std::endl;
     } else if (command == "install") {
         if (input.size() < 1) {
-            std::cerr << "What package?" << std::endl;
+            spdlog::error("What package?");
             return -1;
         }
         if (!isRoot) {
-            std::cout << "Please run upm as sudo to install this package.\n"
-                << "If you meant to install it for your user, remember to pass --local"
-                << std::endl;
+            spdlog::error("Please run upm as sudo to install this package.\n"
+                          "If you meant to install it for your user, remember to pass --local.");
             return -1;
         }
         resolve(input[0], *this);
     } else if (command == "apply") {
         if (input.size() < 1) {
-            std::cerr << "What package?" << std::endl;
+            spdlog::error("What package?");
             return -1;
         }
         if (!isRoot) {
-            std::cout << "Please run upm as sudo to install this package.\n"
-                << "If you meant to install it for your user, remember to pass --local"
-                << std::endl;
+            spdlog::error("Please run upm as sudo to install this package.\n"
+                          "If you meant to install it for your user, remember to pass --local.");
             return -1;
         }
         enable(input[0], *this);
     } else {
         // Commands part of the help, but that aren't implemented yet are still unknown.
         // (read: they're not bugs, for the record :) )
-        std::cerr << "Unknown command: " << command << std::endl;
+        spdlog::error("Unknown command: {}", command);
         return -1;
     }
 

@@ -6,6 +6,7 @@
 #include <regex>
 
 
+#include "spdlog/spdlog.h"
 #include "stc/FS.hpp"
 #include "stc/Environment.hpp"
 #include "upm/Context.hpp"
@@ -37,21 +38,23 @@ inline bool unpackTar(const fs::path& source, const fs::path& dest, int stripCom
     }
     tarArg += " -xf " + source.string();
     tarArg += " -C " + dest.string();
-    std::cout << "Unpacking tar to " << dest.string() << std::endl;
+    spdlog::info("Unpacking tar to ", dest.string());
     fs::create_directory(dest);
     auto res = stc::syscommand("tar " + tarArg);
-    std::cout << res << std::endl;
+    if (res != "") {
+        spdlog::error(res);
+    }
     return res != "";
 
 }
 
 inline fs::path download(const std::string& url) {
-    std::cout << "Downloading " << url << "..." << std::endl;
+    spdlog::info("Downloading {}...", url);
     auto name = url.substr(url.rfind('/') + 1);
     fs::path tmpDir = fs::temp_directory_path();
     fs::path p = tmpDir / ("upm-" + name);
     if (fs::exists(p)) {
-        std::cout << "Cache entry found at " << p.string() << std::endl;
+        spdlog::info("Cache entry found at {}.", p.string());
         return p.string();
     }
 
@@ -63,7 +66,7 @@ inline fs::path download(const std::string& url) {
         of,
         cpr::Url{url}
     );
-    std::cout << "Received " << (((double) r.downloaded_bytes) / (1024.0 * 1024.0)) << "Mb" << std::endl;
+    spdlog::debug("Received {}Mb", ((double) r.downloaded_bytes) / (1024.0 * 1024.0));
     if (r.status_code != 200) {
         throw std::runtime_error(std::string{"Download failed with status code"} + std::to_string(r.status_code));
     }
@@ -79,9 +82,9 @@ inline void install(const std::string& url, const std::string& label, int stripC
     }
     auto unpacked = unpackTar(file, fs::path{"/opt"} / "upm-bin" / label, stripComponents);
     if (unpacked) {
-        std::cout << "Successfully installed " << label << std::endl;
+        spdlog::info("Successfully installed {}", label);
     } else {
-        std::cerr << "Something went wrong when unpacking the tar." << std::endl;
+        spdlog::error("An error occured when unpacking the tar");
     }
 }
 
@@ -89,10 +92,10 @@ inline void resolve(const std::string& package, Context& ctx) {
     auto split = StrUtil::splitString(package, "@", 1);
     auto name = split[0];
     auto version = split.size() == 1 ? "latest" : split[1];
-    std::cout << "Installing " << name << "@" << version << std::endl;
+    spdlog::info("Installing {}@{}", name, version);
 
     if (packages.find(name) == packages.end()) {
-        std::cout << "Failed to find " << name << std::endl;
+        spdlog::error("Failed to find package: {}", name);
         return;
     }
     auto& packageInfo = packages.at(name);
