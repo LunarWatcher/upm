@@ -66,6 +66,7 @@ inline fs::path download(const std::string& url) {
         of,
         cpr::Url{url}
     );
+    spdlog::debug("Received {}Mb", ((double) r.downloaded_bytes) / (1024.0 * 1024.0));
     if (r.status_code != 200) {
         throw std::runtime_error(std::string{"Download failed with status code"} + std::to_string(r.status_code));
     }
