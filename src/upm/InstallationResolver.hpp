@@ -93,6 +93,7 @@ inline void resolve(const std::string& package, Context& ctx) {
     auto name = split[0];
     auto version = split.size() == 1 ? "latest" : split[1];
     spdlog::info("Installing {}@{}", name, version);
+    ctx.package = name + "@" + version;
 
     if (packages.find(name) == packages.end()) {
         spdlog::error("Failed to find package: {}", name);

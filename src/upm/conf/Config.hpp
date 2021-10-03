@@ -9,11 +9,13 @@ class Context;
 class Config {
 private:
     Context* ctx;
+    fs::path confPath;
     
 public:
     nlohmann::json data;
 
     Config(Context* ctx);
+    ~Config();
 };
 
 }

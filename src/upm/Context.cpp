@@ -20,10 +20,18 @@ namespace upm {
 Context::Context(const std::vector<std::string>& cmd) : input(cmd), isRoot(!getuid()), cfg(this) {
 }
 
+void Context::resolvePackageContext(const std::string &package) {
+    // TODO: make this function follow aliases
+    auto split = StrUtil::splitString(package, "@", 1);
+    std::string name = split[0];
+    std::string version = split.size() == 1 ? throw std::runtime_error("Not implemented") : split[1];
+    this->package = name;
+    this->packageVersion = version;
+}
+
 int Context::run() {
     std::string command = input[0];
     input.erase(input.begin());
-
     
     if (command == "help") {
         std::cout << R"(Commands
@@ -59,6 +67,7 @@ See GitHub for the full license.
                           "If you meant to install it for your user, remember to pass --local.");
             return -1;
         }
+        resolvePackageContext(input[0]);
         resolve(input[0], *this);
     } else if (command == "apply") {
         if (input.size() < 1) {
@@ -70,7 +79,8 @@ See GitHub for the full license.
                           "If you meant to install it for your user, remember to pass --local.");
             return -1;
         }
-        enable(input[0], *this);
+        resolvePackageContext(input[0]);
+        enable(*this);
     } else {
         // Commands part of the help, but that aren't implemented yet are still unknown.
         // (read: they're not bugs, for the record :) )

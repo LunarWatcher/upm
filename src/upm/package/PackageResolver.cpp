@@ -1,6 +1,8 @@
+#include "upm/Context.hpp"
 #include "upm/platform/Platform.hpp"
 #include "PackageResolver.hpp"
 
+#include <filesystem>
 #include <stdexcept>
 #include <regex>
 #include <iostream>
@@ -61,13 +63,41 @@ PackageResolver::PackageInfo PackageResolver::ResolveNode(const std::string& ver
     };
 }
 
-bool PackageResolver::EnableBinary(const fs::path& root) {
+std::vector<std::pair<fs::path, fs::path>> PackageResolver::recursiveLink(const fs::path &source, const fs::path &dest, const std::string& fileName) {
+    // We don't have to worry about symlinks in the source directory
+    if (fs::is_directory(source / fileName) && fs::exists(dest / fileName) && !fs::is_symlink(dest/fileName)) {
+        std::vector<std::pair<fs::path, fs::path>> result;
+        for (auto& path : fs::directory_iterator(source / fileName)) {
+            std::string fn = path.path().lexically_relative(source / fileName);
+            auto newVec = recursiveLink(source / fileName, dest / fileName, fn);
+            result.insert(result.end(), newVec.begin(), newVec.end());
+        }
+        return result;
+    } else {
+        if (fs::exists(dest / fileName)) {
+            if (!fs::is_symlink(dest / fileName)) {
+                spdlog::critical("Found existing file or non-symlinked directory at {}", (dest/fileName).string());
+                throw std::runtime_error("Intended target exists and isn't a symlink");
+            }
+            auto str = fs::read_symlink(dest/fileName).string();
+            // TODO: link in context to make this dynamic
+            if (str.find("/opt/upm-bin") == std::string::npos) {
+                spdlog::critical("Found existing symlink at {}, but that points to a non-upm directory ({}).");
+                throw std::runtime_error("Symlink exists, doesn't point to upm");
+            }
+        }
+        return {{source / fileName, dest / fileName}};
+    }
+}
+
+bool PackageResolver::EnableBinary(const fs::path& root, Context& ctx) {
     static const std::vector<std::string> directories = {
         "bin", "share", "lib", "include"
     };
 
     spdlog::info("Enabling...");
 
+    std::vector<std::pair<fs::path, fs::path>> links;
     for (auto& dir : directories) {
         fs::path sourcePath = root / dir;
         fs::path destPath   = fs::path("/usr/local") / dir;
@@ -75,35 +105,23 @@ bool PackageResolver::EnableBinary(const fs::path& root) {
             // returns the path relative to sourcePath
             // TODO: see if calling .path() is unnecessary
             std::string fn = path.path().lexically_relative(sourcePath);
-            //std::cout << (sourcePath / fn).string() << " -> " << (destPath / fn).string() << std::endl;
-            try {
-                if (fs::is_directory(sourcePath / fn)) {
-                    spdlog::warn("Fix directory symlinks, Livi");
-                    continue;
-                }
-                fs::create_symlink(sourcePath / fn, destPath / fn);
-            } catch (...) {
-                spdlog::warn("Failed to create symlink: dest already exists: {} -> {}", (sourcePath / fn).string(), (destPath / fn).string());
-            }
+            auto linksForDir = recursiveLink(sourcePath, destPath, fn);
+            links.insert(links.end(), linksForDir.begin(), linksForDir.end());
         }
+    }
+    for (auto& [source, target] : links) {
+        spdlog::info("Linking {} -> {}", target.string(), source.string());
+        ctx.cfg.data["package"][ctx.package].push_back({{"target", target.string()}, {"source", source.string()}});
+        if (fs::exists(target)) {
+            // This is semi-temporary 'til we get uninstallation in place
+            fs::remove(target);
+        }
+
+        fs::create_symlink(source, target);
     }
 
     spdlog::info("Successfully enabled package.");
     return true;
 }
-
-//bool PackageResolver::EnableNode(const fs::path& root) {
-    //fs::path bin = root / "bin";
-    //fs::path destBin("/usr/local/bin/");
-    //fs::create_symlink(
-        //bin / "node",
-        //destBin / "node"
-    //);
-    //fs::create_symlink(
-        //bin / "npm",
-        //destBin / "npm"
-    //);
-    //return true;
-//}
 
 }

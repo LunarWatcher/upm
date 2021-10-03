@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <cpr/cpr.h>
+#include "upm/Context.hpp"
 
 #include "stc/FS.hpp"
 
@@ -22,18 +23,20 @@ enum class PackageType {
     BINARY_TAR,
 };
 
-typedef struct {
+typedef struct _PackageInfo {
     std::string url;
     PackageType type;
     std::string resolvedVersion;
     // Only necessary for tars;
-    // saved as an option for compatibility purposes
+    // saved as an option for format compatibility purposes
     int stripComponents = -1;
 } PackageInfo;
 
+std::vector<std::pair<fs::path, fs::path>> recursiveLink(const fs::path& source, const fs::path& dest, const std::string& fileName);
+
 PackageInfo ResolveNode(const std::string& version);
 
-bool EnableBinary(const fs::path& root);
-//bool EnableNode(const fs::path& packageDir);
+bool EnableBinary(const fs::path& root, Context& ctx);
+
 }
 }

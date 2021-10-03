@@ -26,7 +26,7 @@ struct Package {
     std::string baseURL;
     PackageProvider provider;
 
-    std::function<bool(const fs::path& packageDir)> enable;
+    std::function<bool(const fs::path& packageDir, Context& ctx)> enable;
 
     // Optional
     std::vector<std::string> dependencies;
