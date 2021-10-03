@@ -31,6 +31,8 @@ typedef struct _PackageInfo {
     int stripComponents = -1;
 } PackageInfo;
 
+std::vector<std::pair<fs::path, fs::path>> recursiveLink(const fs::path& source, const fs::path& dest, const std::string& fileName);
+
 PackageInfo ResolveNode(const std::string& version);
 
 bool EnableBinary(const fs::path& root);
