@@ -27,7 +27,7 @@ typedef struct _PackageInfo {
     PackageType type;
     std::string resolvedVersion;
     // Only necessary for tars;
-    // saved as an option for compatibility purposes
+    // saved as an option for format compatibility purposes
     int stripComponents = -1;
 } PackageInfo;
 
