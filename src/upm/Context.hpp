@@ -12,11 +12,14 @@ private:
     std::vector<std::string> input;
 public:
     std::string package;
+    std::string packageVersion;
 
     const bool isRoot;
     Config cfg;
 
     Context(const std::vector<std::string>& cmd);
+
+    void resolvePackageContext(const std::string& package);
 
     int run();
 
