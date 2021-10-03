@@ -92,18 +92,4 @@ bool PackageResolver::EnableBinary(const fs::path& root) {
     return true;
 }
 
-//bool PackageResolver::EnableNode(const fs::path& root) {
-    //fs::path bin = root / "bin";
-    //fs::path destBin("/usr/local/bin/");
-    //fs::create_symlink(
-        //bin / "node",
-        //destBin / "node"
-    //);
-    //fs::create_symlink(
-        //bin / "npm",
-        //destBin / "npm"
-    //);
-    //return true;
-//}
-
 }

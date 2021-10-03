@@ -22,7 +22,7 @@ enum class PackageType {
     BINARY_TAR,
 };
 
-typedef struct {
+typedef struct _PackageInfo {
     std::string url;
     PackageType type;
     std::string resolvedVersion;
@@ -34,6 +34,6 @@ typedef struct {
 PackageInfo ResolveNode(const std::string& version);
 
 bool EnableBinary(const fs::path& root);
-//bool EnableNode(const fs::path& packageDir);
+
 }
 }
