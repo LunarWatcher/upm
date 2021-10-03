@@ -11,6 +11,7 @@ class Context {
 private:
     std::vector<std::string> input;
 public:
+    std::string package;
 
     const bool isRoot;
     Config cfg;

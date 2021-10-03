@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <cpr/cpr.h>
+#include "upm/Context.hpp"
 
 #include "stc/FS.hpp"
 
@@ -35,7 +36,7 @@ std::vector<std::pair<fs::path, fs::path>> recursiveLink(const fs::path& source,
 
 PackageInfo ResolveNode(const std::string& version);
 
-bool EnableBinary(const fs::path& root);
+bool EnableBinary(const fs::path& root, Context& ctx);
 
 }
 }

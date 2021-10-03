@@ -1,3 +1,4 @@
+#include "upm/Context.hpp"
 #include "upm/platform/Platform.hpp"
 #include "PackageResolver.hpp"
 
@@ -89,7 +90,7 @@ std::vector<std::pair<fs::path, fs::path>> PackageResolver::recursiveLink(const 
     }
 }
 
-bool PackageResolver::EnableBinary(const fs::path& root) {
+bool PackageResolver::EnableBinary(const fs::path& root, Context& ctx) {
     static const std::vector<std::string> directories = {
         "bin", "share", "lib", "include"
     };
@@ -110,6 +111,13 @@ bool PackageResolver::EnableBinary(const fs::path& root) {
     }
     for (auto& [source, target] : links) {
         spdlog::info("Linking {} -> {}", target.string(), source.string());
+        ctx.cfg.data["package"][ctx.package].push_back({{"target", target.string()}, {"source", source.string()}});
+        if (fs::exists(target)) {
+            // This is semi-temporary 'til we get uninstallation in place
+            fs::remove(target);
+        }
+
+        fs::create_symlink(source, target);
     }
 
     spdlog::info("Successfully enabled package.");
