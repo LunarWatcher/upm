@@ -24,7 +24,7 @@ void Context::resolvePackageContext(const std::string &package) {
     // TODO: make this function follow aliases
     auto split = StrUtil::splitString(package, "@", 1);
     std::string name = split[0];
-    std::string version = split.size() == 1 ? throw std::runtime_error("Not implemented") : split[1];
+    std::string version = split.size() == 1 ? "latest" : split[1];
     this->package = name;
     this->packageVersion = version;
 }
@@ -40,6 +40,7 @@ int Context::run() {
     uninstall           Uninstalls one or more packages
     upgrade             Upgrades a package.
     apply               Applies a specific version of a package
+    deactivate          Deactivates a package
     list                Lists installed packages, along with installed versions.
 
 Since upm allows multiple installed versions of certain programs,
@@ -75,12 +76,24 @@ See GitHub for the full license.
             return -1;
         }
         if (!isRoot) {
-            spdlog::error("Please run upm as sudo to install this package.\n"
+            spdlog::error("Please run upm as sudo to apply this package.\n"
                           "If you meant to install it for your user, remember to pass --local.");
             return -1;
         }
         resolvePackageContext(input[0]);
         enable(*this);
+    } else if (command == "deactivate") {
+        if (input.size() < 1) {
+            spdlog::error("What package?");
+            return -1;
+        }
+        if (!isRoot) {
+            spdlog::error("Please run upm as sudo to install this package.\n"
+                          "If you meant to install it for your user, remember to pass --local.");
+            return -1;
+        }
+        resolvePackageContext(input[0]);
+        disable(*this);
     } else {
         // Commands part of the help, but that aren't implemented yet are still unknown.
         // (read: they're not bugs, for the record :) )
