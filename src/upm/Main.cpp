@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include "platform/Platform.hpp"
+
 #include <spdlog/spdlog.h>
 #include <spdlog/cfg/env.h>
 

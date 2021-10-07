@@ -74,12 +74,15 @@ inline fs::path download(const std::string& url) {
 }
 
 inline void install(const std::string& url, const std::string& label, int stripComponents) {
-    // TODO: check local vs root before determining the install location
-    auto file = download(url);
-    // make sure 
+    // make sure the cache exists
     if (!fs::exists(fs::path{"/opt"}/ "upm-bin")) {
         fs::create_directory(fs::path{"/opt"} / "upm-bin");
+    } else if (fs::exists(fs::path{"/opt/upm-bin/"} / label)) {
+        spdlog::info("{} is already installed", label);
+        return;
     }
+    // TODO: check local vs root before determining the install location
+    auto file = download(url);
     auto unpacked = unpackTar(file, fs::path{"/opt"} / "upm-bin" / label, stripComponents);
     if (unpacked) {
         spdlog::info("Successfully installed {}", label);
@@ -92,7 +95,7 @@ inline void resolve(const std::string& package, Context& ctx) {
     auto split = StrUtil::splitString(package, "@", 1);
     auto name = split[0];
     auto version = split.size() == 1 ? "latest" : split[1];
-    spdlog::info("Installing {}@{}", name, version);
+    spdlog::info("Installing {}@{}...", name, version);
     ctx.package = name + "@" + version;
 
     if (packages.find(name) == packages.end()) {
