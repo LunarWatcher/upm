@@ -1,5 +1,10 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.6)
 project(upm)
+
+if (NOT CMAKE_BUILD_TYPE)
+    # Make explicit flags redundant for release builds
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 
 set (CMAKE_CXX_STANDARD 17)
 
