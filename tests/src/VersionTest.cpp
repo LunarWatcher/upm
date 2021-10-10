@@ -38,5 +38,18 @@ TEST_CASE("Test a few typical edge-cases", "[EdgeCaseComparison]") {
 
     REQUIRE(ten1 > ten0);
     REQUIRE(ten1 > ten);
+}
 
+TEST_CASE("Test major versions", "[MajorVersionComparison]") {
+    upm::Version three("3.10.0"), four("4.0");
+    REQUIRE(three > four);
+    REQUIRE(three != four);
+    REQUIRE(four < three);
+
+    upm::Version two("2.10");
+    REQUIRE(two < three);
+    REQUIRE(two < four);
+
+    REQUIRE(four > three);
+    REQUIRE(four > two);
 }
