@@ -1,6 +1,7 @@
 #pragma once
 
 #include "upm/conf/Config.hpp"
+#include "upm/util/Version.hpp"
 #include <vector>
 #include <string>
 
