@@ -1,6 +1,7 @@
 #include "Context.hpp"
 
 #include <iostream>
+#include <algorithm>
 
 #include "InstallationResolver.hpp"
 #include "vm/VersionManager.hpp"
@@ -20,13 +21,37 @@ namespace upm {
 Context::Context(const std::vector<std::string>& cmd) : input(cmd), isRoot(!getuid()), cfg(this) {
 }
 
-void Context::resolvePackageContext(const std::string &package) {
-    // TODO: make this function follow aliases
-    auto split = StrUtil::splitString(package, "@", 1);
-    std::string name = split[0];
-    std::string version = split.size() == 1 ? "latest" : split[1];
-    this->package = name;
-    this->packageVersion = version;
+void Context::resolvePackageContext(const std::string& rawVersion) {
+    int at = 0, approx = 0;
+    for (auto& character : rawVersion) {
+        if (character == '@') ++at;
+        else if (character == '~') ++approx;
+    }
+
+    if (at == 0 && approx == 0) {
+        // No version specified is good; we return latest
+        package = rawVersion;
+        packageVersion = "latest";
+        versionType = VersionType::IMPLICIT;
+    } else if (at != 1 && approx != 1) {
+        spdlog::error("{} doesn't follow any of the supported version formats", rawVersion);
+        // Both @ and ~, and we throw.
+        throw std::runtime_error("Invalid version format");
+    }
+    // We split by whichever thing exists
+
+    
+    if (at != 0) {
+        auto split = StrUtil::splitString(rawVersion, "@", 1);
+        package = split[0];
+        packageVersion = split[1];
+        versionType = VersionType::AT;
+    } else {
+        auto split = StrUtil::splitString(rawVersion, "~", 1);
+        package = split[0];
+        packageVersion = split[1];
+        versionType = VersionType::APPROX;
+    }
 }
 
 int Context::run() {

@@ -8,12 +8,19 @@
 
 namespace upm {
 
+enum class VersionType {
+    AT,
+    APPROX,
+    IMPLICIT
+};
+
 class Context {
 private:
     std::vector<std::string> input;
 public:
     std::string package;
     std::string packageVersion;
+    VersionType versionType;
 
     const bool isRoot;
     Config cfg;

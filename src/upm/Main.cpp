@@ -33,5 +33,9 @@ int main(int argc, const char* argv[]) {
     }
 
     upm::Context ctx(arguments);
-    return ctx.run();
+    try {
+        return ctx.run();
+    } catch (const std::runtime_error& e) {
+        spdlog::error("Aborting with message: {}", e.what());
+    }
 }
