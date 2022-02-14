@@ -1,5 +1,6 @@
 #pragma once
 
+#include "upm/api/LuaHelper.hpp"
 #include "upm/conf/Config.hpp"
 #include "upm/util/Version.hpp"
 #include <vector>
@@ -21,6 +22,8 @@ public:
     std::string package;
     std::string packageVersion;
     VersionType versionType;
+
+    LuaHelper helper;
 
     const bool isRoot;
     Config cfg;

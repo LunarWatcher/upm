@@ -73,7 +73,7 @@ inline fs::path download(const std::string& url) {
     return p;
 }
 
-inline void install(const std::string& url, const std::string& label, int stripComponents) {
+inline void install(const std::string& url, const std::string& label, int stripComponents, const PackageResolver::PackageType& packageType) {
     // make sure the cache exists
     if (!fs::exists(fs::path{"/opt"}/ "upm-bin")) {
         fs::create_directory(fs::path{"/opt"} / "upm-bin");
@@ -83,13 +83,22 @@ inline void install(const std::string& url, const std::string& label, int stripC
     }
     // TODO: check local vs root before determining the install location
     auto file = download(url);
-    auto unpacked = unpackTar(file, fs::path{"/opt"} / "upm-bin" / label, stripComponents);
-    if (unpacked) {
-        spdlog::info("Successfully installed {}", label);
-    } else {
-        spdlog::error("An error occured when unpacking the tar");
+
+    auto dest = fs::path{"/opt"} / "opm-bin" / label;
+    if (packageType == PackageResolver::PackageType::BINARY_TAR) {
+        auto unpacked = unpackTar(file, dest, stripComponents);
+        if (unpacked) {
+            spdlog::info("Successfully installed {}", label);
+        } else {
+            spdlog::error("An error occured when unpacking the tar");
+        }
+        return;
+    } else if (packageType == PackageResolver::PackageType::SOURCE) {
+        //auto unpacked = unpackTar(file, )
+        spdlog::error("Not implemented");
     }
 }
+
 
 inline void resolve(const std::string& package, Context& ctx) {
     auto split = StrUtil::splitString(package, "@", 1);
@@ -109,7 +118,7 @@ inline void resolve(const std::string& package, Context& ctx) {
         break;
     case PackageProvider::OTHER: {
         auto pInfo = packageInfo.resolver(version);
-        install(pInfo.url, name + "-" + pInfo.resolvedVersion, pInfo.stripComponents);
+        install(pInfo.url, name + "-" + pInfo.resolvedVersion, pInfo.stripComponents, pInfo.type);
         } break;
     case PackageProvider::GITHUB: {
 

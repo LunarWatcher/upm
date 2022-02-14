@@ -7,6 +7,11 @@ set (SOURCE_FILES
     upm/util/StrUtil.cpp
     upm/util/Version.cpp
     upm/conf/Config.cpp
+
+    # Lua API {{{
+    upm/api/LuaHelper.cpp
+    upm/api/Network.cpp
+    # }}}
 )
 
 add_library(upm_sources ${SOURCE_FILES})

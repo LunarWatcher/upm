@@ -8,6 +8,7 @@
 
 #include "Context.hpp"
 
+// TODO: merge into stc (haven't I already?)
 std::string toLower(std::string in) {
     std::transform(in.begin(), in.end(), in.begin(),
         [](const char& c) {

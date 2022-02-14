@@ -24,6 +24,8 @@ A C++17 compiler, and Linux or MacOS, and access to `tar` with a few specs (see 
 
 General UNIXes beyond Linux and MacOS will have varying support, for the same reason MacOS doesn't have full support: I don't have those operating systems, and testing them is a slow and annoying process that I don't want to spend my time on.
 
+Additionally, the project relies on Lua to make certain types of scripting better. This is largely to open for custom packages in a more flexible way, as well as make sure that non-standard sites can still be used. The compile-time dependencies are managed through Conan. **TODO:** investigate whether or not installing Lua as a runtime dependency is necessary. Not sure what the Conan package really provides.
+
 ### Tar
 
 * Supports `--strip-components`
@@ -62,5 +64,11 @@ That said, this project may evolve into a glorified "unstable apt" that sources 
 ## Caveats
 
 * While upm does handle version management, it's not meant to be a replacement for virtualenvs in your favorite language. This means that if you need a per-project install, this is currently outside the scope of upm. Note, however, that upm does let you set and use a specific version of a given package for a terminal session.
+
+## Non-goals
+
+* **"Containerized" packages:** cross-environment reproducability isn't a goal for this package manager, at least at this time. I suggest using the packages you install with upm to get containers, such as pyenv. This may change if I actually figure out how package managers like that work, and decide to actually do it, which is very unlikely at the time of writing.
+* **Registry of pre-built packages:** while it's convenient to just download pre-built packages, I have no way to host them, and I've had enough messing around with APIs and server infrastructure for the near foreseeable future, even if I had a way to host it.
+
 
 [1]: https://imgs.xkcd.com/comics/standards.png
