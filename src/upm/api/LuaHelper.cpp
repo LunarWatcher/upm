@@ -12,7 +12,6 @@ LuaHelper::LuaHelper() {
     // Load custom library functions
     registerLibrary("upmnetwork", luaopen_upmnetwork);
 
-    //std::cout << "Lua: " << luaL_dofile(state, "test.lua") << std::endl;
 }
 
 LuaHelper::~LuaHelper() {
@@ -20,6 +19,7 @@ LuaHelper::~LuaHelper() {
 }
 
 void LuaHelper::registerLibrary(const char* libname, lua_CFunction func) {
+    // I'm not sure why this is necessary
     luaL_requiref(state, libname, func, 1);
     lua_pop(state, 1);
 }

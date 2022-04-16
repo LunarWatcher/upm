@@ -1,19 +1,32 @@
 #include "Network.hpp"
+#include "lauxlib.h"
+#include "lua.h"
 
 #include <iostream>
+#include <cpr/cpr.h>
 
 // Do I really need this twice?
 extern "C" {
 
-int upmnetwork_test(lua_State* state) {
-    std::cout << "Look at me, I'm a moving target!\n";
-    return 0;
+int upmnetwork_request(lua_State* state) {
+    if (lua_gettop(state) < 1) {
+        return luaL_error(state, "Need an argument");
+    }
+
+    std::string url = luaL_checklstring(state, 1, nullptr);
+
+
+    auto response = cpr::Get(cpr::Url(url));
+
+    lua_pushstring(state, response.text.c_str());
+
+    return 1;
 }
 
 int luaopen_upmnetwork(lua_State* state) {
 
     static const luaL_Reg functions[] = {
-        {"test", upmnetwork_test},
+        {"request", upmnetwork_request},
         {nullptr, nullptr}
     };
 
