@@ -1,12 +1,17 @@
 #include "Network.hpp"
 #include "lauxlib.h"
 #include "lua.h"
+#include "lua.hpp"
 
 #include <iostream>
 #include <cpr/cpr.h>
 
 // Do I really need this twice?
 extern "C" {
+
+static luaL_Reg cprMetatable[] = {
+
+};
 
 int upmnetwork_request(lua_State* state) {
     if (lua_gettop(state) < 1) {
@@ -18,8 +23,10 @@ int upmnetwork_request(lua_State* state) {
 
     auto response = cpr::Get(cpr::Url(url));
 
+    lua_newtable(state);
     lua_pushstring(state, response.text.c_str());
-
+    lua_setfield(state, 2, "text");
+    
     return 1;
 }
 

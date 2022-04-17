@@ -12,6 +12,10 @@ LuaHelper::LuaHelper() {
     // Load custom library functions
     registerLibrary("upmnetwork", luaopen_upmnetwork);
 
+    if (luaL_dofile(state, "test.lua") != 0) {
+        std::cerr << "Failed to load test.lua: " << lua_tostring(state, -1) << std::endl;
+        throw std::runtime_error("exec  fail");
+    }
 }
 
 LuaHelper::~LuaHelper() {
