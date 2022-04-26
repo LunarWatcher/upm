@@ -26,7 +26,7 @@ int upmnetwork_request(lua_State* state) {
     lua_newtable(state);
     lua_pushstring(state, response.text.c_str());
     lua_setfield(state, 2, "text");
-    
+
     return 1;
 }
 
