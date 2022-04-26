@@ -43,11 +43,19 @@ void Context::resolvePackageContext(const std::string& rawVersion) {
     
     if (at != 0) {
         auto split = StrUtil::splitString(rawVersion, "@", 1);
+        if (split.size() != 2 || split[1].size() == 0) {
+            spdlog::error("Invalid format: {} (expected @<version> or ~<version>)", rawVersion);
+            throw std::runtime_error("Failed to extract version.");
+        }
         package = split[0];
         packageVersion = split[1];
         versionType = VersionType::AT;
     } else {
         auto split = StrUtil::splitString(rawVersion, "~", 1);
+        if (split.size() != 2 || split[1].size() == 0) {
+            spdlog::error("Invalid format: {} (expected @<version> or ~<version>)", rawVersion);
+            throw std::runtime_error("Failed to extract version.");
+        }
         package = split[0];
         packageVersion = split[1];
         versionType = VersionType::APPROX;

@@ -38,13 +38,13 @@ inline bool unpackTar(const fs::path& source, const fs::path& dest, int stripCom
     }
     tarArg += " -xf " + source.string();
     tarArg += " -C " + dest.string();
-    spdlog::info("Unpacking tar to ", dest.string());
-    fs::create_directory(dest);
+    spdlog::info("Unpacking tar to {}", dest.string());
+    fs::create_directories(dest);
     auto res = stc::syscommand("tar " + tarArg);
     if (res != "") {
-        spdlog::error(res);
+        spdlog::error("Tar failed: {}", res);
     }
-    return res != "";
+    return res == "";
 
 }
 
@@ -84,7 +84,7 @@ inline void install(const std::string& url, const std::string& label, int stripC
     // TODO: check local vs root before determining the install location
     auto file = download(url);
 
-    auto dest = fs::path{"/opt"} / "opm-bin" / label;
+    auto dest = fs::path{"/opt"} / "upm-bin" / label;
     if (packageType == PackageResolver::PackageType::BINARY_TAR) {
         auto unpacked = unpackTar(file, dest, stripComponents);
         if (unpacked) {

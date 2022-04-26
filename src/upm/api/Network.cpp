@@ -9,10 +9,6 @@
 // Do I really need this twice?
 extern "C" {
 
-static luaL_Reg cprMetatable[] = {
-
-};
-
 int upmnetwork_request(lua_State* state) {
     if (lua_gettop(state) < 1) {
         return luaL_error(state, "Need an argument");

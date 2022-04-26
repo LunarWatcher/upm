@@ -10,12 +10,12 @@ LuaHelper::LuaHelper() {
     // Load stdlib
     luaL_openlibs(state);
     // Load custom library functions
-    registerLibrary("upmnetwork", luaopen_upmnetwork);
+    //registerLibrary("upmnetwork", luaopen_upmnetwork);
 
-    if (luaL_dofile(state, "test.lua") != 0) {
-        std::cerr << "Failed to load test.lua: " << lua_tostring(state, -1) << std::endl;
-        throw std::runtime_error("exec  fail");
-    }
+    //if (luaL_dofile(state, "test.lua") != 0) {
+        //std::cerr << "Failed to load test.lua: " << lua_tostring(state, -1) << std::endl;
+        //throw std::runtime_error("exec  fail");
+    //}
 }
 
 LuaHelper::~LuaHelper() {
