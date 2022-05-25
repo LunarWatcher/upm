@@ -49,9 +49,9 @@ PackageResolver::PackageInfo PackageResolver::ResolveNode(const std::string& ver
 #if defined LINUX && defined X86_64
         "-linux-x64.tar.xz", PackageType::BINARY_TAR
 #elif defined LINUX && defined ARM7
-        "-linux-arm64.tar.xz", PackageType::BINARY_TAR
-#elif defined LINUX && defined ARM64
         "-linux-armv7l.tar.xz", PackageType::BINARY_TAR
+#elif defined LINUX && defined ARM64
+        "-linux-arm64.tar.xz", PackageType::BINARY_TAR
 #elif defined MACOS && defined ARM64
        "-darwin-arm64.tar.gz", PackageType::BINARY_TAR
 #elif defined MACOS && defined X86_64
