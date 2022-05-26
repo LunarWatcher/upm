@@ -43,10 +43,22 @@ inline std::map<std::string, Package> packages = {
         {},
         upm::PackageResolver::ResolveNode
     }},
+    {
+        "node", {
+            "node.js",
+            PackageProvider::ALIAS
+        }
+    },
+    {
+        "nodejs", {
+            "node.js",
+            PackageProvider::ALIAS
+        }
+    },
     // python == python3.
     // There's no reason what so ever to give people an easy way to install python 2.
     // We're no longer in the dark ages - it's dead. Upgrade already.
-    { "python",{
+    { "python", {
         "",
         PackageProvider::OTHER,
         nullptr,

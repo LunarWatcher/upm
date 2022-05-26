@@ -40,7 +40,6 @@ void Context::resolvePackageContext(const std::string& rawVersion) {
     }
     // We split by whichever thing exists
 
-    
     if (at != 0) {
         auto split = StrUtil::splitString(rawVersion, "@", 1);
         if (split.size() != 2 || split[1].size() == 0) {
@@ -125,7 +124,8 @@ See GitHub for the full license.
                           "If you meant to install it for your user, remember to pass --local.");
             return -1;
         }
-        resolvePackageContext(input[0]);
+        package = input[0];
+        versionType = VersionType::AT;
         disable(*this);
     } else {
         // Commands part of the help, but that aren't implemented yet are still unknown.
