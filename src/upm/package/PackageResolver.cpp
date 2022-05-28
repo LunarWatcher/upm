@@ -1,6 +1,7 @@
 #include "upm/Context.hpp"
 #include "upm/platform/Platform.hpp"
 #include "PackageResolver.hpp"
+#include "upm/util/Version.hpp"
 
 #include <filesystem>
 #include <stdexcept>
@@ -61,6 +62,66 @@ PackageResolver::PackageInfo PackageResolver::ResolveNode(const std::string& ver
 #endif
         , internalVersion, 1
     };
+}
+
+PackageResolver::PackageInfo PackageResolver::ResolvePython(const std::string &version) {
+    std::string internalVersion = version;
+    if (version == "latest" || version == "lts") {
+        cpr::Url url = {
+            std::string("https://python.org/ftp/python/")
+        };
+        cpr::Response r = cpr::Get(
+            url
+        );
+        if (r.status_code != 200) {
+            throw std::runtime_error("python.org/ftp returned bad status code.");
+        }
+        std::cout << r.text;
+
+        // As usual, use regex to parse the HTML. Effectively guaranteed to remain constant this time
+        const static std::regex pat("<a href=\"((?:\\d.?)+)/\"", std::regex::icase);
+        const std::sregex_iterator end;
+
+        std::sregex_iterator it(r.text.begin(), r.text.end(), pat);
+
+        Version v{"0.0"};
+
+        for (; it != end; ++it) {
+            std::smatch m = *it;
+            Version vNew(m[1]);
+
+            if (vNew > v) {
+                v = vNew;
+            }
+        }
+
+        if (v == "0.0") {
+            throw std::runtime_error("Failed to extract version from Python.org");
+        }
+
+        internalVersion = v.getVersion();
+
+        std::cout << "Detected version " << internalVersion << std::endl;
+
+    } 
+    //return {
+        //std::string("https://nodejs.org/dist/v") + internalVersion + "/node-v" + internalVersion +
+//#if defined LINUX && defined X86_64
+        //"-linux-x64.tar.xz", PackageType::BINARY_TAR
+//#elif defined LINUX && defined ARM7
+        //"-linux-armv7l.tar.xz", PackageType::BINARY_TAR
+//#elif defined LINUX && defined ARM64
+        //"-linux-arm64.tar.xz", PackageType::BINARY_TAR
+//#elif defined MACOS && defined ARM64
+       //"-darwin-arm64.tar.gz", PackageType::BINARY_TAR
+//#elif defined MACOS && defined X86_64
+        //"-darwin-x64.tar.gz", PackageType::BINARY_TAR
+//#else
+        //".tar.gz", PackageType::SOURCE
+//#endif
+        //, internalVersion, 1
+    //};
+    throw std::runtime_error("Not configured");
 }
 
 std::vector<std::pair<fs::path, fs::path>> PackageResolver::recursiveLink(const fs::path &source, const fs::path &dest, const std::string& fileName) {

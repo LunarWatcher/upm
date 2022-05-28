@@ -42,9 +42,10 @@ TEST_CASE("Test a few typical edge-cases", "[EdgeCaseComparison]") {
 
 TEST_CASE("Test major versions", "[MajorVersionComparison]") {
     upm::Version three("3.10.0"), four("4.0");
-    REQUIRE(three > four);
+    REQUIRE(three < four);
     REQUIRE(three != four);
-    REQUIRE(four < three);
+    REQUIRE(four > three);
+    REQUIRE_FALSE(three > four);
 
     upm::Version two("2.10");
     REQUIRE(two < three);
@@ -52,4 +53,19 @@ TEST_CASE("Test major versions", "[MajorVersionComparison]") {
 
     REQUIRE(four > three);
     REQUIRE(four > two);
+
+    REQUIRE_FALSE(two > four);
+}
+
+TEST_CASE("Ensure proper checks", "[Version]") {
+    // This test case makes sure there isn't bad checks.
+    // Bug noticed when adding Python, where a > b, b < a, but b > a as well.
+    // This obviously doesn't make sense. A few other tests have
+    // been amended to add this test case, but
+    // this test is exclusively for that.
+    upm::Version a("2.9.13"),
+            b("2.9.2");
+    REQUIRE(a > b);
+    REQUIRE(b < a);
+    REQUIRE_FALSE(b > a);
 }

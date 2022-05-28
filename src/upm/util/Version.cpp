@@ -1,4 +1,5 @@
 #include "Version.hpp"
+#include "upm/util/StrUtil.hpp"
 
 #include <string>
 #include <iostream>
@@ -18,12 +19,17 @@ const std::string& Version::getVersion() {
 }
 
 bool operator<(const Version& a, const Version& b) {
-    for (size_t i = 0; i < std::max(a.components.size(), b.components.size()); ++i) {
-        auto ca = i < a.components.size() ? a.components.at(i) : "0";
-        auto cb = i < b.components.size() ? b.components.at(i) : "0";
-        if (ca.size() < cb.size() || ca.compare(cb) < 0) {
+    std::vector<std::string>
+        aComp = StrUtil::splitString(a.getVersion(), "."),
+        bComp = StrUtil::splitString(b.getVersion(), ".");
+
+    for (int i = 0; i < std::max(aComp.size(), bComp.size()); ++i) {
+        auto aBit = i >= aComp.size() ? 0 : std::stoi(aComp[i]);
+        auto bBit = i >= bComp.size() ? 0 : std::stoi(bComp[i]);
+
+        if (aBit < bBit) {
             return true;
-        }
+        } else if (aBit > bBit) return false;
     }
     return false;
 }
@@ -31,17 +37,26 @@ bool operator==(const Version &a, const Version &b) {
     return a.version == b.version || (!(a < b) && !(a > b));
 }
 
+bool operator==(const Version& a, const std::string& b) {
+    return a.version == b;
+}
+
 bool operator!=(const Version &a, const Version &b) {
     return !(a == b);
 }
 
-bool operator>(const Version &a, const Version &b) {
-    for (size_t i = 0; i < std::max(a.components.size(), b.components.size()); ++i) {
-        auto ca = i < a.components.size() ? a.components.at(i) : "0";
-        auto cb = i < b.components.size() ? b.components.at(i) : "0";
-        if (ca.size() > cb.size() || ca.compare(cb) > 0) {
+bool operator>(const Version& a, const Version& b) {
+    std::vector<std::string>
+        aComp = StrUtil::splitString(a.getVersion(), "."),
+        bComp = StrUtil::splitString(b.getVersion(), ".");
+
+    for (int i = 0; i < std::max(aComp.size(), bComp.size()); ++i) {
+        auto aBit = i >= aComp.size() ? 0 : std::stoi(aComp[i]);
+        auto bBit = i >= bComp.size() ? 0 : std::stoi(bComp[i]);
+
+        if (aBit > bBit) {
             return true;
-        }
+        } else if (aBit < bBit) return false;
     }
     return false;
 }

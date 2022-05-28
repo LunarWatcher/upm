@@ -61,9 +61,9 @@ inline std::map<std::string, Package> packages = {
     { "python", {
         "",
         PackageProvider::OTHER,
-        nullptr,
+        upm::PackageResolver::EnableBinary,
         {},
-        nullptr // TODO
+        upm::PackageResolver::ResolvePython
     }},
     {"python3",{
         "python",

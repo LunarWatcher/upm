@@ -20,15 +20,18 @@ public:
     Version(const std::string& version);
 
     const std::string& getVersion();
+    const std::string& getVersion() const { return version; }
 
     friend bool operator<(const Version& a, const Version& b);
     friend bool operator>(const Version& a, const Version& b);
     friend bool operator==(const Version& a, const Version& b);
+    friend bool operator==(const Version& a, const std::string& b);
 };
 
 bool operator<(const Version& a, const Version& b);
 bool operator>(const Version& a, const Version& b);
 bool operator==(const Version& a, const Version& b);
+bool operator==(const Version& a, const std::string& b);
 bool operator!=(const Version& a, const Version& b);
 
 }
