@@ -22,7 +22,7 @@ bool operator<(const Version& a, const Version& b) {
     return b > a;
 }
 bool operator==(const Version &a, const Version &b) {
-    return a.version == b.version || (!(a < b) && !(a > b));
+    return a.version == b.version;
 }
 
 bool operator==(const Version& a, const std::string& b) {
