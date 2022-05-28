@@ -19,19 +19,7 @@ const std::string& Version::getVersion() {
 }
 
 bool operator<(const Version& a, const Version& b) {
-    std::vector<std::string>
-        aComp = StrUtil::splitString(a.getVersion(), "."),
-        bComp = StrUtil::splitString(b.getVersion(), ".");
-
-    for (int i = 0; i < std::max(aComp.size(), bComp.size()); ++i) {
-        auto aBit = i >= aComp.size() ? 0 : std::stoi(aComp[i]);
-        auto bBit = i >= bComp.size() ? 0 : std::stoi(bComp[i]);
-
-        if (aBit < bBit) {
-            return true;
-        } else if (aBit > bBit) return false;
-    }
-    return false;
+    return b > a;
 }
 bool operator==(const Version &a, const Version &b) {
     return a.version == b.version || (!(a < b) && !(a > b));
