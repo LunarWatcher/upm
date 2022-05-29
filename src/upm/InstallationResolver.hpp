@@ -40,6 +40,7 @@ inline bool unpackTar(const fs::path& source, const fs::path& dest, int stripCom
     tarArg += " -C " + dest.string();
     spdlog::info("Unpacking tar to {}", dest.string());
     fs::create_directories(dest);
+    // ... why not just check the exit code?
     auto res = stc::syscommand("tar " + tarArg);
     if (res != "") {
         spdlog::error("Tar failed: {}", res);
@@ -94,8 +95,37 @@ inline void install(const std::string& url, const std::string& label, int stripC
         }
         return;
     } else if (packageType == PackageResolver::PackageType::SOURCE) {
-        //auto unpacked = unpackTar(file, )
-        spdlog::error("Not implemented");
+        auto srcDest = dest;
+        srcDest.remove_filename();
+        auto fCopy = file;
+        // nasty hack
+        srcDest /= fCopy.replace_extension()
+            .replace_extension();
+
+        auto unpacked = unpackTar(file, srcDest,
+            stripComponents);
+        if (unpacked) {
+            spdlog::info("Unpacked source; preparing to compile");
+
+            // Massively incompatible
+            int res = std::system(("cd " + srcDest.string()
+                + "&& ./configure --prefix=" + dest.string()).c_str());
+            if (res != 0) {
+                spdlog::error("An error occurred when trying to configure");
+                return;
+            }
+            spdlog::info("Configure done. Compiling...");
+            res = std::system(("cd " + srcDest.string()
+                // TODO: Sneak in actual thread count here
+                + "&& make -j 4 && make install").c_str());
+            if (res != 0) {
+                spdlog::error("Failed to compile");
+                return;
+            }
+            spdlog::info("Successfully installed {}", label);
+        } else {
+            spdlog::error("An error occured when unpacking the tar");
+        }
     }
 }
 
