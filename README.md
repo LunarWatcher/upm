@@ -24,7 +24,7 @@ A C++17 compiler, and Linux or MacOS, and access to `tar` with a few specs (see 
 
 General UNIXes beyond Linux and MacOS will have varying support, for the same reason MacOS doesn't have full support: I don't have those operating systems, and testing them is a slow and annoying process that I don't want to spend my time on.
 
-Additionally, the project relies on Lua to make certain types of scripting better. This is largely to open for custom packages in a more flexible way, as well as make sure that non-standard sites can still be used. The compile-time dependencies are managed through Conan. **TODO:** investigate whether or not installing Lua as a runtime dependency is necessary. Not sure what the Conan package really provides.
+Additionally, while not a requirement per se, the PATH has to be augmented to add /opt/upm-active/bin, and possibly others. /bin is required for binaries. It's currently unclear how any of this affects libraries.
 
 ### Tar
 
@@ -41,7 +41,7 @@ The plan for the time being, in no particular order, is:
 * [ ] Maven
 * [ ] Sdkman (maven is supported separately from sdkman, but Java isn't, because of the substantially better repo support. Java also has more platform quirks)
 * [ ] CMake
-* [ ] Python + pip (possibly separate)
+* [x] Python + pip (bundled)
 * [x] Node + npm (bundle), replacing the 5 node version managers recommended by npm's npm package
 * [ ] Config for custom packages, that may or may not be completely unrelated to package managers and SDKs
 
@@ -64,6 +64,7 @@ That said, this project may evolve into a glorified "unstable apt" that sources 
 ## Caveats
 
 * While upm does handle version management, it's not meant to be a replacement for virtualenvs in your favorite language. This means that if you need a per-project install, this is currently outside the scope of upm. Note, however, that upm does let you set and use a specific version of a given package for a terminal session.
+* At this time, upm uses its entirely own bin/lib/etc for managing active files. This isn't great either, but this is done due to the built-in safeguards preventing non-symlink overrides that may break the system. This shouldn't directly break much.
 
 ## Non-goals
 
