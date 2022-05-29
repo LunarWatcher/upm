@@ -10,6 +10,12 @@
 namespace upm {
 namespace PackageResolver {
 
+// Not really sure if this makes sense as a strategy anymore.
+// Kinda feels more obvious for the invoking function to deal with this on its own;
+// that way, we can also supply library methods through Lua when that time
+// comes.
+// I.e. a function for configure and make, one for cmake, one for debs/equivalent, ...
+// Will have to refactor later.
 enum class PackageType {
     // Used for installers, such as .debs on Debian and derivatives
     INSTALLER,

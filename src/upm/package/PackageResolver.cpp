@@ -74,9 +74,9 @@ PackageResolver::PackageInfo PackageResolver::ResolvePython(const std::string &v
             url
         );
         if (r.status_code != 200) {
+            spdlog::error("{}", r.text);
             throw std::runtime_error("python.org/ftp returned bad status code.");
         }
-        std::cout << r.text;
 
         // As usual, use regex to parse the HTML. Effectively guaranteed to remain constant this time
         const static std::regex pat("<a href=\"((?:\\d.?)+)/\"", std::regex::icase);
@@ -84,43 +84,61 @@ PackageResolver::PackageInfo PackageResolver::ResolvePython(const std::string &v
 
         std::sregex_iterator it(r.text.begin(), r.text.end(), pat);
 
-        Version v{"0.0"};
+        Version vHead{"0.0"}, vStable("0.0");
 
         for (; it != end; ++it) {
             std::smatch m = *it;
             Version vNew(m[1]);
 
-            if (vNew > v) {
-                v = vNew;
+            if (vNew > vHead) {
+                vStable = vHead;
+                vHead = vNew;
             }
         }
 
-        if (v == "0.0") {
+        if (vHead == "0.0") {
             throw std::runtime_error("Failed to extract version from Python.org");
         }
 
-        internalVersion = v.getVersion();
+        internalVersion = vHead.getVersion();
 
-        std::cout << "Detected version " << internalVersion << std::endl;
+        // We'll want to shorten this down at some point,
+        // but I imagine that's better done post-Lua
+        // (Note to self: get started on lua already!)
+        cpr::Url u("https:/python.org/ftp/python/" + internalVersion + "/Python-" + internalVersion + ".tar.xz");
+        auto res = cpr::Head(u);
+        // I'm sure there are a lot of ways this could be made more elegant, but here we go anyway.
+        // The idea is, retrieve the last two versions.
+        // If the head doesn't have a binary, assume the second latest
+        // version does.
+        //
+        // Not sure how Python's release cycles works, but this feels
+        // about as bullet-proof as it gets.
+
+        if (res.status_code == 404) {
+            internalVersion = vStable.getVersion();
+        }
+
+        spdlog::info("Resolved @latest to {}", internalVersion);
+
 
     } 
-    //return {
-        //std::string("https://nodejs.org/dist/v") + internalVersion + "/node-v" + internalVersion +
-//#if defined LINUX && defined X86_64
-        //"-linux-x64.tar.xz", PackageType::BINARY_TAR
-//#elif defined LINUX && defined ARM7
-        //"-linux-armv7l.tar.xz", PackageType::BINARY_TAR
-//#elif defined LINUX && defined ARM64
-        //"-linux-arm64.tar.xz", PackageType::BINARY_TAR
-//#elif defined MACOS && defined ARM64
-       //"-darwin-arm64.tar.gz", PackageType::BINARY_TAR
-//#elif defined MACOS && defined X86_64
-        //"-darwin-x64.tar.gz", PackageType::BINARY_TAR
-//#else
-        //".tar.gz", PackageType::SOURCE
-//#endif
-        //, internalVersion, 1
-    //};
+    // If we want support for alpha and beta, this needs some changes. If we
+    // decide to use python@3.11.0b1, that's relatively
+    // easy to support, but auto-detecting
+    // the latest version is painfully annoying.
+    // Might be better to stick to stable?
+    // I highly doubt anyone is going to use this
+    // to get beta versions anyway, but we'll see
+
+    // In either case... sources only. Because Python sucks and doesn't export Linux binaries.
+    // Thanks for nothing
+    // On the bright side, good excuse to finally implement default compiling.
+    return {
+        std::string("https://python.org/ftp/python/") + internalVersion + "/Python-" + internalVersion + ".tar.xz", 
+        PackageType::SOURCE,
+        internalVersion, 1
+    };
     throw std::runtime_error("Not configured");
 }
 
@@ -143,7 +161,8 @@ std::vector<std::pair<fs::path, fs::path>> PackageResolver::recursiveLink(const 
             auto str = fs::read_symlink(dest/fileName).string();
             // TODO: link in context to make this dynamic
             if (str.find("/opt/upm-bin") == std::string::npos) {
-                spdlog::critical("Found existing symlink at {}, but that points to a non-upm directory ({}).");
+                spdlog::critical("Found existing symlink at {}, but that points to a non-upm directory ({}).", 
+                    (dest / fileName).string(), str);
                 throw std::runtime_error("Symlink exists, doesn't point to upm");
             }
         }
@@ -161,7 +180,10 @@ bool PackageResolver::EnableBinary(const fs::path& root, Context& ctx) {
     std::vector<std::pair<fs::path, fs::path>> links;
     for (auto& dir : directories) {
         fs::path sourcePath = root / dir;
-        fs::path destPath   = fs::path("/usr/local") / dir;
+        fs::path destPath   = fs::path("/opt/upm-active") / dir;
+        if (!fs::exists(destPath)) {
+            fs::create_directories(destPath);
+        }
         for (auto& path : fs::directory_iterator(sourcePath)) {
             // returns the path relative to sourcePath
             // TODO: see if calling .path() is unnecessary
