@@ -26,6 +26,12 @@ There's also a separate installation script that _only_ installs upm, and sets u
 
 TODO after writing install scripts
 
+## Updating
+
+Upm is fully self-managed, and is capable of updating itself.
+
+// TODO: actually implement this and document how
+
 ## Uninstalling
 
 TODO

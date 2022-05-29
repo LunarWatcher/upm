@@ -24,6 +24,4 @@ Some sort of version caching may become applicable in the future, at least when 
 
 Modifying `/usr/bin` should only be performed through an alternatives system, such as `update-alternatives` on debian. This won't be implemented for a long time due to the complexity of setting this up and hacking it into the system.
 
-The side-effects of changing system symlinks may include breaking the system or packages managed by the proper package manager, and as already mentioned, an alternatives system, if one exists. Changing system symlinks has major consequences, but modifying `/usr/bin/local` is less damaging.
-
 We have to be careful with potentially overriding user symlinks, which will be more doable when upm starts saving data about the actions it does.<sub>For the record, this doesn't mean telemetry; it's purely meant to keep track of installation locations and what I personally call concepts, such as "latest". There's still a lot to figure out though, so what exactly upm needs to save is not determined in detail yet.</sub>
