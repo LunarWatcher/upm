@@ -43,6 +43,7 @@ The plan for the time being, in no particular order, is:
 * [ ] CMake
 * [x] Python + pip (bundled)
 * [x] Node + npm (bundle), replacing the 5 node version managers recommended by npm's npm package
+* [ ] Vim
 * [ ] Config for custom packages, that may or may not be completely unrelated to package managers and SDKs
 
 However, an important point here is to also allow uninstalling. This isn't something that's easily done when installing manually, because it some times installs dependencies in a bunch of different places. This is primarily true for makefile-based programs.
