@@ -1,6 +1,7 @@
 #include "Exec.hpp"
 
-#include "stc/"
+#include <string>
+#include <cstdlib>
 
 extern "C" {
 
@@ -11,17 +12,36 @@ int upmexec_exec(lua_State* state) {
 
     std::string command = luaL_checklstring(state, 1, nullptr);
 
-    int f = std::system(command);
+    upm::exec::logger->info("Running '{}'...", command);
+
+    int f = std::system(command.c_str());
     int ok = 0;
     if (lua_gettop(state) >= 2) {
-        ok = luaL_checklint(state, 2, nullptr);
+        ok = luaL_checkinteger(state, 2);
     }
     if (f != ok) {
-        return luaL_error(state, "Failed to run \"" + command + "\".");
+        upm::exec::logger->error("Failed to run {}", command);
+        // There has to be a better way to do this, but I don't remember. Basic C-like string operations are a bitch
+        // and don't really have easy syntactic sugar.
+        std::string err = "Failed to run \"" + command + "\"";
+
+        return luaL_error(state, err.c_str());
     }
+
 
     return 0;
     
+}
+
+int luaopen_upmexec(lua_State* state) {
+    static const luaL_Reg functions[] = {
+        {"exec", upmexec_exec},
+        {nullptr, nullptr}
+    };
+
+    luaL_newlib(state, functions);
+
+    return 1;
 }
 
 }

@@ -11,6 +11,7 @@ set (SOURCE_FILES
     # Lua API {{{
     upm/api/LuaHelper.cpp
     upm/api/Network.cpp
+    upm/api/Exec.cpp
     # }}}
 )
 

@@ -1,5 +1,7 @@
 #include "LuaHelper.hpp"
+
 #include "Network.hpp"
+#include "Exec.hpp"
 
 #include <iostream>
 
@@ -11,11 +13,12 @@ LuaHelper::LuaHelper() {
     luaL_openlibs(state);
     // Load custom library functions
     registerLibrary("upmnetwork", luaopen_upmnetwork);
+    registerLibrary("upmexec", luaopen_upmexec);
 
-    //if (luaL_dofile(state, "test.lua") != 0) {
-        //std::cerr << "Failed to load test.lua: " << lua_tostring(state, -1) << std::endl;
-        //throw std::runtime_error("exec  fail");
-    //}
+    if (luaL_dofile(state, "lua/vim.lua") != 0) {
+        std::cerr << "Failed to load lua/vim.lua: " << lua_tostring(state, -1) << std::endl;
+        throw std::runtime_error("exec  fail");
+    }
 }
 
 LuaHelper::~LuaHelper() {
