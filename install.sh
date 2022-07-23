@@ -6,7 +6,7 @@ CMAKE_VERSION=$(cmake --version)
 echo "Testing cmake..."
 if [ -z "$CMAKE_VERSION" -a "$CMAKE_VERSION" != " " ]; then
     echo "Install CMake and try again"
-elif [[ "$CMAKE_VERSION" =~ "cmake version (3\.([6-9]|[1-9][0-9]+)\.[0-9]+|([12][0-9]+|[4-9][0-9]*))" ]]; then
+elif [[ "$CMAKE_VERSION" =~ "cmake version ([3-9]\.([6-9]|[1-9][0-9]+)\.[0-9]+|([12][0-9]+|[4-9][0-9]*))" ]]; then
     echo "Found CMake, but it doesn't appear to be a supported version. Please install CMake 3.10.0 or newer and try again"
     exit -1
 fi

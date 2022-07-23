@@ -22,13 +22,13 @@ int main(int argc, const char* argv[]) {
     spdlog::cfg::load_env_levels();
 
     std::vector<std::string> arguments;
-        for (int i = 1; i < argc; ++i) {
-            if (argv[i] == std::string("--debug")) {
-                spdlog::set_level(spdlog::level::debug);
-            } else {
-                arguments.push_back(argv[i]);
-            }
+    for (int i = 1; i < argc; ++i) {
+        if (argv[i] == std::string("--debug")) {
+            spdlog::set_level(spdlog::level::debug);
+        } else {
+            arguments.push_back(argv[i]);
         }
+    }
     if (arguments.size() == 0) {
         arguments.push_back("help");
     }
