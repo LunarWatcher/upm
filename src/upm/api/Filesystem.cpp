@@ -22,7 +22,7 @@ int upmfilesystem_sharedLibInstalled(lua_State* state) {
     if (lua_gettop(state) < 1) {
         return luaL_error(state, "Need an argument");
     }
-    upm::filesystem::logger->info("checking for library status...");
+    upm::filesystem::logger->info("Looking for required shared libraries...");
 
     std::string cache = stc::syscommand("ldconfig -p");
     std::string libs = "";
@@ -43,9 +43,11 @@ int upmfilesystem_sharedLibInstalled(lua_State* state) {
         std::string err = "Failed to find system libraries: " + libs; 
         return luaL_error(state, err.c_str());
     }
+    upm::filesystem::logger->info("All shared libraries OK.");
 
     return 0;
 }
+
 
 int luaopen_upmfilesystem(lua_State* state) {
     static const luaL_Reg functions[] = {

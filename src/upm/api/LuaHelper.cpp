@@ -3,12 +3,21 @@
 #include "Network.hpp"
 #include "Exec.hpp"
 #include "Filesystem.hpp"
+#include <stc/FS.hpp>
 
 #include <iostream>
 
 namespace upm {
 
 LuaHelper::LuaHelper() {
+    // Need to make sure we have our own, scoped directory.
+    // Means we don't have to deal with locks on shit made.
+    // There can and still will be conflicts if upm runs concurrently,
+    // but I'll eventually make a lock-based system for execution, similar
+    // to how apt does it, to prevent this from happening.
+    // Not sure how I'd go about it, however.
+    fs::create_directory("/tmp/upm");
+
     state = luaL_newstate();
     // Load stdlib
     luaL_openlibs(state);

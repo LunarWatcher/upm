@@ -37,7 +37,6 @@ int luaopen_upmexec(lua_State* state) {
         {"exec", upmexec_exec},
         {nullptr, nullptr}
     };
-
     luaL_newlib(state, functions);
 
     return 1;
