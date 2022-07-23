@@ -26,10 +26,10 @@ LuaHelper::LuaHelper() {
     registerLibrary("upmexec", luaopen_upmexec);
     registerLibrary("upmfs", luaopen_upmfilesystem);
 
-    if (luaL_dofile(state, "lua/vim.lua") != 0) {
-        std::cerr << "Failed to load lua/vim.lua: " << lua_tostring(state, -1) << std::endl;
-        throw std::runtime_error("exec failed");
-    }
+    //if (luaL_dofile(state, "lua/vim.lua") != 0) {
+        //std::cerr << "Failed to load lua/vim.lua: " << lua_tostring(state, -1) << std::endl;
+        //throw std::runtime_error("exec failed");
+    //}
 }
 
 LuaHelper::~LuaHelper() {
