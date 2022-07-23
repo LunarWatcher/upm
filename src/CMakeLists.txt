@@ -12,6 +12,7 @@ set (SOURCE_FILES
     upm/api/LuaHelper.cpp
     upm/api/Network.cpp
     upm/api/Exec.cpp
+    upm/api/Filesystem.cpp
     # }}}
 )
 

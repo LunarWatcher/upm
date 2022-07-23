@@ -30,7 +30,6 @@ int upmexec_exec(lua_State* state) {
 
 
     return 0;
-    
 }
 
 int luaopen_upmexec(lua_State* state) {
