@@ -19,14 +19,16 @@ int upmfilesystem_exists(lua_State* state) {
 }
 
 int upmfilesystem_sharedLibInstalled(lua_State* state) {
-    if (lua_gettop(state) < 1) {
-        return luaL_error(state, "Need an argument");
+    if (lua_gettop(state) < 2) {
+        return luaL_error(state, "Need to arguments");
     }
-    upm::filesystem::logger->info("Looking for required shared libraries...");
 
-    std::string cache = stc::syscommand("ldconfig -p");
+    // Should preserve the cache.
+    static std::string cache = stc::syscommand("ldconfig -p");
+
     std::string libs = "";
-    for (int i = 1; i <= lua_gettop(state); ++i) {
+    bool errorIfMissing = lua_toboolean(state, 1);
+    for (int i = 2; i <= lua_gettop(state); ++i) {
         std::string lib = luaL_checklstring(state, i, nullptr);
         if (cache.find(lib) == std::string::npos) {
             upm::filesystem::logger->info("{}: missing", lib);
@@ -39,13 +41,18 @@ int upmfilesystem_sharedLibInstalled(lua_State* state) {
         }
 
     }
-    if (libs != "") {
-        std::string err = "Failed to find system libraries: " + libs; 
-        return luaL_error(state, err.c_str());
-    }
-    upm::filesystem::logger->info("All shared libraries OK.");
 
-    return 0;
+    if (libs != "") {
+        upm::filesystem::logger->error("Failed to find system libraries: {}", libs); 
+        if (errorIfMissing) {
+            return luaL_error(state, "libraries missing");
+        }
+    } else {
+        upm::filesystem::logger->debug("All shared libraries OK.");
+    }
+    lua_pushboolean(state, libs == "");
+
+    return 1;
 }
 
 

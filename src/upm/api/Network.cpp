@@ -49,7 +49,12 @@ int upmnetwork_gitClone(lua_State* state) {
         } else {
             upm::network::logger->info("Cached clone found; not re-cloning");
             lua_pushboolean(state, false);
-            return 1;
+            // There has to be a better way to push this rather than doing it in two separate places.
+            // Probably organized my code awfully, lmao
+            // For good measure;
+            // TODO: also has to be tweaked when adding the UID
+            lua_pushstring(state, ("/tmp/upm/" + dest).c_str());
+            return 2;
         }
     }
 
@@ -61,7 +66,9 @@ int upmnetwork_gitClone(lua_State* state) {
 
     upm::network::logger->info("Successfully cloned {}", repo);
     lua_pushboolean(state, true);
-    return 1;
+    // TODO: this line also needs to be tweaked when adding the UID
+    lua_pushstring(state, ("/tmp/upm/" + dest).c_str());
+    return 2;
 }
 
 int luaopen_upmnetwork(lua_State* state) {
