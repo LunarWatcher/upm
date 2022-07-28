@@ -54,8 +54,6 @@ int luaopen_context(lua_State* state) {
 
     auto udata = (upm::Context**) lua_newuserdata(state, sizeof(upm::Context*));
     *udata = upm::Context::inst;
-    (*udata)->package = "vim";
-    (*udata)->packageVersion = "latest";
 
     luaL_setmetatable(state, MT_Context);
     lua_setglobal(state, "ctx");
