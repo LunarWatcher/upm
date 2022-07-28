@@ -16,6 +16,9 @@ public:
     LuaHelper();
     ~LuaHelper();
 
+    void init();
+    void runFile(const std::string& fn);
+
     // Why the fuck do I need this??
     void registerLibrary(const char* libname, lua_CFunction func);
 };

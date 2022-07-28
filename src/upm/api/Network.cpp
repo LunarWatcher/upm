@@ -28,6 +28,44 @@ int upmnetwork_request(lua_State* state) {
     return 1;
 }
 
+int upmnetwork_download(lua_State* state) {
+    if (lua_gettop(state) < 1) {
+        return luaL_error(state, "Missing argument: url");
+    }
+
+    std::string url = luaL_checklstring(state, 1, nullptr);
+
+    upm::network::logger->info("Downloading {}...", url);
+    
+
+    auto name = url.substr(url.rfind('/') + 1);
+    fs::path tmpDir = fs::temp_directory_path();
+    fs::path p = tmpDir / ("upm-" + name);
+    if (fs::exists(p)) {
+        spdlog::info("Cache entry found at {}.", p.string());
+        lua_pushstring(state, p.string().c_str());
+        return 1;
+    }
+
+    std::ofstream of(
+        p.string()
+    );
+
+    auto r = cpr::Download(
+        of,
+        cpr::Url{url}
+    );
+    spdlog::debug("Received {}Mb", ((double) r.downloaded_bytes) / (1024.0 * 1024.0));
+    if (r.status_code != 200) {
+        spdlog::error("Download failed with status code {}", r.status_code);
+        return luaL_error(state, "Download errored out.");
+    }
+
+    lua_pushstring(state, p.string().c_str());
+
+    return 1;
+}
+
 int upmnetwork_gitClone(lua_State* state) {
     if (lua_gettop(state) < 2) {
         return luaL_error(state, "Expected 2 arguments");

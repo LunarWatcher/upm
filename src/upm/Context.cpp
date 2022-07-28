@@ -19,6 +19,11 @@
 namespace upm {
 
 Context::Context(const std::vector<std::string>& cmd) : input(cmd), isRoot(!getuid()), cfg(this) {
+    Context::inst = this;
+    
+    // TODO: nasty hack; find a better way to lateinit or init after setting inst
+    helper.init();
+    helper.runFile("vim.lua");
 }
 
 void Context::resolvePackageContext(const std::string& rawVersion) {

@@ -10,17 +10,21 @@
 namespace upm {
 
 enum class VersionType {
-    AT,
-    APPROX,
-    IMPLICIT
+    AT = 0,
+    APPROX = 1,
+    IMPLICIT = 2
 };
 
 class Context {
 private:
     std::vector<std::string> input;
 public:
+    static inline Context* inst = nullptr;
+
     std::string package;
     std::string packageVersion;
+    // TODO: determine the usefulness fo this field in practice, particularly
+    // for the Context Lua API (AKA proxying objects is hard)
     VersionType versionType;
 
     LuaHelper helper;

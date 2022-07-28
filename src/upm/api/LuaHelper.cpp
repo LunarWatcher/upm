@@ -3,6 +3,8 @@
 #include "Network.hpp"
 #include "Exec.hpp"
 #include "Filesystem.hpp"
+#include "Context.hpp"
+
 #include <stc/FS.hpp>
 
 #include <iostream>
@@ -19,21 +21,30 @@ LuaHelper::LuaHelper() {
     fs::create_directory("/tmp/upm");
 
     state = luaL_newstate();
+}
+
+void LuaHelper::init() {
     // Load stdlib
     luaL_openlibs(state);
     // Load custom library functions
     registerLibrary("upmnetwork", luaopen_upmnetwork);
     registerLibrary("upmexec", luaopen_upmexec);
     registerLibrary("upmfs", luaopen_upmfilesystem);
+    registerLibrary("context", luaopen_context);
 
-    //if (luaL_dofile(state, "lua/vim.lua") != 0) {
-        //std::cerr << "Failed to load lua/vim.lua: " << lua_tostring(state, -1) << std::endl;
-        //throw std::runtime_error("exec failed");
-    //}
 }
 
 LuaHelper::~LuaHelper() {
     lua_close(state);
+}
+
+void LuaHelper::runFile(const std::string& fn) {
+    // TODO: deal with cwd not containing lua
+    // TODO(by extension): deal with lookup paths
+    if (luaL_dofile(state, ("lua/" + fn).c_str()) != 0) {
+        std::cerr << "Failed to load lua/vim.lua: " << lua_tostring(state, -1) << std::endl;
+        throw std::runtime_error("exec failed");
+    }
 }
 
 void LuaHelper::registerLibrary(const char* libname, lua_CFunction func) {
