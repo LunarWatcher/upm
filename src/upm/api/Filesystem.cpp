@@ -1,5 +1,12 @@
 #include "Filesystem.hpp"
 
+#include "lauxlib.h"
+#include "upm/Context.hpp"
+
+#include "lua.h"
+#include "upm/api/Constants.hpp"
+
+#include <cstdlib>
 #include <stc/FS.hpp>
 #include <stc/Environment.hpp>
 #include <stc/StringUtil.hpp>
@@ -20,7 +27,7 @@ int upmfilesystem_exists(lua_State* state) {
 
 int upmfilesystem_sharedLibInstalled(lua_State* state) {
     if (lua_gettop(state) < 2) {
-        return luaL_error(state, "Need to arguments");
+        return luaL_error(state, "Need two arguments");
     }
 
     // Should preserve the cache.
@@ -52,14 +59,60 @@ int upmfilesystem_sharedLibInstalled(lua_State* state) {
     }
     lua_pushboolean(state, libs == "");
 
+
     return 1;
 }
 
+int upmfilesystem_configure(lua_State* state) {
+
+    if (lua_gettop(state) < 2) {
+        return luaL_error(state, "Expected at least two arguments: <source directory, configure arguments[, configure command>");
+    }
+
+    std::string relativeSourceDir = lua_tostring(state, 1);
+    std::string arguments = lua_tostring(state, 2);
+
+    std::string configure = lua_gettop(state) >= 3 ? lua_tostring(state, 3) : "./configure";
+
+
+    upm::Context& ctx = *upm::Context::inst;
+
+    int result = WEXITSTATUS(std::system(("cd " + relativeSourceDir
+                              + " && " + configure + " " + arguments
+                              + " --prefix=" + ctx.getPrefix()).c_str()));
+
+    if (result != 0)
+        return luaL_error(state, "Configure failed.");
+    return 0;
+}
+
+int upmfilesystem_make(lua_State* state) {
+    if (lua_gettop(state) < 2) {
+        return luaL_error(state, "Expected at least two arguments: <directory, arguments[, make command]>");
+    }
+
+    std::string sourceDir = lua_tostring(state, 1);
+    std::string arguments = lua_tostring(state, 2);
+
+    // TODO: make not only adjustable, but automatically set to the core count if not overridden
+    // -k seems to be necessary to silence "nothing to be done for ...".
+    // Not sure why that's an error to begin with? TODO: Fix
+    std::string make = lua_gettop(state) >= 3 ? lua_tostring(state, 3) : "make -j 4 -k";
+
+    int status = WEXITSTATUS(std::system(("cd " + sourceDir + " && " + make + " " + arguments + " && " + make + " install").c_str()));
+    if (status != 0) {
+        std::cout << "Status = " << status << std::endl;
+        return luaL_error(state, "Failed to make and/or install");
+    }
+    return 0;
+}
 
 int luaopen_upmfilesystem(lua_State* state) {
     static const luaL_Reg functions[] = {
         {"exists", upmfilesystem_exists},
         {"sharedLibInstalled", upmfilesystem_sharedLibInstalled},
+        {"configure", upmfilesystem_configure},
+        {"make", upmfilesystem_make},
         {nullptr, nullptr}
     };
 

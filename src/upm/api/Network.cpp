@@ -80,12 +80,12 @@ int upmnetwork_gitClone(lua_State* state) {
     // as possible.
     if (fs::exists("/tmp/upm/" + dest)) {
         if (clean) {
-            upm::network::logger->info("Already cloned. Deleting cache...");
+            upm::network::logger->info("Already cloned. Reset policy forces cache deletion...");
             if (!fs::remove_all("/tmp/upm/" + dest)) {
                 return luaL_error(state, ("Failed to delete /tmp/upm/" + dest).c_str());
             }
         } else {
-            upm::network::logger->info("Cached clone found; not re-cloning");
+            upm::network::logger->info("Cached clone found; reset policy doesn't require re-cloning");
             lua_pushboolean(state, false);
             // There has to be a better way to push this rather than doing it in two separate places.
             // Probably organized my code awfully, lmao

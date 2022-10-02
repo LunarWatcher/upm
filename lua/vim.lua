@@ -2,12 +2,6 @@ local network = require "upmnetwork"
 local exec = require "upmexec"
 local fs = require "upmfs"
 
-print(ctx)
-print(type(ctx))
-print("Package", ctx.package);
-print("Version", ctx.version);
-print("Dummy test call to validate metatable function calls", ctx:test());
-
 -- There may be more dependencies than this; my own config seems to be a bit excessive, will have to test
 -- later. Or wait for someone else to use upm and report missing dependencies.
 fs.sharedLibInstalled(true, "libXt.so", "libgtk-3.so",
@@ -42,22 +36,22 @@ print("Perl:", hasPerl);
 -- maybe `make distclean` is what I'm looking for as an alternative?
 -- We already have a return value to check if it was re-cloned or not,
 -- and clone failure throws an error for the user to handle.
---local _, directory = network.gitClone("https://github.com/vim/vim", "vim", true);
+local _, directory = network.gitClone("https://github.com/vim/vim", "vim", true);
 
---local extras = ""
+local extras = ""
 
---if hasLua then
-    --extras += "--enable-luainterp "
---end
---if hasRuby then
-    --extras += "--enable-rubyinterp "
---end
---if hasPython3 then
-    --extras += "--enable-python3interp "
---end
---if hasPerl then
-    --extras += "--enable-perlinterp "
---end
+if hasLua then
+    extras = extras .. "--enable-luainterp "
+end
+if hasRuby then
+    extras = extras .. "--enable-rubyinterp "
+end
+if hasPython3 then
+    extras = extras .. "--enable-python3interp "
+end
+if hasPerl then
+    extras = extras .. "--enable-perlinterp "
+end
 
 ---- TODO: make configure an API function, because this is nasty as fuck.
 ---- Also no prefix here, which is something upm should deal with, which means we're right back
@@ -81,3 +75,10 @@ print("Perl:", hasPerl);
     --.. "--prefix="
     --.. "--enable-fail-if-missing --with-compiledby=\"Olivia/upm\""
 --)
+
+fs.configure(directory .. "/src",
+    "--enable-gui=gtk3 --with-features=huge --enable-multibyte "
+        .. extras
+        .. "--enable-fail-if-missing --with-compiledby=\"Olivia/upm\"")
+
+fs.make(directory .. "/src", "")

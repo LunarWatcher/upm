@@ -1,10 +1,10 @@
 // I regret these filenames
 #include "Context.hpp"
+#include "Constants.hpp"
 #include "upm/Context.hpp"
 
 #include <iostream>
 
-#define MT_Context "LuaContext"
 
 extern "C" {
 
@@ -56,7 +56,7 @@ int luaopen_context(lua_State* state) {
     *udata = upm::Context::inst;
 
     luaL_setmetatable(state, MT_Context);
-    lua_setglobal(state, "ctx");
+    lua_setglobal(state, CONTEXT_IDENTIFIER);
 
     return 1;
 }
