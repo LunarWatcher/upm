@@ -30,7 +30,7 @@ int context_index(lua_State* state) {
         lua_pushstring(state, (*data)->packageVersion.c_str());
         return 1;
     } else {
-        // Why the fuck can I not tuse rawgetp?
+        // Why the fuck can I not use rawgetp?
 
         luaL_getmetatable(state, MT_Context);
         lua_pushvalue(state, 2);
