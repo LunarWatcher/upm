@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include "InstallationResolver.hpp"
+#include "stc/Environment.hpp"
 #include "vm/VersionManager.hpp"
 
 // not even sure if this matters, I'm sure there's an include somewhere else
@@ -23,7 +24,9 @@ Context::Context(const std::vector<std::string>& cmd) : input(cmd), isRoot(!getu
     
     // TODO: nasty hack; find a better way to lateinit or init after setting inst
     helper.init();
-    helper.runFile("vim.lua");
+    //package = "vim";
+    //packageVersion = "latest";
+    //helper.runFile("vim.lua");
 }
 
 void Context::resolvePackageContext(const std::string& rawVersion) {
@@ -140,6 +143,19 @@ See GitHub for the full license.
     }
 
     return 0;
+}
+
+std::string Context::getPrefix() {
+    fs::path root;
+    if (isRoot) {
+        root = "/opt";
+    } else root = stc::getHome();
+
+    root /= "upm-bin";
+
+    // This is a temporary hack; this needs to represent the real resolved version
+    root /= package + "-" + packageVersion;
+    return root.string();
 }
 
 }

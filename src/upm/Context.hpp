@@ -36,6 +36,8 @@ public:
 
     void resolvePackageContext(const std::string& package);
 
+    std::string getPrefix();
+
     int run();
 
     const decltype(input)& getInput() { return input; }

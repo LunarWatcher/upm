@@ -1,10 +1,10 @@
 // I regret these filenames
 #include "Context.hpp"
+#include "Constants.hpp"
 #include "upm/Context.hpp"
 
 #include <iostream>
 
-#define MT_Context "LuaContext"
 
 extern "C" {
 
@@ -30,7 +30,7 @@ int context_index(lua_State* state) {
         lua_pushstring(state, (*data)->packageVersion.c_str());
         return 1;
     } else {
-        // Why the fuck can I not tuse rawgetp?
+        // Why the fuck can I not use rawgetp?
 
         luaL_getmetatable(state, MT_Context);
         lua_pushvalue(state, 2);
@@ -56,7 +56,7 @@ int luaopen_context(lua_State* state) {
     *udata = upm::Context::inst;
 
     luaL_setmetatable(state, MT_Context);
-    lua_setglobal(state, "ctx");
+    lua_setglobal(state, CONTEXT_IDENTIFIER);
 
     return 1;
 }
