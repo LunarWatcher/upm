@@ -11,6 +11,7 @@ private:
     Context* ctx;
     fs::path confPath;
     
+    void setup();
 public:
     nlohmann::json data;
 

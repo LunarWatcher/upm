@@ -37,6 +37,7 @@ public:
     void resolvePackageContext(const std::string& package);
 
     std::string getPrefix();
+    std::string getLuaLookupDirectory();
 
     int run();
 

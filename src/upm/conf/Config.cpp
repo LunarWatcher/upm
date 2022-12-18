@@ -36,4 +36,8 @@ Config::~Config() {
 
 }
 
+void Config::setup() {
+    // reserved for future use
+}
+
 }

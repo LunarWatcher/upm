@@ -1,10 +1,12 @@
 #include "Context.hpp"
 
+#include <filesystem>
 #include <iostream>
 #include <algorithm>
 
 #include "InstallationResolver.hpp"
 #include "stc/Environment.hpp"
+#include "upm/conf/Constants.hpp"
 #include "vm/VersionManager.hpp"
 
 // not even sure if this matters, I'm sure there's an include somewhere else
@@ -156,6 +158,12 @@ std::string Context::getPrefix() {
     // This is a temporary hack; this needs to represent the real resolved version
     root /= package + "-" + packageVersion;
     return root.string();
+}
+
+std::string Context::getLuaLookupDirectory() {
+    fs::path root;
+
+
 }
 
 }

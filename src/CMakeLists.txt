@@ -8,6 +8,8 @@ set (SOURCE_FILES
     upm/util/Version.cpp
     upm/conf/Config.cpp
 
+    upm/input/Parser.cpp
+
     # Lua API {{{
     upm/api/LuaHelper.cpp
     upm/api/Network.cpp

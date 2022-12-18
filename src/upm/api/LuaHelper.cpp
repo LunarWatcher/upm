@@ -32,6 +32,8 @@ void LuaHelper::init() {
     registerLibrary("upmfs", luaopen_upmfilesystem);
     registerLibrary("context", luaopen_context);
 
+    // Init is called when the package is clear.
+
 }
 
 LuaHelper::~LuaHelper() {
@@ -45,6 +47,10 @@ void LuaHelper::runFile(const std::string& fn) {
         std::cerr << "Failed to load lua/vim.lua: " << lua_tostring(state, -1) << std::endl;
         throw std::runtime_error("exec failed");
     }
+}
+
+void LuaHelper::install() {
+
 }
 
 void LuaHelper::registerLibrary(const char* libname, lua_CFunction func) {
