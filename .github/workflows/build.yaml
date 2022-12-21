@@ -1,0 +1,23 @@
+name: Tests
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  test-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+        with:
+          recursive: true
+      - uses: LunarWatcher/install-conan@master
+      - name: Build
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make -j 4
+      - name: Run tests
+        run: |
+          ./bin/tests
