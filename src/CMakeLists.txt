@@ -16,6 +16,8 @@ set (SOURCE_FILES
     upm/api/Exec.cpp
     upm/api/Filesystem.cpp
     upm/api/Context.cpp
+
+    upm/api/json/JSON.cpp
     # }}}
 )
 
