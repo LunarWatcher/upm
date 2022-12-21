@@ -13,7 +13,8 @@ jobs:
         with:
           recursive: true
       - uses: actions/setup-python@main
-        python-version: '3.11'
+        with:
+          python-version: '3.11'
       - uses: LunarWatcher/install-conan@master
       - name: Build
         run: |
