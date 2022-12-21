@@ -18,14 +18,10 @@ TEST_CASE("Ensure parsing works") {
     )");
     lua_getglobal(helper.getState(), "a");
     for (int i = 1; i <= 3; ++i) {
-        helper.dump();
         lua_rawgeti(helper.getState(), -1, i);
-        helper.dump();
         REQUIRE(lua_tointeger(helper.getState(), -1) == i);
-        helper.dump();
         // Ensure the array is at the top of the stack
         lua_pop(helper.getState(), 1);
-        helper.dump();
     }
     
     lua_getglobal(helper.getState(), "aSize");
