@@ -23,4 +23,5 @@ jobs:
           make -j 4
       - name: Run tests
         run: |
+          cd build
           ./bin/tests
