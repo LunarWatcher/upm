@@ -3,18 +3,18 @@
 #include "upm/api/LuaHelper.hpp"
 #include "upm/api/json/JSON.hpp"
 
-TEST_CASE("Ensure parsing works") {
+TEST_CASE("Ensure parsing works", "[Feat][Json]") {
     upm::LuaHelper helper;
     helper.init();
     helper.runString(R"(
-         local j = require "json"
+        local j = require "json"
 
-         local parseRes = j.parse('{"a": [1, 2, 3], "b": 6, "c": "여우"}');
+        local parseRes = j.parse('{"a": [1, 2, 3], "b": 6, "c": "여우"}');
 
-         a = parseRes["a"];
-         aSize = #(a);
-         b = parseRes["b"];
-         c = parseRes["c"];
+        a = parseRes["a"];
+        aSize = #(a);
+        b = parseRes["b"];
+        c = parseRes["c"];
     )");
     lua_getglobal(helper.getState(), "a");
     for (int i = 1; i <= 3; ++i) {
@@ -31,4 +31,21 @@ TEST_CASE("Ensure parsing works") {
     lua_getglobal(helper.getState(), "c");
     auto c = std::string(lua_tostring(helper.getState(), -1));
     REQUIRE(c == "여우");
+}
+
+TEST_CASE("Ensure nesting works", "[Feat][Json]") {
+    upm::LuaHelper helper;
+    helper.init();
+    helper.runString(R"(
+        local j = require "json"
+
+        local parseRes = j.parse('{"a": [1, 2, 3], "b": {"b1": {"b2": [1, 2, {"b3": 69}]}}, "c": "여우"}');
+        
+        b3 = parseRes["b"]["b1"]["b2"][3]["b3"];
+        
+    )");
+
+    lua_getglobal(helper.getState(), "b3");
+    auto b3 = lua_tointeger(helper.getState(), -1);
+    REQUIRE(b3 == 69);
 }
