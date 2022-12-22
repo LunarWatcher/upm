@@ -49,3 +49,20 @@ TEST_CASE("Ensure nesting works", "[Feat][Json]") {
     auto b3 = lua_tointeger(helper.getState(), -1);
     REQUIRE(b3 == 69);
 }
+
+TEST_CASE("Ensure primitives work", "[Feat][Json]") {
+    upm::LuaHelper helper;
+    helper.init();
+    helper.runString(R"(
+        local j = require "json"
+
+        res = j.parse('"never gonna give you up"');
+        
+    )");
+    lua_getglobal(helper.getState(), "res");
+    REQUIRE(strcmp(lua_tostring(helper.getState(), -1), "never gonna give you up") == 0);
+
+    REQUIRE_THROWS_AS(helper.runString(R"(local j = require "json"; j.parse('6, 9'))"), nlohmann::json::parse_error);
+    REQUIRE_THROWS_AS(helper.runString(R"(local j = require "json"; j.parse('6 9'))"), nlohmann::json::parse_error);
+    REQUIRE_THROWS_AS(helper.runString(R"(local j = require "json"; j.parse('6 "abcd"'))"), nlohmann::json::parse_error);
+}
