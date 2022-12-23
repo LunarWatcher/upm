@@ -2,6 +2,8 @@ local network = require "upmnetwork"
 local exec = require "upmexec"
 local fs = require "upmfs"
 local log = require "upmlog"
+log.log("Test:", true, {}, 69, 62.1);
+log.warn("Henlo", 69);
 
 function install()
     -- There may be more dependencies than this; my own config seems to be a bit excessive, will have to test
@@ -18,10 +20,10 @@ function install()
     local hasPerl = fs.sharedLibInstalled(false, "libperl.so");
 
     -- TODO: find a better way to log config.
-    print("Lua:", hasLua);
-    print("Ruby:", hasRuby);
-    print("Python 3:", hasPython3);
-    print("Perl:", hasPerl);
+    log.log("Lua:", hasLua);
+    log.log("Ruby:", hasRuby);
+    log.log("Python 3:", hasPython3);
+    log.log("Perl:", hasPerl);
 
     -- Note: we _have_ to clean Vim with a nuke. I'm sure there's commands that work,
     -- but this worked in my makefile, and makes sure shit works if shit goes sideways.
