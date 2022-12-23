@@ -2,8 +2,6 @@ local network = require "upmnetwork"
 local exec = require "upmexec"
 local fs = require "upmfs"
 local log = require "upmlog"
-log.log("Test:", true, {}, 69, 62.1);
-log.warn("Henlo", 69);
 
 function install()
     -- There may be more dependencies than this; my own config seems to be a bit excessive, will have to test
