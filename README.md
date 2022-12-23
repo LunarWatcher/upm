@@ -38,11 +38,9 @@ Additionally, while not a requirement per se, the PATH has to be augmented to ad
 The plan for the time being, in no particular order, is:
 
 
-* [ ] Maven
-* [ ] Sdkman (maven is supported separately from sdkman, but Java isn't, because of the substantially better repo support. Java also has more platform quirks)
 * [ ] CMake
 * [x] Python + pip (bundled)
-* [x] Node + npm (bundle), replacing the 5 node version managers recommended by npm's npm package
+* [x] Node + npm (bundle), replacing the 5 node version managers recommended by npm's npm package (Node/NPM needs to die in a fire)
 * [ ] Vim
 * [ ] ssh/sshd
 * [ ] Config for custom packages, that may or may not be completely unrelated to package managers and SDKs
@@ -70,7 +68,7 @@ That said, this project may evolve into a glorified "unstable apt" that sources 
 
 ## Non-goals
 
-* **"Containerized" packages:** cross-environment reproducability isn't a goal for this package manager, at least at this time. I suggest using the packages you install with upm to get containers, such as pyenv. This may change if I actually figure out how package managers like that work, and decide to actually do it, which is very unlikely at the time of writing.
+* **"Containerized" packages:** cross-environment reproducability isn't a goal for this package manager, at least at this time. I suggest using the packages you install with upm to get containers, such as pyenv. This may change if I actually figure out how package managers like that work, and decide I like pain enough to actually do it, which is very unlikely at the time of writing.
 * **Registry of pre-built packages:** while it's convenient to just download pre-built packages, I have no way to host them, and I've had enough messing around with APIs and server infrastructure for the near foreseeable future, even if I had a way to host it.
 
 

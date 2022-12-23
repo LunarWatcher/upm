@@ -18,10 +18,10 @@ function install()
     local hasPerl = fs.sharedLibInstalled(false, "libperl.so");
 
     -- TODO: find a better way to log config.
-    log.log("Lua:", hasLua);
-    log.log("Ruby:", hasRuby);
-    log.log("Python 3:", hasPython3);
-    log.log("Perl:", hasPerl);
+    log.info("Lua:", hasLua);
+    log.info("Ruby:", hasRuby);
+    log.info("Python 3:", hasPython3);
+    log.info("Perl:", hasPerl);
 
     -- Note: we _have_ to clean Vim with a nuke. I'm sure there's commands that work,
     -- but this worked in my makefile, and makes sure shit works if shit goes sideways.
@@ -45,11 +45,12 @@ function install()
         extras = extras .. "--enable-perlinterp "
     end
 
-
+    log.info("Preparing configure...");
     fs.configure(directory .. "/src",
         "--enable-gui=gtk3 --with-features=huge --enable-multibyte "
             .. extras
             .. "--with-compiledby=\"Olivia, using LunarWatcher/upm\"")
 
+    log.info("Preparing install...");
     fs.make(directory .. "/src", "")
 end
