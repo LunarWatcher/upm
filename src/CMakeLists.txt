@@ -18,6 +18,8 @@ set (SOURCE_FILES
     upm/api/Context.cpp
 
     upm/api/json/JSON.cpp
+
+    upm/api/io/LogAPI.cpp
     # }}}
 )
 

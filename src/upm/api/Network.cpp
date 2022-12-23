@@ -21,9 +21,11 @@ int upmnetwork_request(lua_State* state) {
     auto response = cpr::Get(cpr::Url(url));
 
     lua_newtable(state);
-    // How the fuck does this work again?
     lua_pushstring(state, response.text.c_str());
-    lua_setfield(state, 2, "text");
+    lua_setfield(state, -2, "text");
+
+    lua_pushinteger(state, response.status_code);
+    lua_setfield(state, -2, "status_code");
 
     return 1;
 }

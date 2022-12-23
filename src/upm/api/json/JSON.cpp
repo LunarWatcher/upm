@@ -28,7 +28,6 @@ void upmjson_parseInternal(lua_State* state, const nlohmann::json& json) {
         for (auto& [k, v] : json.items()) {
             upmjson_parseInternal(state, v);
             lua_setfield(state, -2, k.c_str()); // step[k] = v
-
         }
     } else {
         throw std::runtime_error("bad JSON parsing");

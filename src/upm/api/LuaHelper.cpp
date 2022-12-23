@@ -5,6 +5,7 @@
 #include "Filesystem.hpp"
 #include "Context.hpp"
 #include "json/JSON.hpp"
+#include "io/LogAPI.hpp"
 
 #include <stc/FS.hpp>
 
@@ -33,6 +34,7 @@ void LuaHelper::init() {
     registerLibrary("upmfs", luaopen_upmfilesystem);
     registerLibrary("context", luaopen_context);
     registerLibrary("json", luaopen_upmjson);
+    registerLibrary("upmlog", luaopen_upmlog);
 
     // Init is called when the package is clear.
 
