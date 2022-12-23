@@ -3,12 +3,6 @@ local exec = require "upmexec"
 local fs = require "upmfs"
 local log = require "upmlog"
 
-log.log(log.INFO, ctx.version);
-log.log("Message-only");
-log.log(log.ERROR, "ERror");
-log.log(log.DEBUG, "Debug");
-log.log(log.WARN, "Warning");
-
 function install()
     -- There may be more dependencies than this; my own config seems to be a bit excessive, will have to test
     -- later. Or wait for someone else to use upm and report missing dependencies.
