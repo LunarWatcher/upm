@@ -9,7 +9,7 @@
 namespace upm {
 
 Config::Config(Context* ctx) : ctx(ctx) {
-    fs::path conf = ctx->isRoot ? "/opt/upm-bin/" : stc::getHome();
+    fs::path conf = ctx->isRoot ? "/opt/upm/" : stc::getHome();
     if (!fs::exists(conf)) {
         fs::create_directories(conf);
     }

@@ -147,23 +147,38 @@ See GitHub for the full license.
     return 0;
 }
 
+void Context::install() {
+    
+}
+
+void Context::activate() {
+
+}
+
 std::string Context::getPrefix() {
     fs::path root;
     if (isRoot) {
         root = "/opt";
-    } else root = stc::getHome();
+    } else root = stc::getHome() / ".local";
 
-    root /= "upm-bin";
+    root /= "upm/packages";
 
     // This is a temporary hack; this needs to represent the real resolved version
+    // TODO: replace with an argument retrieved from the API
     root /= package + "-" + packageVersion;
     return root.string();
 }
 
-std::string Context::getLuaLookupDirectory() {
-    fs::path root;
+std::vector<fs::path> Context::getLuaLookupDirectory() {
+    // Getting lookup directories is a complicated process.
+    //
+    // The scripts are packaged in two different ways; user-specific stuff, and global stuff.
+    // Global stuff is always loaded, but user stuff is only loaded when not running as root, primarily
+    // to avoid privilege escalation via scripts.
+    // Therefore, the first check is to grab all the script paths from the global directory:
+    std::vector<fs::path> res;
 
-
+    return res;
 }
 
 }

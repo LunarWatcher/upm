@@ -76,16 +76,16 @@ inline fs::path download(const std::string& url) {
 
 inline void install(const std::string& url, const std::string& label, int stripComponents, const PackageResolver::PackageType& packageType) {
     // make sure the cache exists
-    if (!fs::exists(fs::path{"/opt"}/ "upm-bin")) {
-        fs::create_directory(fs::path{"/opt"} / "upm-bin");
-    } else if (fs::exists(fs::path{"/opt/upm-bin/"} / label)) {
+    if (!fs::exists(fs::path{"/opt"} / "upm")) {
+        fs::create_directory(fs::path{"/opt"} / "upm");
+    } else if (fs::exists(fs::path{"/opt/upm/"} / label)) {
         spdlog::info("{} is already installed", label);
         return;
     }
     // TODO: check local vs root before determining the install location
     auto file = download(url);
 
-    auto dest = fs::path{"/opt"} / "upm-bin" / label;
+    auto dest = fs::path{"/opt"} / "upm" / label;
     if (packageType == PackageResolver::PackageType::BINARY_TAR) {
         auto unpacked = unpackTar(file, dest, stripComponents);
         if (unpacked) {

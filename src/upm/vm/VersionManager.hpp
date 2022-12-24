@@ -24,7 +24,7 @@ inline void enable(Context& ctx) {
     }
 
     auto& packageInfo = packages.at(name);
-    auto packagePath = fs::path("/opt/upm-bin") / (name + "-" + version);
+    auto packagePath = fs::path("/opt/upm") / (name + "-" + version);
     packageInfo.enable(packagePath, ctx);
 }
 

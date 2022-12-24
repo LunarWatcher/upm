@@ -18,7 +18,7 @@ Manually installing the upm is standard procedure; clone, download a zip of, or 
 
 #### Paths
 
-Note that the manual installation does not include convenient path setting tools; the dotfiles for your favorite shell have to be amended to include /opt/upm-active/bin to be able to use any activated packages.
+Note that the manual installation does not include convenient path setting tools; the dotfiles for your favorite shell have to be amended to include /opt/upm/active/bin to be able to use any activated packages.
 
 Legacy versions of upm used /usr/local instead, but due to rampant conflicts on one machine when installing Python, the binaries were moved.
 

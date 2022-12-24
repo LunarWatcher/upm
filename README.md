@@ -24,7 +24,7 @@ A C++17 compiler, and Linux or MacOS, and access to `tar` with a few specs (see 
 
 General UNIXes beyond Linux and MacOS will have varying support, for the same reason MacOS doesn't have full support: I don't have those operating systems, and testing them is a slow and annoying process that I don't want to spend my time on.
 
-Additionally, while not a requirement per se, the PATH has to be augmented to add /opt/upm-active/bin, and possibly others. /bin is required for binaries. It's currently unclear how any of this affects libraries.
+Additionally, while not a requirement per se, the PATH has to be augmented to add /opt/upm/active/bin, and possibly others. /bin is required for binaries. It's currently unclear how any of this affects libraries.
 
 ### Tar
 

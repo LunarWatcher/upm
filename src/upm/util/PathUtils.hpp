@@ -9,7 +9,7 @@ namespace upm {
  */
 inline bool isGoodSymlink(const fs::path& link) {
     return fs::is_symlink(link)
-        && fs::read_symlink(link).string().find("upm-bin") != std::string::npos; 
+        && fs::read_symlink(link).string().find("/upm") != std::string::npos; 
 }
 
 }

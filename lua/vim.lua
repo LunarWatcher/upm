@@ -54,3 +54,7 @@ function install()
     log.info("Preparing install...");
     fs.make(directory .. "/src", "")
 end
+
+return {
+    installFunc = install
+}

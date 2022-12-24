@@ -30,7 +30,8 @@ PackageResolver::PackageInfo PackageResolver::ResolveNode(const std::string& ver
             url
         );
         if (r.status_code != 200) {
-            throw std::runtime_error("nodejs.org returned bad status code.");
+            spdlog::error("Error message: {}", r.error.message);
+            throw std::runtime_error("nodejs.org returned bad status code: " + std::to_string(r.status_code));
         }
         // This part is really simple; we just need to find the version.
         // We leave URL validation to InstallationResolver
@@ -74,8 +75,8 @@ PackageResolver::PackageInfo PackageResolver::ResolvePython(const std::string &v
             url
         );
         if (r.status_code != 200) {
-            spdlog::error("{}", r.text);
-            throw std::runtime_error("python.org/ftp returned bad status code.");
+            spdlog::error("Error message: {}", r.error.message);
+            throw std::runtime_error("nodejs.org returned bad status code: " + std::to_string(r.status_code));
         }
 
         // As usual, use regex to parse the HTML. Effectively guaranteed to remain constant this time
@@ -160,7 +161,7 @@ std::vector<std::pair<fs::path, fs::path>> PackageResolver::recursiveLink(const 
             }
             auto str = fs::read_symlink(dest/fileName).string();
             // TODO: link in context to make this dynamic
-            if (str.find("/opt/upm-bin") == std::string::npos) {
+            if (str.find("/opt/upm") == std::string::npos) {
                 spdlog::critical("Found existing symlink at {}, but that points to a non-upm directory ({}).", 
                     (dest / fileName).string(), str);
                 throw std::runtime_error("Symlink exists, doesn't point to upm");
@@ -180,7 +181,7 @@ bool PackageResolver::EnableBinary(const fs::path& root, Context& ctx) {
     std::vector<std::pair<fs::path, fs::path>> links;
     for (auto& dir : directories) {
         fs::path sourcePath = root / dir;
-        fs::path destPath   = fs::path("/opt/upm-active") / dir;
+        fs::path destPath   = fs::path("/opt/upm/active") / dir;
         if (!fs::exists(destPath)) {
             fs::create_directories(destPath);
         }

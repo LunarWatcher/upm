@@ -36,8 +36,13 @@ public:
 
     void resolvePackageContext(const std::string& package);
 
+    void install();
+    void activate();
+
     std::string getPrefix();
-    std::string getLuaLookupDirectory();
+    std::vector<fs::path> getLuaLookupDirectory();
+
+    std::string locateFile(const std::string& packageName);
 
     int run();
 
