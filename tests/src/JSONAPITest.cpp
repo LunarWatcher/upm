@@ -57,7 +57,6 @@ TEST_CASE("Ensure primitives work", "[Feat][Json]") {
         local j = require "json"
 
         res = j.parse('"never gonna give you up"');
-        
     )");
     lua_getglobal(helper.getState(), "res");
     REQUIRE(strcmp(lua_tostring(helper.getState(), -1), "never gonna give you up") == 0);

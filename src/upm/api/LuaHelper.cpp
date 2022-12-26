@@ -45,11 +45,29 @@ LuaHelper::~LuaHelper() {
 }
 
 void LuaHelper::runFile(const std::string& fn) {
-    // TODO: deal with cwd not containing lua
-    // TODO(by extension): deal with lookup paths
-    if (luaL_dofile(state, ("lua/" + fn).c_str()) != 0) {
+
+    if (luaL_dofile(state, fn.c_str()) != 0) {
         std::cerr << "Failed to load lua file: " << lua_tostring(state, -1) << std::endl;
         throw std::runtime_error("exec failed");
+    }
+}
+
+void LuaHelper::runFileForResult(const std::string& fn, int nRes, std::vector<int> types) {
+    runFile(fn);
+    if (lua_gettop(state) != nRes) {
+        throw std::runtime_error("Wrong number of arguments returned; expected "
+                                 + std::to_string(nRes)
+                                 + ", got "
+                                 + std::to_string(lua_gettop(state)));
+    }
+
+    for (int i = 1; i <= nRes; ++i) {
+        auto type = types.at(i - 1);
+        if  (type == LUA_TNONE) {
+            continue;
+        } else if (lua_type(state, i) != type) {
+            throw std::runtime_error("Illegal argument returned at index " + std::to_string(i));
+        }
     }
 }
 

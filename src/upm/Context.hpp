@@ -35,6 +35,7 @@ public:
     Context(const std::vector<std::string>& cmd);
 
     void resolvePackageContext(const std::string& package);
+    void runFile(const std::string& targetFun);
 
     /**
      * Utility function for dealing with the install process. This does not deal with any specific installation systems,
@@ -46,7 +47,7 @@ public:
      * Utility function for dealing with the activation process. This does not deal with any specific activation systems,
      * because different programs are different and often require minor changes.
      */
-    void activate();
+    void apply();
 
     std::string getPrefix();
     std::vector<fs::path> getLuaLookupDirectory();

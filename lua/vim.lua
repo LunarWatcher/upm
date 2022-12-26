@@ -56,5 +56,5 @@ function install()
 end
 
 return {
-    installFunc = install
+    install = install
 }

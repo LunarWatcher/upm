@@ -111,7 +111,7 @@ See GitHub for the full license.
             return -1;
         }
         resolvePackageContext(input[0]);
-        resolve(input[0], *this);
+        install();
     } else if (command == "apply") {
         if (input.size() < 1) {
             spdlog::error("What package?");
@@ -123,7 +123,7 @@ See GitHub for the full license.
             return -1;
         }
         resolvePackageContext(input[0]);
-        enable(*this);
+        apply();
     } else if (command == "deactivate") {
         if (input.size() < 1) {
             spdlog::error("What package?");
@@ -148,11 +148,37 @@ See GitHub for the full license.
 }
 
 void Context::install() {
-    
+    runFile("install");
 }
 
-void Context::activate() {
+void Context::apply() {
+    runFile("apply");
+}
 
+void Context::runFile(const std::string& targetFun) {
+    auto res = locateFile(this->package);
+    if (res == "") {
+        throw std::runtime_error("Failed to find a Lua file for " + this->package);
+    }
+
+    helper.runFileForResult(res, 1, {LUA_TTABLE});
+    lua_getfield(helper.getState(), -1, targetFun.c_str());
+    if (lua_isnil(helper.getState(), -1)) {
+        throw std::runtime_error("Must define a function for " + targetFun);
+    }
+    lua_call(helper.getState(), 0, 0);
+}
+
+std::string Context::locateFile(const std::string& packageName) {
+    auto dirs = getLuaLookupDirectory();
+    for (auto& dir : dirs) {
+        // TODO: this is where alias cache lookup goes
+        auto path = dir / (packageName + ".lua");
+        if (fs::is_regular_file(path)) {
+            return path;
+        }
+    }
+    return "";
 }
 
 std::string Context::getPrefix() {
