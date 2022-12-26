@@ -34,8 +34,9 @@ target_link_libraries(upm upm_sources)
 
 add_custom_target(luascripts
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/lua
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/lua ${CMAKE_BINARY_DIR}/lua
-    COMMENT "Copying ${CMAKE_SOURCE_DIR}/lua to ${CMAKE_BINARY_DIR}/lua"
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/lua/upm
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/lua ${CMAKE_BINARY_DIR}/lua/upm
+    COMMENT "Copying ${CMAKE_SOURCE_DIR}/lua to ${CMAKE_BINARY_DIR}/lua/upm"
 )
 
 add_dependencies(upm luascripts)

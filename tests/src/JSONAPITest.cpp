@@ -65,6 +65,7 @@ TEST_CASE("Ensure primitives work", "[Feat][Json]") {
     REQUIRE_THROWS_AS(helper.runString(R"(local j = require "json"; j.parse('6, 9'))"), nlohmann::json::parse_error);
     REQUIRE_THROWS_AS(helper.runString(R"(local j = require "json"; j.parse('6 9'))"), nlohmann::json::parse_error);
     REQUIRE_THROWS_AS(helper.runString(R"(local j = require "json"; j.parse('6 "abcd"'))"), nlohmann::json::parse_error);
+    REQUIRE_THROWS(helper.runString(R"(local j = require "json"; j.parse('{"a": "b", "__metatable": "a"}'))"));
 
     helper.runString("local j = require \"json\"; local pr = j.parse('6.9'); res = pr == 6.9;");
     lua_getglobal(helper.getState(), "res");

@@ -74,7 +74,6 @@ int upmfilesystem_configure(lua_State* state) {
 
     std::string configure = lua_gettop(state) >= 3 ? lua_tostring(state, 3) : "./configure";
 
-
     upm::Context& ctx = *upm::Context::inst;
 
     int result = WEXITSTATUS(std::system(("cd " + relativeSourceDir

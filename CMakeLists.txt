@@ -5,6 +5,9 @@ if (NOT CMAKE_BUILD_TYPE)
     # Make explicit flags redundant for release builds
     set(CMAKE_BUILD_TYPE Release)
 endif()
+if (NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUPM_DEBUG=1")
+endif()
 
 set (CMAKE_CXX_STANDARD 17)
 

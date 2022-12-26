@@ -11,20 +11,22 @@ void upmjson_parseInternal(lua_State* state, const nlohmann::json& json) {
     if (json.is_null()) {
         lua_pushnil(state);
     } else if (json.is_number_integer()) {
-        lua_pushinteger(state, json.get<int>());
+        lua_pushinteger(state, json.get<long long>());
     } else if (json.is_number_float()) {
         lua_pushnumber(state, json.get<double>());
     } else if (json.is_string()) {
         lua_pushstring(state, json.get<std::string>().c_str());
     } else if (json.is_array()) {
         lua_newtable(state);
+
         int index = 0;
         for (auto& value : json) {
             upmjson_parseInternal(state, value);
-            lua_rawseti(state, -2, ++index);
+            lua_seti(state, -2, ++index);
         }
     } else if (json.is_object()) {
         lua_newtable(state);
+
         for (auto& [k, v] : json.items()) {
             upmjson_parseInternal(state, v);
             lua_setfield(state, -2, k.c_str()); // step[k] = v

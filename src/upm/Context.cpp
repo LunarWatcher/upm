@@ -177,6 +177,19 @@ std::vector<fs::path> Context::getLuaLookupDirectory() {
     // to avoid privilege escalation via scripts.
     // Therefore, the first check is to grab all the script paths from the global directory:
     std::vector<fs::path> res;
+#ifdef UPM_DEBUG
+    // If built as debug, make sure ./lua is included first in the search path.
+    res.push_back("./lua/upm");
+#endif
+
+    // Each subfolder of the lua folder represents one repository, though I'm not sure how I want to set that up yet.
+    // It's primarily set up this way to open for less refactoring.
+    res.push_back("/opt/upm/lua/upm/");
+
+
+    if (!isRoot) {
+        // TODO: set up per-user stuff
+    }
 
     return res;
 }

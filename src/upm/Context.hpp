@@ -36,7 +36,16 @@ public:
 
     void resolvePackageContext(const std::string& package);
 
+    /**
+     * Utility function for dealing with the install process. This does not deal with any specific installation systems,
+     * because different programs are different and require variations here.
+     */
     void install();
+
+    /**
+     * Utility function for dealing with the activation process. This does not deal with any specific activation systems,
+     * because different programs are different and often require minor changes.
+     */
     void activate();
 
     std::string getPrefix();
