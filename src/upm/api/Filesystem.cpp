@@ -96,7 +96,7 @@ int upmfilesystem_make(lua_State* state) {
     // TODO: make not only adjustable, but automatically set to the core count if not overridden
     // -k seems to be necessary to silence "nothing to be done for ...".
     // Not sure why that's an error to begin with? TODO: Fix
-    std::string make = lua_gettop(state) >= 3 ? lua_tostring(state, 3) : "make -j 4 -k";
+    std::string make = lua_gettop(state) >= 3 ? lua_tostring(state, 3) : "make -j 4";
 
     int status = WEXITSTATUS(std::system(("cd " + sourceDir + " && " + make + " " + arguments + " && " + make + " install").c_str()));
     if (status != 0) {

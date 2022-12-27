@@ -4,6 +4,7 @@ local fs = require "upmfs"
 local log = require "upmlog"
 
 function install()
+    log.info("Checking for required dependencies....");
     -- There may be more dependencies than this; my own config seems to be a bit excessive, will have to test
     -- later. Or wait for someone else to use upm and report missing dependencies.
     fs.sharedLibInstalled(true, "libXt.so", "libgtk-3.so",
@@ -11,17 +12,19 @@ function install()
                          -- so it's easier to just define .so and hope the pattern remains constant
         "libpango-1.0.so", "libcairo.so", "libatk-1.0.so");
 
+    log.info("Checking for optional feature support...");
     -- TODO: revisit; not convinced this is the best approach
     local hasLua = fs.sharedLibInstalled(false, "liblua5");
     local hasRuby = fs.sharedLibInstalled(false, "libruby-");
     local hasPython3 = fs.sharedLibInstalled(false, "libpython3");
     local hasPerl = fs.sharedLibInstalled(false, "libperl.so");
 
-    -- TODO: find a better way to log config.
+    log.info("Compiling with:")
     log.info("Lua:", hasLua);
     log.info("Ruby:", hasRuby);
     log.info("Python 3:", hasPython3);
     log.info("Perl:", hasPerl);
+    print()
 
     -- Note: we _have_ to clean Vim with a nuke. I'm sure there's commands that work,
     -- but this worked in my makefile, and makes sure shit works if shit goes sideways.
@@ -53,6 +56,7 @@ function install()
 
     log.info("Preparing install...");
     fs.make(directory .. "/src", "")
+    log.info("Done.");
 end
 
 return {
