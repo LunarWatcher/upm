@@ -2,6 +2,7 @@ local network = require "upmnetwork"
 local exec = require "upmexec"
 local fs = require "upmfs"
 local log = require "upmlog"
+local activators = require "activators"
 
 function install()
     log.info("Checking for required dependencies....");
@@ -52,7 +53,7 @@ function install()
     fs.configure(directory .. "/src",
         "--enable-gui=gtk3 --with-features=huge --enable-multibyte "
             .. extras
-            .. "--with-compiledby=\"Olivia, using LunarWatcher/upm\"")
+            .. "--with-compiledby=\"Olivia (LunarWatcher/upm)\"")
 
     log.info("Preparing install...");
     fs.make(directory .. "/src", "")
@@ -60,5 +61,6 @@ function install()
 end
 
 return {
-    install = install
+    install = install,
+    apply = activators.universalUNIX
 }
