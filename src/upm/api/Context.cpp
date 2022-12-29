@@ -25,18 +25,13 @@ int context_index(lua_State* state) {
 
     if (name == "package") {
         lua_pushstring(state, (*data)->package.c_str());
-        return 1;
     } else if (name == "version") {
-        
         lua_pushstring(state, (*data)->packageVersion.c_str());
-        return 1;
     } else {
-        // Why the fuck can I not use rawgetp?
-
-        luaL_getmetatable(state, MT_Context);
-        lua_pushvalue(state, 2);
-        lua_rawget(state, -2);
+        return luaL_error(state, "Invalid key");
     }
+
+    // __index seems to only allow a single return value, so no point in returning anything else.
     return 1;
 }
 
@@ -45,6 +40,7 @@ int context_getArch(lua_State* state) {
 
     lua_pushstring(state, (*data)->sysInfo.os.c_str());
     lua_pushstring(state, (*data)->sysInfo.cpuArch.c_str());
+
     return 2;
 }
 
