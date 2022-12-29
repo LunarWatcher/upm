@@ -4,10 +4,11 @@
 #include <iostream>
 #include <algorithm>
 
-#include "InstallationResolver.hpp"
 #include "stc/Environment.hpp"
+#include "stc/StringUtil.hpp"
+
+#include "upm/util/PathUtils.hpp"
 #include "upm/conf/Constants.hpp"
-#include "vm/VersionManager.hpp"
 
 // not even sure if this matters, I'm sure there's an include somewhere else
 // that fails the Windows build, that's built earlier in the translation unit.
@@ -51,7 +52,7 @@ void Context::resolvePackageContext(const std::string& rawVersion) {
     // We split by whichever thing exists
 
     if (at != 0) {
-        auto split = StrUtil::splitString(rawVersion, "@", 1);
+        auto split = stc::string::split(rawVersion, "@", 1);
         if (split.size() != 2 || split[1].size() == 0) {
             spdlog::error("Invalid format: {} (expected @<version> or ~<version>)", rawVersion);
             throw std::runtime_error("Failed to extract version.");
@@ -60,7 +61,7 @@ void Context::resolvePackageContext(const std::string& rawVersion) {
         packageVersion = split[1];
         versionType = VersionType::AT;
     } else {
-        auto split = StrUtil::splitString(rawVersion, "~", 1);
+        auto split = stc::string::split(rawVersion, "~", 1);
         if (split.size() != 2 || split[1].size() == 0) {
             spdlog::error("Invalid format: {} (expected @<version> or ~<version>)", rawVersion);
             throw std::runtime_error("Failed to extract version.");
@@ -142,7 +143,7 @@ See GitHub for the full license.
         }
         package = input[0];
         versionType = VersionType::AT;
-        disable(*this);
+        disable();
         spdlog::info("Successfully disabled " + package);
     } else {
         // Commands part of the help, but that aren't implemented yet are still unknown.
@@ -160,6 +161,32 @@ void Context::install() {
 
 void Context::apply() {
     runFile("apply");
+}
+
+void Context::disable() {
+    // we don't need the version for disabling.
+    // Only one version of any given package can be enabled at an arbitrary time anyway.
+    if (!cfg.data.contains("package")) {
+        spdlog::error("No packages activated");
+        return;
+    }
+    auto it = cfg.data.at("package").find(package);
+    if (it == cfg.data.at("package").end()) {
+        spdlog::error("{} does not appear to be activated", package);
+        return;
+    }
+    for (auto& sourceDest : *it) {
+        auto symlinkDest = sourceDest.at("target");
+        fs::path castPath = fs::path(symlinkDest.get<std::string>());
+        if (isGoodSymlink(castPath)) {
+            spdlog::info("Unlinking {}", castPath.string());
+            fs::remove(castPath);
+        } else {
+            spdlog::error("Skipped bad entry: {}", castPath.string());
+        }
+    }
+
+    cfg.data.at("package").erase(it);
 }
 
 void Context::runFile(const std::string& targetFun) {

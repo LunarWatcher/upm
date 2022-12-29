@@ -3,9 +3,7 @@ set (SOURCE_FILES
 
     upm/conf/Config.cpp
 
-    upm/package/PackageResolver.cpp
     upm/package/Activators.cpp
-    upm/util/StrUtil.cpp
     upm/util/Version.cpp
     upm/conf/Config.cpp
 

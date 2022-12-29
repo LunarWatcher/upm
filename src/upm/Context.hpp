@@ -80,6 +80,8 @@ public:
      */
     void apply();
 
+    void disable();
+
     std::string getPrefix();
     std::vector<fs::path> getLuaLookupDirectory();
 

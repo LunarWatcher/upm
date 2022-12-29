@@ -1,5 +1,5 @@
 #include "Version.hpp"
-#include "upm/util/StrUtil.hpp"
+#include "stc/StringUtil.hpp"
 
 #include <string>
 #include <iostream>
@@ -35,8 +35,8 @@ bool operator!=(const Version &a, const Version &b) {
 
 bool operator>(const Version& a, const Version& b) {
     std::vector<std::string>
-        aComp = StrUtil::splitString(a.getVersion(), "."),
-        bComp = StrUtil::splitString(b.getVersion(), ".");
+        aComp = stc::string::split(a.getVersion(), "."),
+        bComp = stc::string::split(b.getVersion(), ".");
 
     for (int i = 0; i < std::max(aComp.size(), bComp.size()); ++i) {
         auto aBit = i >= aComp.size() ? 0 : std::stoi(aComp[i]);

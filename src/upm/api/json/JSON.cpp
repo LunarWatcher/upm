@@ -31,6 +31,7 @@ void upmjson_parseInternal(lua_State* state, const nlohmann::json& json) {
 
         for (auto& [k, v] : json.items()) {
             upmjson_parseInternal(state, v);
+            luaL_checktype(state, -2, LUA_TTABLE);
             lua_setfield(state, -2, k.c_str()); // step[k] = v
         }
     } else {

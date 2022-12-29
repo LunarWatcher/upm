@@ -68,6 +68,7 @@ int upmfilesystem_installCopy(lua_State* state) {
     fs::path dest = upm::Context::inst->getPrefix();
     if (!fs::is_directory(dest)) fs::create_directories(dest);
 
+    // At least recursive copying is easy now
     fs::copy(source, dest, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
     return 0;
 }

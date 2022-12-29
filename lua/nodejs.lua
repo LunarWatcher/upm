@@ -30,10 +30,11 @@ function install()
                 end
             end
         end
-        if (version[1] ~= 'v') then
-            error("Failed to resolve version");
+
+        if (version:sub(1, 1) ~= 'v') then
+            error("Failed to resolve version: found " .. version);
         end
-    elseif (version[1] ~= 'v') then
+    elseif (version:sub(1, 1) ~= 'v') then
         version = "v" .. version
         r = network.request("https://nodejs.org/dist/" .. version)
         if (r["status_code"] ~= 200) then
