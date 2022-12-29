@@ -16,6 +16,8 @@ void upmjson_parseInternal(lua_State* state, const nlohmann::json& json) {
         lua_pushnumber(state, json.get<double>());
     } else if (json.is_string()) {
         lua_pushstring(state, json.get<std::string>().c_str());
+    } else if (json.is_boolean()) {
+        lua_pushboolean(state, json.get<bool>());
     } else if (json.is_array()) {
         lua_newtable(state);
 
@@ -32,7 +34,7 @@ void upmjson_parseInternal(lua_State* state, const nlohmann::json& json) {
             lua_setfield(state, -2, k.c_str()); // step[k] = v
         }
     } else {
-        throw std::runtime_error("bad JSON parsing");
+        throw std::runtime_error("bad JSON parsing at " + json.dump());
     }
 }
 

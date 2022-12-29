@@ -2,6 +2,7 @@
 #include "Context.hpp"
 #include "Constants.hpp"
 #include "upm/Context.hpp"
+#include "LuaHelper.hpp"
 
 #include <iostream>
 
@@ -9,7 +10,7 @@
 extern "C" {
 
 static const luaL_Reg contextMetatable[] = {
-    {"test", context_test},
+    {"getArch", context_getArch},
     // Meta methods
     {"__index", context_index},
     {nullptr, nullptr}
@@ -39,9 +40,12 @@ int context_index(lua_State* state) {
     return 1;
 }
 
-int context_test(lua_State* state) {
-    lua_pushstring(state, "test object function");
-    return 1;
+int context_getArch(lua_State* state) {
+    upm::Context** data = static_cast<upm::Context**>(luaL_checkudata(state, 1, MT_Context));
+
+    lua_pushstring(state, (*data)->sysInfo.os.c_str());
+    lua_pushstring(state, (*data)->sysInfo.cpuArch.c_str());
+    return 2;
 }
 
 int luaopen_context(lua_State* state) {
