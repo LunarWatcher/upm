@@ -42,11 +42,12 @@ int upmnetwork_download(lua_State* state) {
 
     auto name = url.substr(url.rfind('/') + 1);
     fs::path tmpDir = fs::temp_directory_path();
-    fs::path p = tmpDir / ("upm-" + name);
+    fs::path p = tmpDir / ("upm/" + name);
     if (fs::exists(p)) {
         spdlog::info("Cache entry found at {}.", p.string());
+        lua_pushinteger(state, 200);
         lua_pushstring(state, p.string().c_str());
-        return 1;
+        return 2;
     }
 
     std::ofstream of(
@@ -58,14 +59,17 @@ int upmnetwork_download(lua_State* state) {
         cpr::Url{url}
     );
     spdlog::debug("Received {}Mb", ((double) r.downloaded_bytes) / (1024.0 * 1024.0));
-    if (r.status_code != 200) {
+    lua_pushinteger(state, r.status_code);
+    if (r.status_code == 0) {
+        return luaL_error(state, "Network error. Make sure you're still connected to the interweebs.");
+    } else if (r.status_code != 200) {
         spdlog::error("Download failed with status code {}", r.status_code);
-        return luaL_error(state, "Download errored out.");
+        lua_pushnil(state);
+    } else {
+        lua_pushstring(state, p.string().c_str());
     }
 
-    lua_pushstring(state, p.string().c_str());
-
-    return 1;
+    return 2;
 }
 
 int upmnetwork_gitClone(lua_State* state) {
@@ -116,6 +120,7 @@ int luaopen_upmnetwork(lua_State* state) {
     static const luaL_Reg functions[] = {
         {"request", upmnetwork_request},
         {"gitClone", upmnetwork_gitClone},
+        {"download", upmnetwork_download},
         {nullptr, nullptr}
     };
 

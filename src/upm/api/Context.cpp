@@ -28,7 +28,10 @@ int context_index(lua_State* state) {
     } else if (name == "version") {
         lua_pushstring(state, (*data)->packageVersion.c_str());
     } else {
-        return luaL_error(state, "Invalid key");
+        // Note for future self: this is to allow function resolution from the metatable.
+        luaL_getmetatable(state, MT_Context);
+        lua_pushvalue(state, 2);
+        lua_rawget(state, -2);
     }
 
     // __index seems to only allow a single return value, so no point in returning anything else.

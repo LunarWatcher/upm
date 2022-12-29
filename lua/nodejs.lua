@@ -30,14 +30,30 @@ function install()
                 end
             end
         end
+        if (version[1] ~= 'v') then
+            error("Failed to resolve version");
+        end
     elseif (version[1] ~= 'v') then
         version = "v" .. version
+        r = network.request("https://nodejs.org/dist/" .. version)
+        if (r["status_code"] ~= 200) then
+            error("Invalid version supplied; nodejs.org/dist/" .. version .. " couldn't be resolved.")
+        end
     end
     log.info("Resolved version:", version);
     os, arch = ctx:getArch();
 
-
     log.info("Resolved OS, arch:", os, arch)
+    if (os ~= "UNK" and arch ~= "UNK") then
+        status, filePath = network.download("https://nodejs.org/dist/" .. version .. "/node-" .. version .. "-" .. os .. "-" .. arch .. ".tar.gz")
+        if (filePath ~= nil) then
+            dest = fs.untar(filePath, 1)
+            fs.installCopy(dest)
+            return
+        end
+        
+    end
+    error("Compiling from source is not supported")
 end
 
 return {

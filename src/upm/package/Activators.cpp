@@ -46,6 +46,8 @@ bool Activators::recursiveUniversalUNIXLink() {
     }
     for (auto& [source, target] : links) {
         spdlog::info("Linking {} -> {}", target.string(), source.string());
+        // TODO: use package.<package>.files instead, and add
+        // a package.<package>.version
         ctx.cfg.data["package"][ctx.package].push_back({{"target", target.string()}, {"source", source.string()}});
         if (fs::exists(target)) {
             // This is semi-temporary 'til we get uninstallation in place

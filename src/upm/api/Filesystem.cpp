@@ -63,6 +63,15 @@ int upmfilesystem_sharedLibInstalled(lua_State* state) {
     return 1;
 }
 
+int upmfilesystem_installCopy(lua_State* state) {
+    fs::path source = luaL_checkstring(state, 1);
+    fs::path dest = upm::Context::inst->getPrefix();
+    if (!fs::is_directory(dest)) fs::create_directories(dest);
+
+    fs::copy(source, dest, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
+    return 0;
+}
+
 int upmfilesystem_configure(lua_State* state) {
 
     if (lua_gettop(state) < 2) {
@@ -106,12 +115,45 @@ int upmfilesystem_make(lua_State* state) {
     return 0;
 }
 
+int upmfilesystem_untar(lua_State* state) {
+    fs::path source = luaL_checkstring(state, 1);
+    if (auto pos = source.string().find("/tmp/"); pos == std::string::npos || pos != 0) {
+        throw std::runtime_error("Invalid path; must be a path to /tmp/");
+    }
+    int stripComponents = luaL_optinteger(state, 2, -1);
+    
+    auto dest = source;
+    dest.replace_extension().replace_extension();
+    if (auto pos = dest.string().find("/tmp/"); pos == std::string::npos || pos != 0) {
+        throw std::runtime_error("Fatal: resolved destination path is not a /tmp/ path");
+    }
+    std::string tarArg = "";
+    if (stripComponents > 0) {
+        tarArg += "--strip-components " + std::to_string(stripComponents);
+    }
+
+    tarArg += " -xf " + source.string();
+    tarArg += " -C " + dest.string();
+    upm::filesystem::logger->info("Unpacking {} to {}...", source.string(), dest.string());
+
+    fs::create_directories(dest);
+    auto res = std::system(("tar " + tarArg).c_str());
+    if (res != 0) {
+        return luaL_error(state, "Failed to untar");
+    }
+
+    lua_pushstring(state, dest.string().c_str());
+    return 1;
+}
+
 int luaopen_upmfilesystem(lua_State* state) {
     static const luaL_Reg functions[] = {
         {"exists", upmfilesystem_exists},
         {"sharedLibInstalled", upmfilesystem_sharedLibInstalled},
         {"configure", upmfilesystem_configure},
         {"make", upmfilesystem_make},
+        {"untar", upmfilesystem_untar},
+        {"installCopy", upmfilesystem_installCopy},
         {nullptr, nullptr}
     };
 

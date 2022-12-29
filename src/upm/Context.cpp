@@ -112,6 +112,7 @@ See GitHub for the full license.
         }
         resolvePackageContext(input[0]);
         install();
+        spdlog::info("Successfully installed " + package);
     } else if (command == "apply") {
         if (input.size() < 1) {
             spdlog::error("What package?");
@@ -123,7 +124,12 @@ See GitHub for the full license.
             return -1;
         }
         resolvePackageContext(input[0]);
+        if (cfg.data.contains("package") && cfg.data.at("package").contains(package)) {
+            spdlog::error(package + " is already active. Deactivate it before trying again");
+            return -1;
+        }
         apply();
+        spdlog::info("Successfully activated " + package);
     } else if (command == "deactivate") {
         if (input.size() < 1) {
             spdlog::error("What package?");
@@ -137,6 +143,7 @@ See GitHub for the full license.
         package = input[0];
         versionType = VersionType::AT;
         disable(*this);
+        spdlog::info("Successfully disabled " + package);
     } else {
         // Commands part of the help, but that aren't implemented yet are still unknown.
         // (read: they're not bugs, for the record :) )
