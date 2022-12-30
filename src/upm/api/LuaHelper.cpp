@@ -4,9 +4,13 @@
 #include "Exec.hpp"
 #include "Filesystem.hpp"
 #include "Context.hpp"
-#include "Activators.hpp"
+
 #include "json/JSON.hpp"
+
 #include "io/LogAPI.hpp"
+
+#include "stdfunc/Activators.hpp"
+#include "stdfunc/VersionResolvers.hpp"
 
 #include <stc/FS.hpp>
 
@@ -37,6 +41,7 @@ void LuaHelper::init() {
     registerLibrary("json", luaopen_upmjson);
     registerLibrary("upmlog", luaopen_upmlog);
     registerLibrary("activators", luaopen_activators);
+    registerLibrary("verresolvers", luaopen_verresolvers);
 
     // Init is called when the package is clear.
 

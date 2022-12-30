@@ -15,7 +15,9 @@ set (SOURCE_FILES
     upm/api/Exec.cpp
     upm/api/Filesystem.cpp
     upm/api/Context.cpp
-    upm/api/Activators.cpp
+
+    upm/api/stdfunc/Activators.cpp
+    upm/api/stdfunc/VersionResolvers.cpp
 
     upm/api/json/JSON.cpp
 
