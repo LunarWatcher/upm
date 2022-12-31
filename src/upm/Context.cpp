@@ -43,7 +43,8 @@ void Context::resolvePackageContext(const std::string& rawVersion) {
         // No version specified is good; we return latest
         package = rawVersion;
         packageVersion = "latest";
-        versionType = VersionType::IMPLICIT;
+        versionType = VersionType::AT;
+        return;
     } else if (at != 1 && approx != 1) {
         spdlog::error("{} doesn't follow any of the supported version formats", rawVersion);
         // Both @ and ~, and we throw.

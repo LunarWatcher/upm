@@ -13,7 +13,6 @@ namespace upm {
 enum class VersionType {
     AT = 0,
     APPROX = 1,
-    IMPLICIT = 2
 };
 
 typedef struct {
