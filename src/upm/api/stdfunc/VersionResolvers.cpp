@@ -1,9 +1,16 @@
 #include "VersionResolvers.hpp"
 
+#include "upm/package/VersionResolvers.hpp"
+
 extern "C" {
 
-int verresolvers_git(lua_State* git) {
-    return 0;
+int verresolvers_git(lua_State* state) {
+    lua_pushstring(state,
+        upm::VersionResolvers::git(
+            luaL_checkstring(state, 1)           
+        ).c_str()
+    );
+    return 1;
 }
 
 int luaopen_verresolvers(lua_State* state) {

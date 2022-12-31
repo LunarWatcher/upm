@@ -4,6 +4,7 @@ set (SOURCE_FILES
     upm/conf/Config.cpp
 
     upm/package/Activators.cpp
+    upm/package/VersionResolvers.cpp
     upm/util/Version.cpp
     upm/conf/Config.cpp
 
