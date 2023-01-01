@@ -120,9 +120,8 @@ See GitHub for the full license.
             spdlog::error("What package?");
             return -1;
         }
-        if (!isRoot) {
-            spdlog::error("Please run upm as sudo to apply this package.\n"
-                          "If you meant to install it for your user, remember to pass --local.");
+        if (isRoot) {
+            spdlog::error("Please run upm as your normal user.");
             return -1;
         }
         resolvePackageContext(input[0]);
