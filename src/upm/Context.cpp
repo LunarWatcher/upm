@@ -24,6 +24,9 @@ namespace upm {
 
 Context::Context(const std::vector<std::string>& cmd) : input(cmd), isRoot(!getuid()), cfg(this) {
     Context::inst = this;
+    if (isRoot) {
+        throw std::runtime_error("upm cannot be run as root");
+    }
     
     // TODO: nasty hack; find a better way to lateinit or init after setting inst
     helper.init();
@@ -107,21 +110,12 @@ See GitHub for the full license.
             spdlog::error("What package?");
             return -1;
         }
-        if (!isRoot) {
-            spdlog::error("Please run upm as sudo to install this package.\n"
-                          "If you meant to install it for your user, remember to pass --local.");
-            return -1;
-        }
         resolvePackageContext(input[0]);
         install();
         spdlog::info("Successfully installed " + package);
     } else if (command == "apply") {
         if (input.size() < 1) {
             spdlog::error("What package?");
-            return -1;
-        }
-        if (isRoot) {
-            spdlog::error("Please run upm as your normal user.");
             return -1;
         }
         resolvePackageContext(input[0]);
@@ -136,15 +130,12 @@ See GitHub for the full license.
             spdlog::error("What package?");
             return -1;
         }
-        if (!isRoot) {
-            spdlog::error("Please run upm as sudo to install this package.\n"
-                          "If you meant to install it for your user, remember to pass --local.");
-            return -1;
-        }
         package = input[0];
         versionType = VersionType::AT;
         disable();
-        spdlog::info("Successfully disabled " + package);
+    } else if (command == "_path") {
+        std::cout << "/opt/upm/active/bin" << std::endl;
+        return 0;
     } else {
         // Commands part of the help, but that aren't implemented yet are still unknown.
         // (read: they're not bugs, for the record :) )
@@ -187,6 +178,7 @@ void Context::disable() {
     }
 
     cfg.data.at("package").erase(it);
+    spdlog::info("Successfully disabled " + package);
 }
 
 void Context::runFile(const std::string& targetFun) {
@@ -217,9 +209,9 @@ std::string Context::locateFile(const std::string& packageName) {
 
 std::string Context::getPrefix() {
     fs::path root;
-    if (isRoot) {
-        root = "/opt";
-    } else root = stc::getHome() / ".local";
+    //if (isRoot) {
+    root = "/opt";
+    //} else root = stc::getHome() / ".local";
 
     root /= "upm/packages";
 
@@ -230,12 +222,6 @@ std::string Context::getPrefix() {
 }
 
 std::vector<fs::path> Context::getLuaLookupDirectory() {
-    // Getting lookup directories is a complicated process.
-    //
-    // The scripts are packaged in two different ways; user-specific stuff, and global stuff.
-    // Global stuff is always loaded, but user stuff is only loaded when not running as root, primarily
-    // to avoid privilege escalation via scripts.
-    // Therefore, the first check is to grab all the script paths from the global directory:
     std::vector<fs::path> res;
 #ifdef UPM_DEBUG
     // If built as debug, make sure ./lua is included first in the search path.
@@ -247,9 +233,9 @@ std::vector<fs::path> Context::getLuaLookupDirectory() {
     res.push_back("/opt/upm/lua/upm/");
 
 
-    if (!isRoot) {
-        // TODO: set up per-user stuff
-    }
+    //if (!isRoot) {
+        //// TODO: set up per-user stuff
+    //}
 
     return res;
 }

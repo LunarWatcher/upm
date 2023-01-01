@@ -9,7 +9,7 @@
 namespace upm {
 
 Config::Config(Context* ctx) : ctx(ctx) {
-    fs::path conf = ctx->isRoot ? "/opt/upm/" : stc::getHome();
+    fs::path conf = "/opt/upm/";
     if (!fs::exists(conf)) {
         fs::create_directories(conf);
     }
@@ -33,7 +33,6 @@ Config::~Config() {
     }
     std::ofstream cOut(this->confPath);
     cOut << data;
-
 }
 
 void Config::setup() {

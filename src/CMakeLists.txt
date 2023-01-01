@@ -44,4 +44,7 @@ add_custom_target(luascripts
 
 add_dependencies(upm luascripts)
 
+install(TARGETS upm DESTINATION bin)
+install(DIRECTORY lua DESTINATION lua/upm)
+
 # vim:ft=cmake
