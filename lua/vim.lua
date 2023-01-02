@@ -35,7 +35,8 @@ function install()
     -- We already have a return value to check if it was re-cloned or not,
     -- and clone failure throws an error for the user to handle.
     local _, directory = network.gitClone("https://github.com/vim/vim", "vim", true);
-    version = vResolvers.git(directory)
+    version = vResolvers.git(directory, true)
+    ctx:checkInstalled()
 
     local extras = ""
 
@@ -65,6 +66,6 @@ end
 
 return {
     install = install,
-    versionValidator = vResolvers.validateGitVPrefix
+    versionValidator = vResolvers.validateGitVPrefix,
     apply = activators.universalUNIX
 }

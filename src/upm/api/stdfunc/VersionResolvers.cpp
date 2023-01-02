@@ -5,9 +5,14 @@
 extern "C" {
 
 int verresolvers_git(lua_State* state) {
+    bool vPrefix = false;
+    if (lua_gettop(state) > 2) {
+        vPrefix = lua_toboolean(state, 2);
+    }
     lua_pushstring(state,
         upm::VersionResolvers::git(
-            luaL_checkstring(state, 1)           
+            luaL_checkstring(state, 1),
+            vPrefix
         ).c_str()
     );
     return 1;

@@ -28,11 +28,7 @@ Context::Context(const std::vector<std::string>& cmd) : input(cmd), isRoot(!getu
         throw std::runtime_error("upm cannot be run as root");
     }
     
-    // TODO: nasty hack; find a better way to lateinit or init after setting inst
     helper.init();
-    //package = "vim";
-    //packageVersion = "latest";
-    //helper.runFile("vim.lua");
 }
 
 void Context::resolvePackageContext(const std::string& rawVersion) {
@@ -199,8 +195,15 @@ void Context::runFile(const std::string& targetFun) {
     if (lua_isnil(helper.getState(), -1)) {
         throw std::runtime_error("Must define a function for " + targetFun);
     }
-    lua_call(helper.getState(), 0, 0);
-    helper.dump();
+    if (lua_pcall(helper.getState(), 0, 0, 0) != LUA_OK) {
+        if (lua_isstring(*helper, -1)) {
+            spdlog::error(lua_tostring(*helper, -1));
+        } else {
+            helper.dump();
+        }
+        throw std::runtime_error("A critical Lua failure occurred.");
+    }
+    lua_pop(helper.getState(), lua_gettop(helper.getState()));
 }
 
 std::string Context::locateFile(const std::string& packageName) {
@@ -213,6 +216,13 @@ std::string Context::locateFile(const std::string& packageName) {
         }
     }
     return "";
+}
+
+bool Context::checkInstalled() {
+    auto prefix = getPrefix();
+    bool isInstalled = fs::is_directory(prefix);
+    // TODO: use isInstalled + config to check whether or not the existing directory should be removed
+    return isInstalled;
 }
 
 std::string Context::getPrefix() {

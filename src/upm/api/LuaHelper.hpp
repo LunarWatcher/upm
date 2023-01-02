@@ -26,6 +26,7 @@ public:
      * with this.
      */
     void runFile(const std::string& fn);
+
     /**
      * Identical to runFile, but with additional validation for the return results.
      *
@@ -43,6 +44,8 @@ public:
     // Why the fuck do I need this??
     void registerLibrary(const char* libname, lua_CFunction func);
     decltype(state) getState() { return state; }
+
+    decltype(state) operator*() { return state; }
 };
 
 }

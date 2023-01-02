@@ -3,13 +3,14 @@
 #include <fstream>
 #include "upm/Context.hpp"
 #include "stc/Environment.hpp"
+#include <unistd.h>
 
 namespace upm {
 
-std::string VersionResolvers::git(const std::string &repoPath) {
+std::string VersionResolvers::git(const std::string &repoPath, bool vPrefix) {
     // Note; no version capability checks are performed here. These are performed
     // via version declarations in the object.
-    auto version = Context::inst->packageVersion;
+    std::string version = Context::inst->packageVersion;
     int statusCode = 0;
     std::string res;
     auto cd = "cd " + repoPath + " && ";
@@ -34,24 +35,39 @@ std::string VersionResolvers::git(const std::string &repoPath) {
             res = stc::syscommand(cd + "git describe --tags --abbrev=0", &statusCode);
             // Unlike nightly, this doesn't have a fallback to refer to the latest
             // commit, because this tag is specifically for 
+        } else {
+            if (vPrefix && version[0] != 'v') version = "v" + version;
+            res = stc::syscommand(cd + "git tags -l " + version);
         }
         break;
     case VersionType::APPROX:
+        if (vPrefix && version[0] != 'v') version = "v" + version;
         // the star doesn't have to be escaped in plain sh, but there isn't necessarily a guarantee
         // sh is the runner.
         // This ensures compatibility on the off chance /bin/sh isn't the runner for `popen`
         // This returns the last tag matching the pattern provided.
         //
-        // This particular category, by definition, does not have 
-        res = stc::syscommand(cd + "git describe --tags --abbrev=0 --match " + version  + "\\*", &statusCode);
+        // This particular category, by definition, does not have identifiers. They're for cases where
+        // "I know I need v<x>, but I'd like the most recent version matching these criteria without googling"
+        res = stc::syscommand(cd + "git describe --tags --abbrev=0 --match " + version + "\\*", &statusCode);
         break;
     default:
         // Should never be invoked; this is a catch-all if different versions are added in the future
         throw std::runtime_error("Illegal versionType used; the git version resolver needs an update");
     }
     if (statusCode == 0) {
-        Context::inst->resolvedPackageVersion = res;
-        return res;
+        auto resolvedVersion = res;
+
+        // Ensure newlines are stripped from the output
+        if (auto index = resolvedVersion.find('\n'); index != std::string::npos) {
+            resolvedVersion = resolvedVersion.substr(0, index);
+        }
+        Context::inst->resolvedPackageVersion = resolvedVersion;
+        stc::syscommand((cd + "git checkout " + resolvedVersion).c_str(), &statusCode);
+        if (statusCode != 0) {
+            throw std::runtime_error("Failed to checkout " + resolvedVersion);
+        }
+        return resolvedVersion;
     } else throw std::runtime_error("Git failed to return an appropriate status code. stdout: " + res);
 }
 

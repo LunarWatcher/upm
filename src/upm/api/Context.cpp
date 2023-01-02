@@ -62,6 +62,15 @@ int context_getArch(lua_State* state) {
     return 2;
 }
 
+int context_checkInstalled(lua_State* state) {
+    upm::Context** data = static_cast<upm::Context**>(luaL_checkudata(state, 1, MT_Context));
+    if ((*data)->checkInstalled()) {
+        return luaL_error(state, "Package already installed. Pass --reinstall to automatically uninstall and reinstall.");
+    }
+
+    return 0;
+}
+
 int luaopen_context(lua_State* state) {
 
     luaL_newmetatable(state, MT_Context);

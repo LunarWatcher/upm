@@ -98,6 +98,8 @@ public:
 
     void disable();
 
+    bool checkInstalled();
+
     std::string getPrefix();
     std::vector<fs::path> getLuaLookupDirectory();
 

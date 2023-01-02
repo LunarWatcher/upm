@@ -11,7 +11,7 @@ namespace VersionResolvers {
 /**
  * Version resolver for tagged Git repositories
  */
-std::string git(const std::string& repoPath);
+std::string git(const std::string& repoPath, bool vPrefix = false);
 
 }
 

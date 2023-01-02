@@ -13,17 +13,15 @@ You're free to structure your scripts however you see fit<sup>[1]</sup>. However
 ```lua
 return {
     install = install,
-    versionValidator = vResolvers.validateGitVPrefix,
     apply = activators.universalUNIX
 }
 ```
 
-These are, incidentally, all the required keys, as well as some optional ones. The values for `apply` and `versionValidator` are API functions, discussed in other documents. However, in short:
+These are, incidentally, all the required keys, as well as some optional ones. The values for `apply` is an API function, discussed in other documents. However, in short:
 
-* `vResolvers` is a library (`local vResolvers = require "vResolvers"`), and primarily does version resolution, with a bit of version validation on the side. Its validation suite is generally associated with resolvers by the same name. `validateGitVPrefix`, for instance, is used with its `git(repoPath)` resolver function. `Git` symbolises it validates in line with the capabilities of the `git` version resolver, and `VPrefix` means it does  so in a way that also looks for a prefixed `v` in front of the version.
-* `activators` is a library (`local activators = require "activators"`), and defines a bunch of default activation systems. Most critically, `activators.universalUNIX`, which activates all packages existing only in the default UNIX format (i.e. `bin`, `lib`, `include`, ...). This is, by far, the most commonly used activator in the entire library.
+`activators` is a library (`local activators = require "activators"`), and defines a bunch of default activation systems. Most critically, `activators.universalUNIX`, which activates all packages existing only in the default UNIX format (i.e. `bin`, `lib`, `include`, ...). This is, by far, the most commonly used activator in the entire library.
 
-To see more version resolvers and activators, and more in-depth and technically explanations, see their respective documentation.
+To see more activators, and more in-depth and technically explanations, see its documentation..
 
 [1]: ... in theory. Contributions to the core scripts have higher requirements, and specific standards written by me because I can. You're free to write them however you see fit in your own package repositories, but that doesn't mean individual package repositories can't have their own standards for script structure outside the required bare minimum. Your own package repos can define its own standards, as long as they follow the minimum requirements. There's no general style decisions or function name requirements, nor a requirement only so many functions can be included. Use whatever general script structure you feel like, and it's fully irrelevant as long as the correct functions are supplied in the return value from the script, and as long as it's valid Lua 5.4.
 
@@ -51,9 +49,3 @@ This function is called during the application process of a package. This key ov
 When it doesn't, it uses `ctx` to get the install prefix, and perform the symlinks and any necessary directory creation. This function should NOT use `upmfilesystem` for any write processes. `upmfilesystem` may be performed to, among other things, iterate directories and files, but `ctx` has to be used to apply the binaries.
 
 This is a requirement to ensure automatic disabling, and by extension, uninstallation. upm's context API automatically tracks and stores symlinks in its config file, to save time dealing with uninstallations.
-
-### `versionValidator` (optional)
-
-This (optional) function lets `upm` validate the form of the version prior to installation. This function can perform validity checks, but it's primarily intended to check the syntax. Take `vResolvers.validateGitVPrefix`; all it does is ensure `version == "latest" || version == "nightly" || version =~ "v.*"`. This means it could pass `v6.9`, but whether that version _exists_ will not be resolved in that step.
-
-In essence, this function exists to ensure early errors for syntactic mistakes. Whether that version exists is dealt with later.
