@@ -38,9 +38,9 @@ std::string VersionResolvers::git(const std::string &repoPath, bool vPrefix) {
         } else {
             if (vPrefix && version[0] != 'v') version = "v" + version;
             res = stc::syscommand(cd + "git tag -l " + version, &statusCode);
-            if (res == version || res == version + "\n") {
-                res = version;
-            } else statusCode = 1;
+            if (res == "\n" || res == "") {
+                statusCode = 1;
+            }
         }
         break;
     case VersionType::APPROX:
