@@ -41,7 +41,7 @@ void LuaHelper::init() {
     registerLibrary("json", luaopen_upmjson);
     registerLibrary("upmlog", luaopen_upmlog);
     registerLibrary("activators", luaopen_activators);
-    registerLibrary("verresolvers", luaopen_verresolvers);
+    registerLibrary("vResolvers", luaopen_verresolvers);
 
     // Init is called when the package is clear.
 

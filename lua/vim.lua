@@ -3,8 +3,10 @@ local exec = require "upmexec"
 local fs = require "upmfs"
 local log = require "upmlog"
 local activators = require "activators"
+local vResolvers = require "vResolvers"
 
 function install()
+
     log.info("Checking for required dependencies....");
     -- There may be more dependencies than this; my own config seems to be a bit excessive, will have to test
     -- later. Or wait for someone else to use upm and report missing dependencies.
@@ -33,6 +35,7 @@ function install()
     -- We already have a return value to check if it was re-cloned or not,
     -- and clone failure throws an error for the user to handle.
     local _, directory = network.gitClone("https://github.com/vim/vim", "vim", true);
+    version = vResolvers.git(directory)
 
     local extras = ""
 
@@ -62,5 +65,6 @@ end
 
 return {
     install = install,
+    versionValidator = vResolvers.validateGitVPrefix
     apply = activators.universalUNIX
 }

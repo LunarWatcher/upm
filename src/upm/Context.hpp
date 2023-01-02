@@ -51,10 +51,27 @@ public:
 #endif
     };
 
+    /**
+     * The package name; received as user input
+     */
     std::string package;
+
+    /**
+     * The package version; received as user input. May represent a semantic string rather
+     * than a concrete version; meaning while this could be 6.9.0, it could also be latest,
+     * lts, or nightly. Whether these are supported is down to version resolution
+     */
     std::string packageVersion;
-    // TODO: determine the usefulness fo this field in practice, particularly
-    // for the Context Lua API (AKA proxying objects is hard)
+
+    /**
+     * For symlink purposes, this represents the concrete version. If one isn't defined,
+     * packageVersion may be used instead.
+     *
+     * This is primarily used to symlink semantical version (such as latest or nightly) to
+     * concrete versions, as defined by the individual script's version resolution systems.
+     */
+    std::string resolvedPackageVersion;
+
     VersionType versionType;
 
     LuaHelper helper;

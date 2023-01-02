@@ -113,6 +113,12 @@ See GitHub for the full license.
         resolvePackageContext(input[0]);
         install();
         spdlog::info("Successfully installed " + package);
+        spdlog::info("Preparing automatic activation...");
+        if (cfg.data.contains("package") && cfg.data.at("package").contains(package)) {
+            disable();
+        }
+        apply();
+        spdlog::info("{} activated", package);
     } else if (command == "apply") {
         if (input.size() < 1) {
             spdlog::error("What package?");
@@ -130,6 +136,7 @@ See GitHub for the full license.
             spdlog::error("What package?");
             return -1;
         }
+        resolvePackageContext(input[0]);
         package = input[0];
         versionType = VersionType::AT;
         disable();
@@ -193,6 +200,7 @@ void Context::runFile(const std::string& targetFun) {
         throw std::runtime_error("Must define a function for " + targetFun);
     }
     lua_call(helper.getState(), 0, 0);
+    helper.dump();
 }
 
 std::string Context::locateFile(const std::string& packageName) {
@@ -208,16 +216,11 @@ std::string Context::locateFile(const std::string& packageName) {
 }
 
 std::string Context::getPrefix() {
-    fs::path root;
-    //if (isRoot) {
-    root = "/opt";
-    //} else root = stc::getHome() / ".local";
+    fs::path root = "/opt/upm/packages";
 
-    root /= "upm/packages";
-
-    // This is a temporary hack; this needs to represent the real resolved version
-    // TODO: replace with an argument retrieved from the API
-    root /= package + "-" + packageVersion;
+    root /= package + "-" + (
+        resolvedPackageVersion == "" ? packageVersion : resolvedPackageVersion
+    );
     return root.string();
 }
 

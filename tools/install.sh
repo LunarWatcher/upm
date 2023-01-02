@@ -40,9 +40,7 @@ python3 -m pip install --upgrade conan || exit -1
 
 echo "Checkout build directory"
 mkdir -p build && cd build
-# TODO: Hook up -j <threads> with automatic core detection
-cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/upm/packages/upm-nightly && make -j $(nproc)
-make install -j $(nproc)
-
-#TODO: enable when a upm lua script exists
-#/opt/upm/packages/upm-nightly/bin/upm apply upm@latest
+# Bootstrap build
+cmake .. -DCMAKE_BUILD_TYPE=Release && make -j $(nproc)
+# Make upm install itself
+./bin/upm install upm@nightly

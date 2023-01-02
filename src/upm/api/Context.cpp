@@ -11,8 +11,10 @@ extern "C" {
 
 static const luaL_Reg contextMetatable[] = {
     {"getArch", context_getArch},
+    {"checkInstalled", context_checkInstalled},
     // Meta methods
     {"__index", context_index},
+    {"__newindex", context_newindex},
     {nullptr, nullptr}
 };
 
@@ -27,6 +29,8 @@ int context_index(lua_State* state) {
         lua_pushstring(state, (*data)->package.c_str());
     } else if (name == "version") {
         lua_pushstring(state, (*data)->packageVersion.c_str());
+    } else if (name == "resolvedVersion") {
+        lua_pushstring(state, (*data)->resolvedPackageVersion.c_str());
     } else {
         // Note for future self: this is to allow function resolution from the metatable.
         luaL_getmetatable(state, MT_Context);
@@ -36,6 +40,17 @@ int context_index(lua_State* state) {
 
     // __index seems to only allow a single return value, so no point in returning anything else.
     return 1;
+}
+
+int context_newindex(lua_State* state) {
+    upm::Context** data = static_cast<upm::Context**>(luaL_checkudata(state, 1, MT_Context));
+    std::string key = luaL_checkstring(state, 2);
+    if (key == "resolvedVersion") {
+        (*data)->resolvedPackageVersion = luaL_checkstring(state, 3);
+        return 0;
+    } else {
+        return luaL_error(state, "Nope");
+    }
 }
 
 int context_getArch(lua_State* state) {
