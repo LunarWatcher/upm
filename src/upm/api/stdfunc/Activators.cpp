@@ -6,7 +6,7 @@ extern "C" {
 
 int activators_universalUNIX(lua_State* state) {
     if (!upm::Activators::recursiveUniversalUNIXLink()) {
-        return luaL_error(state, "Activation function errorred.");
+        return luaL_error(state, "Activation function errored.");
     }
     return 0;
 }

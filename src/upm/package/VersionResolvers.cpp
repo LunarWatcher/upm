@@ -67,6 +67,7 @@ std::string VersionResolvers::git(const std::string &repoPath, bool vPrefix) {
         if (statusCode != 0) {
             throw std::runtime_error("Failed to checkout " + resolvedVersion);
         }
+        spdlog::info("Resolved package to version {}", resolvedVersion);
         return resolvedVersion;
     } else throw std::runtime_error("Git failed to return an appropriate status code. stdout: " + res);
 }
