@@ -2,7 +2,10 @@
 
 Note: this document does NOT refer to installing upm. See [TODO: document upm installation]
 
-Installing packages is done through `upm install package@version`. There's a few syntactical markers supported:
+Installing packages is done through `upm install package@version` or `upm install package~version`.
+
+## Using `package@version`
+There's a few syntactical markers supported for `@version`:
 
 * `latest` - try to resolve the latest version and download it. Some packages may not support this
 * `lts` - get the LTS version. Only possible for packages that have an LTS version, and that also have an easy way to determine what the LTS is
@@ -21,6 +24,14 @@ Git repositories are guaranteed to use @latest for the latest tag, and @nightly 
 See also the help for individual packages to list their capabilities and config.
 
 `version` may also be a proper version `1.2.3`.
+
+## Using `package~version`
+
+For `package~version`, this is meant to provide support for partial versions. For instance, if you want to install Vim 8.2 (which is no longer supported; Vim 9.0 is the newest at the time of writing, so nightly and latest aren't valid solutions), but you have no idea what the latest patch of it is, you can use `upm install vim~8.2`. upm registers this version as a partial version, and does its best to match your query to the latest version. If you run this now, upm figures out you're looking for v8.2.5172, and installs it.
+
+Note that due to the way certain matching systems work, this may provide partly unexpected results. For instance, if you want the latest version of Node 18.1.x, you'd have to use `upm install nodejs~18.1.`; note the trailing period. If you don't, it's at risk of matching `18.12.1`, because it's the most recent version caught by the implicit wildcard.
+
+Unlike `package@version`, this syntax does not support any syntactical markers. You must provide a version number. That version number here does not have to be complete, as already discussed.
 
 ## Listing packages
 
