@@ -1,4 +1,4 @@
-local network = require "upmnetwork"
+local git = require "git"
 local exec = require "upmexec"
 local fs = require "upmfs"
 local log = require "upmlog"
@@ -34,7 +34,7 @@ function install()
     -- maybe `make distclean` is what I'm looking for as an alternative?
     -- We already have a return value to check if it was re-cloned or not,
     -- and clone failure throws an error for the user to handle.
-    local _, directory = network.gitClone("https://github.com/vim/vim", "vim", true);
+    local _, directory = git.clone("https://github.com/vim/vim", "vim", true);
     version = vResolvers.git(directory, true)
     ctx:checkInstalled()
 
