@@ -31,6 +31,8 @@ int context_index(lua_State* state) {
         lua_pushstring(state, (*data)->packageVersion.c_str());
     } else if (name == "resolvedVersion") {
         lua_pushstring(state, (*data)->resolvedPackageVersion.c_str());
+    } else if (name == "prefix") {
+        lua_pushstring(state, (*data)->getPrefix().c_str());
     } else {
         // Note for future self: this is to allow function resolution from the metatable.
         luaL_getmetatable(state, MT_Context);

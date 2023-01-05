@@ -4,6 +4,7 @@
 #include "Exec.hpp"
 #include "Filesystem.hpp"
 #include "Context.hpp"
+#include "Git.hpp"
 
 #include "json/JSON.hpp"
 
@@ -42,6 +43,7 @@ void LuaHelper::init() {
     registerLibrary("upmlog", luaopen_upmlog);
     registerLibrary("activators", luaopen_activators);
     registerLibrary("vResolvers", luaopen_verresolvers);
+    registerLibrary("git", luaopen_git);
 
     // Init is called when the package is clear.
 
