@@ -18,6 +18,20 @@ const std::string& Version::getVersion() {
     return this->version;
 }
 
+bool Version::componentEquals(const Version& b, size_t idx) {
+    // TODO: cache in the class itself
+    std::vector<std::string>
+        aComp = stc::string::split(version, "."),
+        bComp = stc::string::split(b.version, ".");
+
+    if (idx >= aComp.size()) {
+        throw std::runtime_error("Illegal version access; has " + std::to_string(aComp.size()) + " components, required component " + std::to_string(idx));
+    } else if (aComp.size() != bComp.size()) {
+        return false;
+    }
+    return aComp.at(idx) == bComp.at(idx);
+}
+
 bool operator<(const Version& a, const Version& b) {
     return b > a;
 }

@@ -87,3 +87,14 @@ TEST_CASE("Version normalisation", "[Version][Feat]") {
     REQUIRE_FALSE(c < a);
     REQUIRE_FALSE(c < b);
 }
+
+TEST_CASE("Component equality", "[Version][Feat]") {
+    for (auto& [v1, v2] : std::vector<std::pair<upm::Version, upm::Version>>{
+        {{"2.3.0"}, {"2.4.0"}},
+        {{"2.4.0"}, {"2.3.0"}}
+    }) {
+        REQUIRE(v1.componentEquals(v2, 0));
+        REQUIRE_FALSE(v1.componentEquals(v2, 1));
+        REQUIRE(v1.componentEquals(v2, 2));
+    }
+}

@@ -27,6 +27,8 @@ public:
     const std::string& getVersion();
     const std::string& getVersion() const { return version; }
 
+    bool componentEquals(const Version& b, size_t idx);
+
     friend bool operator<(const Version& a, const Version& b);
     friend bool operator>(const Version& a, const Version& b);
     friend bool operator==(const Version& a, const Version& b);
