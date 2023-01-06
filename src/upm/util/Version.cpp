@@ -6,7 +6,7 @@
 
 namespace upm {
 
-Version::Version(const std::string& version) : version(version) {
+Version::Version(const std::string& rawVersion) : version(rawVersion.at(0) == 'v' ? rawVersion.substr(1) : rawVersion) {
     std::sregex_token_iterator it(version.begin(), version.end(), COMPONENT_SPLIT, -1), end;
     while (it != end) {
         components.push_back(*it);

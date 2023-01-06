@@ -17,6 +17,11 @@ private:
     std::vector<std::string> components;
 
 public:
+    /**
+     * Initialize the version from the provided string.
+     * Note that due to conventions, if the version starts with a (lower-case) v, the character
+     * is stripped
+     */
     Version(const std::string& version);
 
     const std::string& getVersion();

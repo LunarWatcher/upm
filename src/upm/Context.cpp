@@ -108,6 +108,7 @@ See GitHub for the full license.
         }
         resolvePackageContext(input[0]);
         install();
+        configureSemanticMarkers();
         spdlog::info("Successfully installed " + package);
         spdlog::info("Preparing automatic activation...");
         if (cfg.data.contains("package") && cfg.data.at("package").contains(package)) {
@@ -155,6 +156,29 @@ void Context::install() {
 
 void Context::apply() {
     runFile("apply");
+}
+
+void Context::configureSemanticMarkers() {
+
+    if (versionType == VersionType::AT && (packageVersion == "latest" || packageVersion == "lts" || packageVersion == "nightly")) {
+        if (resolvedPackageVersion == "") {
+            // No version resolution, no marker resolution. 
+            return;
+        }
+        if (cfg.data.contains("semanticMarkers") && cfg.data.at("semanticMarkers").contains(package) && cfg.data.at("semanticMarkers").at(package).contains(packageVersion)) {
+            // This configuration is well-known; this means the version has to be checked.
+            Version oldResolution = cfg.data.at("semanticMarkers").at(package).at(packageVersion).get<std::string>();
+            Version newResolution = resolvedPackageVersion;
+            if (packageVersion != "lts") {
+                // nightly and latest
+            } else {
+                // LTS
+            }
+        }
+        cfg["semanticMarkers"][package][packageVersion] = resolvedPackageVersion;
+    } else {
+        // TODO
+    }
 }
 
 void Context::disable() {

@@ -17,6 +17,10 @@ public:
 
     Config(Context* ctx);
     ~Config();
+
+    nlohmann::json& operator[](const std::string& key) {
+        return data[key];
+    }
 };
 
 }

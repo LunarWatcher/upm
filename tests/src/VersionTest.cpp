@@ -69,3 +69,21 @@ TEST_CASE("Ensure proper checks", "[Version]") {
     REQUIRE(b < a);
     REQUIRE_FALSE(b > a);
 }
+
+TEST_CASE("Version normalisation", "[Version][Feat]") {
+    upm::Version a("v2.3"), b("2.3"), c("2.4");
+    REQUIRE(a == a);
+    REQUIRE(a == b);
+    REQUIRE_FALSE(a > b);
+    REQUIRE_FALSE(b > a);
+    REQUIRE_FALSE(a < b);
+    REQUIRE_FALSE(b < a);
+
+    REQUIRE(a < c);
+    REQUIRE(b < c);
+    REQUIRE(c > a);
+    REQUIRE(c > b);
+
+    REQUIRE_FALSE(c < a);
+    REQUIRE_FALSE(c < b);
+}
