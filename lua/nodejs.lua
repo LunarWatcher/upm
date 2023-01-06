@@ -42,6 +42,9 @@ function install()
         end
     end
     log.info("Resolved version:", version);
+    ctx["resolvedVersion"] = version
+    ctx:checkInstalled()
+
     os, arch = ctx:getArch();
 
     log.info("Resolved OS, arch:", os, arch)
