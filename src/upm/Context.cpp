@@ -165,16 +165,7 @@ void Context::configureSemanticMarkers() {
             // No version resolution, no marker resolution. 
             return;
         }
-        if (cfg.data.contains("semanticMarkers") && cfg.data.at("semanticMarkers").contains(package) && cfg.data.at("semanticMarkers").at(package).contains(packageVersion)) {
-            // This configuration is well-known; this means the version has to be checked.
-            Version oldResolution = cfg.data.at("semanticMarkers").at(package).at(packageVersion).get<std::string>();
-            Version newResolution = resolvedPackageVersion;
-            if (packageVersion != "lts") {
-                // nightly and latest
-            } else {
-                // LTS
-            }
-        }
+        // No extended checks are needed here. If we install a version using a semantic marker, that semantic marker is now that version.
         cfg["semanticMarkers"][package][packageVersion] = resolvedPackageVersion;
     } else {
         // TODO

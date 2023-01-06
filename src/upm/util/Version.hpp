@@ -27,6 +27,11 @@ public:
     const std::string& getVersion();
     const std::string& getVersion() const { return version; }
 
+    /**
+     * Checks whether the same component in two different version objects are the same.
+     * Note that the interpretation of this must be checked by the consumer. The only check performed is on a single
+     * component level.
+     */
     bool componentEquals(const Version& b, size_t idx);
 
     friend bool operator<(const Version& a, const Version& b);
