@@ -100,12 +100,10 @@ public:
      * Internal helper function that deals with saving semantic marker information to the config. This particular method is
      * primarily used for installation, uninstallation, and upgrades.
      *
-     * Couple key features:
-     * * Nightly wand latest can automatically be moved if the newly installed version is higher than the previous version
-     * * LTS is primarily moved within the same minor version. If 19.2.0 is installed via @lts, and 19.3.0 is installed via
-     *      @19.3.0, lts is automatically moved to 19.3.0.
+     * This function checks if the version provided by the user matches one of a few predefined strings (see the documentation for an up-to-date-ish list),
+     * and stores  the newly installed version in it. If a new version is installed using the same semantic marker later, the previously written value is blatantly overridden
      *
-     * This method does not remove any installed versions. This must be addressed manually via the upgrade system.
+     * This method does not remove any installed versions. This must be addressed manually via the upgrade or removal system, depending on context
      */
     void configureSemanticMarkers();
 
