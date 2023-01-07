@@ -134,7 +134,6 @@ See GitHub for the full license.
             return -1;
         }
         resolvePackageContext(input[0]);
-        package = input[0];
         versionType = VersionType::AT;
         disable();
     } else if (command == "_path") {
@@ -155,6 +154,7 @@ void Context::install() {
 }
 
 void Context::apply() {
+    resolveSemanticMarkers();
     runFile("apply");
 }
 
@@ -169,6 +169,17 @@ void Context::configureSemanticMarkers() {
         cfg["semanticMarkers"][package][packageVersion] = resolvedPackageVersion;
     } else {
         // TODO
+    }
+    cfg.save();
+}
+
+void Context::resolveSemanticMarkers() {
+    if (versionType == VersionType::AT && (packageVersion == "latest" || packageVersion == "lts" || packageVersion == "nightly")) {
+        if (cfg.data.contains("semanticMarkers")
+            && cfg.data.at("semanticMarkers").contains(package)
+            && cfg.data.at("semanticMarkers").at(package).contains(packageVersion)) {
+            resolvedPackageVersion = cfg.data.at("semanticMarkers").at(package).at(packageVersion).get<std::string>();
+        }
     }
 }
 
@@ -196,6 +207,7 @@ void Context::disable() {
     }
 
     cfg.data.at("package").erase(it);
+    cfg.save();
     spdlog::info("Successfully disabled " + package);
 }
 

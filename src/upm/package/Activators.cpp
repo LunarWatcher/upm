@@ -56,6 +56,7 @@ bool Activators::recursiveUniversalUNIXLink() {
 
         fs::create_symlink(source, target);
     }
+    ctx.cfg.save();
 
     return true;
 }

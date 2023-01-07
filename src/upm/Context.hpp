@@ -109,6 +109,11 @@ public:
      */
     void configureSemanticMarkers();
 
+    /**
+     * Queries the semantic marker cache for a relevant version to use.
+     */
+    void resolveSemanticMarkers();
+
     void disable();
 
     bool checkInstalled();
