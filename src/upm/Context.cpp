@@ -78,13 +78,13 @@ int Context::run() {
     
     if (command == "help") {
         std::cout << R"(Commands
-    help                Shows this helpful message
-    install             Installs one or more packages
-    uninstall           Uninstalls one or more packages
-    upgrade             Upgrades a package.
-    apply               Applies a specific version of a package
-    deactivate          Deactivates a package
-    list                Lists installed packages, along with installed versions.
+    help                    Shows this helpful message
+    install                 Installs one or more packages
+    uninstall               Uninstalls one or more packages
+    upgrade                 Upgrades a package.
+    apply                   Applies a specific version of a package
+    deactivate, disable     Deactivates a package
+    list                    Lists installed packages, along with installed versions.
 
 Since upm allows multiple installed versions of certain programs,
 install and uninstall may require a version to work.
@@ -129,7 +129,7 @@ See GitHub for the full license.
         spdlog::info("Resolved version to {}", resolvedPackageVersion == "" ? packageVersion : resolvedPackageVersion);
         apply();
         spdlog::info("Successfully activated " + package);
-    } else if (command == "deactivate") {
+    } else if (command == "deactivate" || command == "disable") {
         if (input.size() < 1) {
             spdlog::error("What package?");
             return -1;
