@@ -160,27 +160,43 @@ void Context::apply() {
 }
 
 void Context::configureSemanticMarkers() {
+    if (resolvedPackageVersion == "") {
+        // No version resolution, no marker resolution for you
+        return;
+    }
 
     if (versionType == VersionType::AT && (packageVersion == "latest" || packageVersion == "lts" || packageVersion == "nightly")) {
-        if (resolvedPackageVersion == "") {
-            // No version resolution, no marker resolution. 
-            return;
-        }
         // No extended checks are needed here. If we install a version using a semantic marker, that semantic marker is now that version.
         cfg["semanticMarkers"][package][packageVersion] = resolvedPackageVersion;
-    } else {
-        // TODO
+        cfg.save();
     }
-    cfg.save();
+    // We _could_ check for exact versions and update the existing definitions, but why? The majority of the time people specify versions,
+    // it's legacy versions or a version that's ahead of the current version, but still oddly specifically required for some reason:tm:.
+    // This does mean if someone @latest grabbing 1.2.2, and then later @1.2.3, the latest head won't be moved. This also helps upgrade
+    // semantics, as this lets us track uniquely installed versions vs. semantic installs following some pre-defined "version pointer"
+    // of sorts.
+    //
+    // I mean, that's effectively what latest, lts, and nightly all are.
 }
 
 void Context::resolveSemanticMarkers() {
-    if (versionType == VersionType::AT && (packageVersion == "latest" || packageVersion == "lts" || packageVersion == "nightly")) {
-        if (cfg.data.contains("semanticMarkers")
-            && cfg.data.at("semanticMarkers").contains(package)
-            && cfg.data.at("semanticMarkers").at(package).contains(packageVersion)) {
-            resolvedPackageVersion = cfg.data.at("semanticMarkers").at(package).at(packageVersion).get<std::string>();
-        }
+    // See the comments in configureSemanticMarkers (that are right above this function at the time of writing) for some context
+    //
+    // Since semantic markers are only meant to follow the version pointers from some upstream source, there's v ery little to do here.
+    // Now, while an equivalent check to what configureSemanticMarkers does, there isn't a need to. We just check for the existence
+    // of the supplied package version in the semantic markers map for the package.
+    //
+    // If it isn't there, we don't know much about its validity as a semantic marker.
+    // If it is there, we know it was defined by configureSemanticMarkers (barring fuckery from the user, but that's their fault),
+    // and that it therefore is a valid semantic marker.
+    //
+    // It saves redundancy in the event future markers are added, as they only need to be updated there (and potentially in some
+    // consumer scripts), and nowhere else.
+    if (versionType == VersionType::AT
+        && cfg.data.contains("semanticMarkers")
+        && cfg.data.at("semanticMarkers").contains(package)
+        && cfg.data.at("semanticMarkers").at(package).contains(packageVersion)) {
+        resolvedPackageVersion = cfg.data.at("semanticMarkers").at(package).at(packageVersion).get<std::string>();
     }
 }
 

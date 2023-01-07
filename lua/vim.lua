@@ -66,6 +66,5 @@ end
 
 return {
     install = install,
-    versionValidator = vResolvers.validateGitVPrefix,
     apply = activators.universalUNIX
 }
