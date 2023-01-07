@@ -121,11 +121,12 @@ See GitHub for the full license.
             spdlog::error("What package?");
             return -1;
         }
-        resolvePackageContext(input[0]);
         if (cfg.data.contains("package") && cfg.data.at("package").contains(package)) {
             spdlog::error(package + " is already active. Deactivate it before trying again");
             return -1;
         }
+        resolvePackageContext(input[0]);
+        spdlog::info("Resolved version to {}", resolvedPackageVersion == "" ? packageVersion : resolvedPackageVersion);
         apply();
         spdlog::info("Successfully activated " + package);
     } else if (command == "deactivate") {
