@@ -1,12 +1,12 @@
 #include "Version.hpp"
-#include "upm/util/StrUtil.hpp"
+#include "stc/StringUtil.hpp"
 
 #include <string>
 #include <iostream>
 
 namespace upm {
 
-Version::Version(const std::string& version) : version(version) {
+Version::Version(const std::string& rawVersion) : version(rawVersion.at(0) == 'v' ? rawVersion.substr(1) : rawVersion) {
     std::sregex_token_iterator it(version.begin(), version.end(), COMPONENT_SPLIT, -1), end;
     while (it != end) {
         components.push_back(*it);
@@ -16,6 +16,20 @@ Version::Version(const std::string& version) : version(version) {
 
 const std::string& Version::getVersion() {
     return this->version;
+}
+
+bool Version::componentEquals(const Version& b, size_t idx) {
+    // TODO: cache in the class itself
+    std::vector<std::string>
+        aComp = stc::string::split(version, "."),
+        bComp = stc::string::split(b.version, ".");
+
+    if (idx >= aComp.size()) {
+        throw std::runtime_error("Illegal version access; has " + std::to_string(aComp.size()) + " components, required component " + std::to_string(idx));
+    } else if (aComp.size() != bComp.size()) {
+        return false;
+    }
+    return aComp.at(idx) == bComp.at(idx);
 }
 
 bool operator<(const Version& a, const Version& b) {
@@ -35,8 +49,8 @@ bool operator!=(const Version &a, const Version &b) {
 
 bool operator>(const Version& a, const Version& b) {
     std::vector<std::string>
-        aComp = StrUtil::splitString(a.getVersion(), "."),
-        bComp = StrUtil::splitString(b.getVersion(), ".");
+        aComp = stc::string::split(a.getVersion(), "."),
+        bComp = stc::string::split(b.getVersion(), ".");
 
     for (int i = 0; i < std::max(aComp.size(), bComp.size()); ++i) {
         auto aBit = i >= aComp.size() ? 0 : std::stoi(aComp[i]);

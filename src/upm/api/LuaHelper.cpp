@@ -4,6 +4,14 @@
 #include "Exec.hpp"
 #include "Filesystem.hpp"
 #include "Context.hpp"
+#include "Git.hpp"
+
+#include "json/JSON.hpp"
+
+#include "io/LogAPI.hpp"
+
+#include "stdfunc/Activators.hpp"
+#include "stdfunc/VersionResolvers.hpp"
 
 #include <stc/FS.hpp>
 
@@ -31,6 +39,11 @@ void LuaHelper::init() {
     registerLibrary("upmexec", luaopen_upmexec);
     registerLibrary("upmfs", luaopen_upmfilesystem);
     registerLibrary("context", luaopen_context);
+    registerLibrary("json", luaopen_upmjson);
+    registerLibrary("upmlog", luaopen_upmlog);
+    registerLibrary("activators", luaopen_activators);
+    registerLibrary("vResolvers", luaopen_verresolvers);
+    registerLibrary("git", luaopen_git);
 
     // Init is called when the package is clear.
 
@@ -41,11 +54,63 @@ LuaHelper::~LuaHelper() {
 }
 
 void LuaHelper::runFile(const std::string& fn) {
-    // TODO: deal with cwd not containing lua
-    // TODO(by extension): deal with lookup paths
-    if (luaL_dofile(state, ("lua/" + fn).c_str()) != 0) {
-        std::cerr << "Failed to load lua/vim.lua: " << lua_tostring(state, -1) << std::endl;
+
+    if (luaL_dofile(state, fn.c_str()) != 0) {
+        std::cerr << "Failed to load lua file: " << lua_tostring(state, -1) << std::endl;
         throw std::runtime_error("exec failed");
+    }
+}
+
+void LuaHelper::runFileForResult(const std::string& fn, int nRes, std::vector<int> types) {
+    runFile(fn);
+    if (lua_gettop(state) != nRes) {
+        throw std::runtime_error("Wrong number of arguments returned; expected "
+                                 + std::to_string(nRes)
+                                 + ", got "
+                                 + std::to_string(lua_gettop(state)));
+    }
+
+    for (int i = 1; i <= nRes; ++i) {
+        auto type = types.at(i - 1);
+        if  (type == LUA_TNONE) {
+            continue;
+        } else if (lua_type(state, i) != type) {
+            throw std::runtime_error("Illegal argument returned at index " + std::to_string(i));
+        }
+    }
+}
+
+void LuaHelper::runString(const std::string& script) {
+    if (luaL_dostring(state, script.c_str())) {
+        std::cerr << "Failed to run lua script: " << lua_tostring(state, -1) << std::endl;
+        throw std::runtime_error("Exec failed");
+    }
+}
+
+void LuaHelper::dump() {
+    dump(state);
+}
+
+void LuaHelper::dump(lua_State* state) {
+    for (int i = 1; i <= lua_gettop(state); i++) {
+        std::cout << i << "\t" << luaL_typename(state, i) << "\t";
+        switch (lua_type(state, i)) {
+            case LUA_TNUMBER:
+                std::cout << lua_tonumber(state, i) << std::endl;;
+                break;
+            case LUA_TSTRING:
+                std::cout << lua_tostring(state, i) << std::endl;
+                break;
+            case LUA_TBOOLEAN:
+                std::cout << (lua_toboolean(state, i) ? "true" : "false") << std::endl;
+                break;
+            case LUA_TNIL:
+                std::cout << "nil" << std::endl;
+                break;
+            default:
+                std::cout << lua_topointer(state, i) << std::endl;
+                break;
+        }
     }
 }
 

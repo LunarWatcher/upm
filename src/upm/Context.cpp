@@ -4,10 +4,11 @@
 #include <iostream>
 #include <algorithm>
 
-#include "InstallationResolver.hpp"
 #include "stc/Environment.hpp"
+#include "stc/StringUtil.hpp"
+
+#include "upm/util/PathUtils.hpp"
 #include "upm/conf/Constants.hpp"
-#include "vm/VersionManager.hpp"
 
 // not even sure if this matters, I'm sure there's an include somewhere else
 // that fails the Windows build, that's built earlier in the translation unit.
@@ -23,12 +24,11 @@ namespace upm {
 
 Context::Context(const std::vector<std::string>& cmd) : input(cmd), isRoot(!getuid()), cfg(this) {
     Context::inst = this;
+    if (isRoot) {
+        throw std::runtime_error("upm cannot be run as root");
+    }
     
-    // TODO: nasty hack; find a better way to lateinit or init after setting inst
     helper.init();
-    //package = "vim";
-    //packageVersion = "latest";
-    //helper.runFile("vim.lua");
 }
 
 void Context::resolvePackageContext(const std::string& rawVersion) {
@@ -42,7 +42,8 @@ void Context::resolvePackageContext(const std::string& rawVersion) {
         // No version specified is good; we return latest
         package = rawVersion;
         packageVersion = "latest";
-        versionType = VersionType::IMPLICIT;
+        versionType = VersionType::AT;
+        return;
     } else if (at != 1 && approx != 1) {
         spdlog::error("{} doesn't follow any of the supported version formats", rawVersion);
         // Both @ and ~, and we throw.
@@ -51,7 +52,7 @@ void Context::resolvePackageContext(const std::string& rawVersion) {
     // We split by whichever thing exists
 
     if (at != 0) {
-        auto split = StrUtil::splitString(rawVersion, "@", 1);
+        auto split = stc::string::split(rawVersion, "@", 1);
         if (split.size() != 2 || split[1].size() == 0) {
             spdlog::error("Invalid format: {} (expected @<version> or ~<version>)", rawVersion);
             throw std::runtime_error("Failed to extract version.");
@@ -60,7 +61,7 @@ void Context::resolvePackageContext(const std::string& rawVersion) {
         packageVersion = split[1];
         versionType = VersionType::AT;
     } else {
-        auto split = StrUtil::splitString(rawVersion, "~", 1);
+        auto split = stc::string::split(rawVersion, "~", 1);
         if (split.size() != 2 || split[1].size() == 0) {
             spdlog::error("Invalid format: {} (expected @<version> or ~<version>)", rawVersion);
             throw std::runtime_error("Failed to extract version.");
@@ -77,13 +78,13 @@ int Context::run() {
     
     if (command == "help") {
         std::cout << R"(Commands
-    help                Shows this helpful message
-    install             Installs one or more packages
-    uninstall           Uninstalls one or more packages
-    upgrade             Upgrades a package.
-    apply               Applies a specific version of a package
-    deactivate          Deactivates a package
-    list                Lists installed packages, along with installed versions.
+    help                    Shows this helpful message
+    install                 Installs one or more packages
+    uninstall               Uninstalls one or more packages
+    upgrade                 Upgrades a package.
+    apply                   Applies a specific version of a package
+    deactivate, disable     Deactivates a package
+    list                    Lists installed packages, along with installed versions.
 
 Since upm allows multiple installed versions of certain programs,
 install and uninstall may require a version to work.
@@ -105,38 +106,40 @@ See GitHub for the full license.
             spdlog::error("What package?");
             return -1;
         }
-        if (!isRoot) {
-            spdlog::error("Please run upm as sudo to install this package.\n"
-                          "If you meant to install it for your user, remember to pass --local.");
-            return -1;
-        }
         resolvePackageContext(input[0]);
-        resolve(input[0], *this);
+        install();
+        configureSemanticMarkers();
+        spdlog::info("Successfully installed " + package);
+        spdlog::info("Preparing automatic activation...");
+        if (cfg.data.contains("package") && cfg.data.at("package").contains(package)) {
+            disable();
+        }
+        apply();
+        spdlog::info("{} activated", package);
     } else if (command == "apply") {
         if (input.size() < 1) {
             spdlog::error("What package?");
             return -1;
         }
-        if (!isRoot) {
-            spdlog::error("Please run upm as sudo to apply this package.\n"
-                          "If you meant to install it for your user, remember to pass --local.");
+        if (cfg.data.contains("package") && cfg.data.at("package").contains(package)) {
+            spdlog::error(package + " is already active. Deactivate it before trying again");
             return -1;
         }
         resolvePackageContext(input[0]);
-        enable(*this);
-    } else if (command == "deactivate") {
+        spdlog::info("Resolved version to {}", resolvedPackageVersion == "" ? packageVersion : resolvedPackageVersion);
+        apply();
+        spdlog::info("Successfully activated " + package);
+    } else if (command == "deactivate" || command == "disable") {
         if (input.size() < 1) {
             spdlog::error("What package?");
             return -1;
         }
-        if (!isRoot) {
-            spdlog::error("Please run upm as sudo to install this package.\n"
-                          "If you meant to install it for your user, remember to pass --local.");
-            return -1;
-        }
-        package = input[0];
+        resolvePackageContext(input[0]);
         versionType = VersionType::AT;
-        disable(*this);
+        disable();
+    } else if (command == "_path") {
+        std::cout << "/opt/upm/active/bin" << std::endl;
+        return 0;
     } else {
         // Commands part of the help, but that aren't implemented yet are still unknown.
         // (read: they're not bugs, for the record :) )
@@ -147,23 +150,151 @@ See GitHub for the full license.
     return 0;
 }
 
+void Context::install() {
+    runFile("install");
+}
+
+void Context::apply() {
+    resolveSemanticMarkers();
+    runFile("apply");
+}
+
+void Context::configureSemanticMarkers() {
+    if (resolvedPackageVersion == "") {
+        // No version resolution, no marker resolution for you
+        return;
+    }
+
+    if (versionType == VersionType::AT && (packageVersion == "latest" || packageVersion == "lts" || packageVersion == "nightly")) {
+        // No extended checks are needed here. If we install a version using a semantic marker, that semantic marker is now that version.
+        cfg["semanticMarkers"][package][packageVersion] = resolvedPackageVersion;
+        cfg.save();
+    }
+    // We _could_ check for exact versions and update the existing definitions, but why? The majority of the time people specify versions,
+    // it's legacy versions or a version that's ahead of the current version, but still oddly specifically required for some reason:tm:.
+    // This does mean if someone @latest grabbing 1.2.2, and then later @1.2.3, the latest head won't be moved. This also helps upgrade
+    // semantics, as this lets us track uniquely installed versions vs. semantic installs following some pre-defined "version pointer"
+    // of sorts.
+    //
+    // I mean, that's effectively what latest, lts, and nightly all are.
+}
+
+void Context::resolveSemanticMarkers() {
+    // See the comments in configureSemanticMarkers (that are right above this function at the time of writing) for some context
+    //
+    // Since semantic markers are only meant to follow the version pointers from some upstream source, there's v ery little to do here.
+    // Now, while an equivalent check to what configureSemanticMarkers does, there isn't a need to. We just check for the existence
+    // of the supplied package version in the semantic markers map for the package.
+    //
+    // If it isn't there, we don't know much about its validity as a semantic marker.
+    // If it is there, we know it was defined by configureSemanticMarkers (barring fuckery from the user, but that's their fault),
+    // and that it therefore is a valid semantic marker.
+    //
+    // It saves redundancy in the event future markers are added, as they only need to be updated there (and potentially in some
+    // consumer scripts), and nowhere else.
+    if (versionType == VersionType::AT
+        && cfg.data.contains("semanticMarkers")
+        && cfg.data.at("semanticMarkers").contains(package)
+        && cfg.data.at("semanticMarkers").at(package).contains(packageVersion)) {
+        resolvedPackageVersion = cfg.data.at("semanticMarkers").at(package).at(packageVersion).get<std::string>();
+    }
+}
+
+void Context::disable() {
+    // we don't need the version for disabling.
+    // Only one version of any given package can be enabled at an arbitrary time anyway.
+    if (!cfg.data.contains("package")) {
+        spdlog::error("No packages activated");
+        return;
+    }
+    auto it = cfg.data.at("package").find(package);
+    if (it == cfg.data.at("package").end()) {
+        spdlog::error("{} does not appear to be activated", package);
+        return;
+    }
+    for (auto& sourceDest : *it) {
+        auto symlinkDest = sourceDest.at("target");
+        fs::path castPath = fs::path(symlinkDest.get<std::string>());
+        if (isGoodSymlink(castPath)) {
+            spdlog::info("Unlinking {}", castPath.string());
+            fs::remove(castPath);
+        } else {
+            spdlog::error("Skipped bad entry: {}", castPath.string());
+        }
+    }
+
+    cfg.data.at("package").erase(it);
+    cfg.save();
+    spdlog::info("Successfully disabled " + package);
+}
+
+void Context::runFile(const std::string& targetFun) {
+    auto res = locateFile(this->package);
+    if (res == "") {
+        throw std::runtime_error("Failed to find a Lua file for " + this->package);
+    }
+
+    helper.runFileForResult(res, 1, {LUA_TTABLE});
+    lua_getfield(helper.getState(), -1, targetFun.c_str());
+    if (lua_isnil(helper.getState(), -1)) {
+        throw std::runtime_error("Must define a function for " + targetFun);
+    }
+    if (lua_pcall(helper.getState(), 0, 0, 0) != LUA_OK) {
+        if (lua_isstring(*helper, -1)) {
+            spdlog::error(lua_tostring(*helper, -1));
+        } else {
+            helper.dump();
+        }
+        throw std::runtime_error("A critical Lua failure occurred.");
+    }
+    lua_pop(helper.getState(), lua_gettop(helper.getState()));
+}
+
+std::string Context::locateFile(const std::string& packageName) {
+    auto dirs = getLuaLookupDirectory();
+    for (auto& dir : dirs) {
+        // TODO: this is where alias cache lookup goes
+        auto path = dir / (packageName + ".lua");
+        if (fs::is_regular_file(path)) {
+            return path;
+        }
+    }
+    return "";
+}
+
+bool Context::checkInstalled() {
+    auto prefix = getPrefix();
+    bool isInstalled = fs::is_directory(prefix);
+    // TODO: use isInstalled + config to check whether or not the existing directory should be removed
+    return isInstalled;
+}
+
 std::string Context::getPrefix() {
-    fs::path root;
-    if (isRoot) {
-        root = "/opt";
-    } else root = stc::getHome();
+    fs::path root = "/opt/upm/packages";
 
-    root /= "upm-bin";
-
-    // This is a temporary hack; this needs to represent the real resolved version
-    root /= package + "-" + packageVersion;
+    root /= package + "-" + (
+        resolvedPackageVersion == "" ? packageVersion : resolvedPackageVersion
+    );
     return root.string();
 }
 
-std::string Context::getLuaLookupDirectory() {
-    fs::path root;
+std::vector<fs::path> Context::getLuaLookupDirectory() {
+    std::vector<fs::path> res;
+#ifdef UPM_DEBUG
+    // If built as debug, make sure ./lua is included first in the search path.
+    res.push_back("./lua/upm");
+#endif
+
+    // Each subfolder of the lua folder represents one repository, though I'm not sure how I want to set that up yet.
+    // It's primarily set up this way to open for less refactoring.
+    res.push_back("/opt/upm/lua/upm/");
 
 
+    //if (!isRoot) {
+        //// TODO: set up per-user stuff
+    //}
+
+    return res;
 }
 
 }

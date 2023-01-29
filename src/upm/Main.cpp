@@ -9,15 +9,13 @@
 #include "Context.hpp"
 
 // TODO: merge into stc (haven't I already?)
-std::string toLower(std::string in) {
-    std::transform(in.begin(), in.end(), in.begin(),
-        [](const char& c) {
-            return std::tolower(c);
-        });
-    return in;
-}
 
 int main(int argc, const char* argv[]) {
+    if (!fs::exists("/opt/upm")) {
+        spdlog::error("/opt/upm does not exist. Please install properly. Note that the permissions aren't checked, but your user has to chown /opt/upm/");
+        spdlog::error("If you're getting this and have no idea what you're doing, look at (or use) the tools/install.sh script.");
+        return -1;
+    }
     spdlog::set_pattern("[%^%l%$] %v");
     spdlog::cfg::load_env_levels();
 
@@ -36,7 +34,11 @@ int main(int argc, const char* argv[]) {
     upm::Context ctx(arguments);
     try {
         return ctx.run();
-    } catch (const std::runtime_error& e) {
+    } catch (const std::exception& e) {
         spdlog::error("Aborting with message: {}", e.what());
+    } catch(const std::string& e) {
+        spdlog::error("Aborting with message: {}", e);
+    } catch(const char* e) {
+        spdlog::error("Aborting with message: {}", e);
     }
 }

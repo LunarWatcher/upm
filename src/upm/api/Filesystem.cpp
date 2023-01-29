@@ -63,6 +63,16 @@ int upmfilesystem_sharedLibInstalled(lua_State* state) {
     return 1;
 }
 
+int upmfilesystem_installCopy(lua_State* state) {
+    fs::path source = luaL_checkstring(state, 1);
+    fs::path dest = upm::Context::inst->getPrefix();
+    if (!fs::is_directory(dest)) fs::create_directories(dest);
+
+    // At least recursive copying is easy now
+    fs::copy(source, dest, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
+    return 0;
+}
+
 int upmfilesystem_configure(lua_State* state) {
 
     if (lua_gettop(state) < 2) {
@@ -73,7 +83,6 @@ int upmfilesystem_configure(lua_State* state) {
     std::string arguments = lua_tostring(state, 2);
 
     std::string configure = lua_gettop(state) >= 3 ? lua_tostring(state, 3) : "./configure";
-
 
     upm::Context& ctx = *upm::Context::inst;
 
@@ -97,14 +106,50 @@ int upmfilesystem_make(lua_State* state) {
     // TODO: make not only adjustable, but automatically set to the core count if not overridden
     // -k seems to be necessary to silence "nothing to be done for ...".
     // Not sure why that's an error to begin with? TODO: Fix
-    std::string make = lua_gettop(state) >= 3 ? lua_tostring(state, 3) : "make -j 4 -k";
+    std::string make = lua_gettop(state) >= 3 ? lua_tostring(state, 3) : "make -j 8";
 
-    int status = WEXITSTATUS(std::system(("cd " + sourceDir + " && " + make + " " + arguments + " && " + make + " install").c_str()));
+    int status = WEXITSTATUS(std::system(("cd " + sourceDir + " && " + make + " " + arguments).c_str()));
     if (status != 0) {
         std::cout << "Status = " << status << std::endl;
-        return luaL_error(state, "Failed to make and/or install");
+        return luaL_error(state, "Failed to make");
+    }
+    status = WEXITSTATUS(std::system(("cd " + sourceDir + " && " + make + " install").c_str()));
+    if (status != 0) {
+        std::cout << "Status = " << status << std::endl;
+        return luaL_error(state, "Failed to install");
     }
     return 0;
+}
+
+int upmfilesystem_untar(lua_State* state) {
+    fs::path source = luaL_checkstring(state, 1);
+    if (auto pos = source.string().find("/tmp/"); pos == std::string::npos || pos != 0) {
+        throw std::runtime_error("Invalid path; must be a path to /tmp/");
+    }
+    int stripComponents = luaL_optinteger(state, 2, -1);
+    
+    auto dest = source;
+    dest.replace_extension().replace_extension();
+    if (auto pos = dest.string().find("/tmp/"); pos == std::string::npos || pos != 0) {
+        throw std::runtime_error("Fatal: resolved destination path is not a /tmp/ path");
+    }
+    std::string tarArg = "";
+    if (stripComponents > 0) {
+        tarArg += "--strip-components " + std::to_string(stripComponents);
+    }
+
+    tarArg += " -xf " + source.string();
+    tarArg += " -C " + dest.string();
+    upm::filesystem::logger->info("Unpacking {} to {}...", source.string(), dest.string());
+
+    fs::create_directories(dest);
+    auto res = std::system(("tar " + tarArg).c_str());
+    if (res != 0) {
+        return luaL_error(state, "Failed to untar");
+    }
+
+    lua_pushstring(state, dest.string().c_str());
+    return 1;
 }
 
 int luaopen_upmfilesystem(lua_State* state) {
@@ -113,6 +158,8 @@ int luaopen_upmfilesystem(lua_State* state) {
         {"sharedLibInstalled", upmfilesystem_sharedLibInstalled},
         {"configure", upmfilesystem_configure},
         {"make", upmfilesystem_make},
+        {"untar", upmfilesystem_untar},
+        {"installCopy", upmfilesystem_installCopy},
         {nullptr, nullptr}
     };
 

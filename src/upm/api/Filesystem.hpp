@@ -15,8 +15,10 @@ extern "C" {
 
 extern int upmfilesystem_exists(lua_State* state);
 extern int upmfilesystem_sharedLibInstalled(lua_State* state);
+extern int upmfilesystem_installCopy(lua_State* state);
 
 extern int upmfilesystem_configure(lua_State* state);
+extern int upmfilesystem_untar(lua_State* state);
 
 extern int luaopen_upmfilesystem(lua_State* state);
 

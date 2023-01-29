@@ -17,10 +17,22 @@ private:
     std::vector<std::string> components;
 
 public:
+    /**
+     * Initialize the version from the provided string.
+     * Note that due to conventions, if the version starts with a (lower-case) v, the character
+     * is stripped
+     */
     Version(const std::string& version);
 
     const std::string& getVersion();
     const std::string& getVersion() const { return version; }
+
+    /**
+     * Checks whether the same component in two different version objects are the same.
+     * Note that the interpretation of this must be checked by the consumer. The only check performed is on a single
+     * component level.
+     */
+    bool componentEquals(const Version& b, size_t idx);
 
     friend bool operator<(const Version& a, const Version& b);
     friend bool operator>(const Version& a, const Version& b);

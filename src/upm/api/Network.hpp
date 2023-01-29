@@ -13,7 +13,6 @@ const auto logger = std::make_shared<spdlog::logger>("upm:network", Constants::s
 extern "C" {
 
 extern int upmnetwork_request(lua_State* state);
-extern int upmnetwork_gitClone(lua_State* state);
 
 // Who in the actual fuck decided lua_State was a good naming practice?
 // Like, preferences and shit aside, this name is blatantly disgusting

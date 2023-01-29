@@ -69,3 +69,32 @@ TEST_CASE("Ensure proper checks", "[Version]") {
     REQUIRE(b < a);
     REQUIRE_FALSE(b > a);
 }
+
+TEST_CASE("Version normalisation", "[Version][Feat]") {
+    upm::Version a("v2.3"), b("2.3"), c("2.4");
+    REQUIRE(a == a);
+    REQUIRE(a == b);
+    REQUIRE_FALSE(a > b);
+    REQUIRE_FALSE(b > a);
+    REQUIRE_FALSE(a < b);
+    REQUIRE_FALSE(b < a);
+
+    REQUIRE(a < c);
+    REQUIRE(b < c);
+    REQUIRE(c > a);
+    REQUIRE(c > b);
+
+    REQUIRE_FALSE(c < a);
+    REQUIRE_FALSE(c < b);
+}
+
+TEST_CASE("Component equality", "[Version][Feat]") {
+    for (auto& [v1, v2] : std::vector<std::pair<upm::Version, upm::Version>>{
+        {{"2.3.0"}, {"2.4.0"}},
+        {{"2.4.0"}, {"2.3.0"}}
+    }) {
+        REQUIRE(v1.componentEquals(v2, 0));
+        REQUIRE_FALSE(v1.componentEquals(v2, 1));
+        REQUIRE(v1.componentEquals(v2, 2));
+    }
+}
