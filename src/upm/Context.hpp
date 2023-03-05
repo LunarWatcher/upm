@@ -72,6 +72,8 @@ public:
      */
     std::string resolvedPackageVersion;
 
+    std::map<std::string, std::string> variables;
+
     VersionType versionType;
 
     LuaHelper helper;

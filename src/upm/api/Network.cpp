@@ -27,6 +27,9 @@ int upmnetwork_request(lua_State* state) {
     lua_pushinteger(state, response.status_code);
     lua_setfield(state, -2, "status_code");
 
+    lua_pushstring(state, response.error.message.c_str());
+    lua_setfield(state, -2, "error_message");
+
     return 1;
 }
 

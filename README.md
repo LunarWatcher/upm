@@ -24,9 +24,8 @@ A C++17 compiler, and Linux or MacOS, and access to `tar` with a few specs (see 
 
 General UNIXes beyond Linux and MacOS will have varying support, for the same reason MacOS doesn't have full support: I don't have those operating systems, and testing them is a slow and annoying process that I don't want to spend my time on.
 
-Additionally, while not a requirement per se, the PATH has to be augmented to add /opt/upm/active/bin, and possibly others. /bin is required for binaries. It's currently unclear how any of this affects libraries.
 
-### Tar
+### Tar (temporary; see #20)
 
 * Supports `--strip-components`
 * Supports automatic tar type detection*
@@ -49,49 +48,21 @@ However, an important point here is to also allow uninstalling. This isn't somet
 
 That said, this project may evolve into a glorified "unstable apt" that sources the newest packages, instead of whatever ancient version retrieved when the dinosaurs were still around, that the repos push. We'll see how far this rabbit hole goes.
 
-## Advantages
+## How does it work?
 
-* One package manager
-* ... that's self-managed, and running on UNIX, a place where binaries can modify the underlying binary without needing to stop.
-* Exposes binaries through already existing entries in the PATH: no performance loss (unlike nvm, which takes at least 2.6+ seconds to load, blocking my terminal in the process)
-    * ... and still offers version management
-* Manages symlinks, not path entries, and is always on-demand invoked
+Packages are installed to `/opt/upm`. Packages are then activated via symlinks in `/usr/local/`, similar to how a normal manual installation would work. 
 
-## Disadvantages
+To make a painfully long and already well-documented story short, installing third party packages in "non-standard" formats on Linux fucking sucks. "Non-standard" in this context really just means anything that doesn't fit the format of the system-wide package manager. And yes, this includes binary tars.
 
-* Still doesn't modify /usr/bin packages, and consequently may break with programs that hard-code `/usr/bin/<binary>`-paths. This is currently [wontfix] because of the potentially bad side-effects this has.
+upm has gone through several iterations of different package locations, only to return to the starting point: `/usr/local`.
 
-## Caveats
+There are a few reasons for this, and there are probably many more than the reasons I'm aware of. Let's assume we want a non-standard install directory. This affects:
 
-* While upm does handle version management, it's not meant to be a replacement for virtualenvs in your favorite language. This means that if you need a per-project install, this is currently outside the scope of upm. Note, however, that upm does let you set and use a specific version of a given package for a terminal session.
-* At this time, upm uses its entirely own bin/lib/etc for managing active files. This isn't great either, but this is done due to the built-in safeguards preventing non-symlink overrides that may break the system. This shouldn't directly break much.
-
-## Non-goals
-
-* **"Containerized" packages:** cross-environment reproducability isn't a goal for this package manager, at least at this time. I suggest using the packages you install with upm to get containers, such as pyenv. This may change if I actually figure out how package managers like that work, and decide I like pain enough to actually do it, which is very unlikely at the time of writing.
-* **Registry of pre-built packages:** while it's convenient to just download pre-built packages, I have no way to host them, and I've had enough messing around with APIs and server infrastructure for the near foreseeable future, even if I had a way to host it.
-
-## Why not use [my favorite package manager]?
-
-Why use mine. Use whatever works.
-
-If you're considering using upm, that's probably a sign your current solution doesn't work. For the majority of people anyway, looking for a solution to a problem they've already solved in a satisfactory way is a waste of time. Don't get me wrong, I enjoy playing with stuff as much as the next person, but if I actively look for specific things acting as a replacement to somethign I have, I'm never happy with the existing solution.
-
-There are probably hundreds of alternatives out there. Some include:
-
-* [asdf](//asdf-vm.com)
-* [nix](//nixos.org)
-* [Homebrew](https://brew.sh/)
-* ... and an [unbelievably large array of language-specific version managers](https://github.com/bernardoduarte/awesome-version-managers)
-
-Upm exists as an alternative to these, offering:
-
-* A name that isn't in [9th place for the most commonly used passwords](https://www.welivesecurity.com/2019/12/16/worst-passwords-2019-did-yours-make-list/#tablepress-790)
-* Self-contained systems: the core scripts are bundled with upm. The core will never be dependent on repositories owned by anyone who made that particular script.
-* When third party scripts are added, centralisation support is a goal; rather than the model of one repo per script, one repo is a package repo that can contain anywhere from 1 script to however many scripts your disk can fit.
-    * Note that I don't mean centralisation as in only one repo I control for unlimited power (muhaha), but to allow for a per-user or per-organisation model rather than a repo-per-software basis. Think PPAs; numerous bundles of user-defined scripts, but with "bundles" still being a keyword. True centralisation isn't a goal, and won't be. 
-* Version management without a focus on reproducibility: while potentially a drawback for many, there are far better alternatives if this is the goal. Notably Docker, which isn't a package manager, but if you want a universal environment, you literally cannot beat a systemt based on virtual machines. As previously mentioned, asdf and nix are also options, both of which have project reproducibility at the core of their goal. upm, on the other hand, exists to cover the land between a system package manager, and versioned package management; the ability to get up-to-date packages, or just installing some obscure version because you can or just need it briefly.
-* Near 0 runtime overhead: all binaries are exposed via a single location that can be trivially added to the PATH. Some shell utilities for upm do get installed, but unlike certain version managers (*cough cough [nvm](https://github.com/nvm-sh/nvm)*), it won't slow your shell to a halt
-* QOL extensions for scripts: the scripts being written in Lua means any system calls are defined via an API, meant to be as extensive as possible to eliminate unnecessary code for standardized systems.
+1. **Binary path**: new additions require amendments to the PATH variable. This isn't too bad, but there isn't an automated way to do this. For package managers, this is fine; you add one directory, and you're good to go. If you want to install individual packages though, it isn't as convenient.
+2. **Include and library path**: this does not apply to all packages (by a long shot), but any packages that come with a development component need a discoverable include and library path. This is now two more variables.
+3. **`.desktop` files**: not all packages are terminal tools. Some need desktop entries, or other metadata additions. In the case of desktop files in particular, there's two more categories:
+    1. Relative bin path: #1 has to be set beyond the shell, complicating installation
+    2. Absolute bin path: The desktop file has to be modified, either by the install process or the user to function, at least if the install location is unexpected.
+4. **man pages**: Many packages include man pages, and these also require a variable addition.
 
 [1]: https://imgs.xkcd.com/comics/standards.png

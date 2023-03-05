@@ -2,6 +2,7 @@
 
 #include "stc/Environment.hpp"
 #include "upm/Context.hpp"
+#include "upm/conf/Constants.hpp"
 
 #include <spdlog/spdlog.h>
 #include <fstream>
@@ -9,7 +10,7 @@
 namespace upm {
 
 Config::Config(Context* ctx) : ctx(ctx) {
-    confPath = "/opt/upm/.upmrc";
+    confPath = Constants::UPM_ROOT / ".upmrc";
 
     if (!fs::exists(confPath)) {
         spdlog::debug("No config found at " + confPath.string());

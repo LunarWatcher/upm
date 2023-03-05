@@ -11,11 +11,7 @@
 // TODO: merge into stc (haven't I already?)
 
 int main(int argc, const char* argv[]) {
-    if (!fs::exists("/opt/upm")) {
-        spdlog::error("/opt/upm does not exist. Please install properly. Note that the permissions aren't checked, but your user has to chown /opt/upm/");
-        spdlog::error("If you're getting this and have no idea what you're doing, look at (or use) the tools/install.sh script.");
-        return -1;
-    }
+
     spdlog::set_pattern("[%^%l%$] %v");
     spdlog::cfg::load_env_levels();
 

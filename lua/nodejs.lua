@@ -12,7 +12,7 @@ function install()
         log.info("Attempting to resolve version...");
         r = network.request("https://nodejs.org/dist/index.json");
         if (r.status_code ~= 200) then
-            error("Failed to request node version index");
+            error("Failed to request node version index: " .. r.error_message);
             -- Probably redundant
             return
         end

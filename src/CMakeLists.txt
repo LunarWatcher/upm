@@ -28,10 +28,9 @@ set (SOURCE_FILES
 )
 
 add_library(upm_sources ${SOURCE_FILES})
-target_include_directories(upm_sources PUBLIC ./ ../stc/src)
-target_include_directories(upm_sources PUBLIC ${CONAN_INCLUDE_DIRS})
+target_include_directories(upm_sources PUBLIC ./ ${CONAN_INCLUDE_DIRS})
 
-target_link_libraries(upm_sources ${CONAN_LIBS})
+target_link_libraries(upm_sources ${CONAN_LIBS} stc)
 
 add_executable(upm upm/Main.cpp)
 target_link_libraries(upm upm_sources)

@@ -26,7 +26,7 @@ endif()
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 
 conan_cmake_configure (REQUIRES
-                        cpr/1.9.0
+                        cpr/1.10.0
                         nlohmann_json/3.11.2
                         spdlog/1.10.0
                         lua/5.4.4
@@ -37,6 +37,7 @@ conan_cmake_install (PATH_OR_REFERENCE . BUILD missing SETTINGS ${settings})
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
+add_subdirectory(stc)
 add_subdirectory(src)
 add_subdirectory(tests EXCLUDE_FROM_ALL)
 

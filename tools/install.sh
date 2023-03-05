@@ -1,10 +1,5 @@
 #!/bin/bash
 
-if [ "$EUID" -eq 0 ]; then
-    echo "This install script cannot be run as root."
-    exit -1
-fi
-
 CMAKE_VERSION=$(cmake --version)
 
 echo "Testing cmake..."

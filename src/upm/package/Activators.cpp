@@ -1,6 +1,7 @@
 #include "Activators.hpp"
 
 #include "upm/Context.hpp"
+#include "upm/conf/Constants.hpp"
 #include <spdlog/spdlog.h>
 
 #include <vector>
@@ -32,7 +33,7 @@ bool Activators::recursiveUniversalUNIXLink() {
             // folders are required
             continue;
         }
-        fs::path destPath   = fs::path("/opt/upm/active") / dir;
+        fs::path destPath   = Constants::APPLY_ROOT / dir;
         if (!fs::exists(destPath)) {
             fs::create_directories(destPath);
         }
@@ -63,8 +64,10 @@ bool Activators::recursiveUniversalUNIXLink() {
 
 // Util defs {{{
 std::vector<std::pair<fs::path, fs::path>> Activators::Utils::recursiveLink(const fs::path &source, const fs::path &dest, const std::string& fileName) {
-    // We don't have to worry about symlinks in the source directory
+    
     if (fs::is_directory(source / fileName) && fs::exists(dest / fileName) && !fs::is_symlink(dest/fileName)) {
+        // If the file we're symlinking is a directory, the target exists, and it isn't a symlink, handle the directory recursively.
+        // TODO: sanity-check
         std::vector<std::pair<fs::path, fs::path>> result;
         for (auto& path : fs::directory_iterator(source / fileName)) {
             std::string fn = path.path().lexically_relative(source / fileName);

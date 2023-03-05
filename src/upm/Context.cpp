@@ -24,10 +24,10 @@ namespace upm {
 
 Context::Context(const std::vector<std::string>& cmd) : input(cmd), isRoot(!getuid()), cfg(this) {
     Context::inst = this;
-    if (isRoot) {
-        throw std::runtime_error("upm cannot be run as root");
+    if (!isRoot) {
+        throw std::runtime_error("upm must be run as root");
     }
-    
+
     helper.init();
 }
 
@@ -80,7 +80,7 @@ int Context::run() {
         std::cout << R"(Commands
     help                    Shows this helpful message
     install                 Installs one or more packages
-    uninstall               Uninstalls one or more packages
+    uninstall, remove       Uninstalls one or more packages
     upgrade                 Upgrades a package.
     apply                   Applies a specific version of a package
     deactivate, disable     Deactivates a package
@@ -106,6 +106,11 @@ See GitHub for the full license.
             spdlog::error("What package?");
             return -1;
         }
+
+        if (!fs::is_directory(Constants::UPM_ROOT)) {
+            fs::create_directories(Constants::UPM_ROOT);
+        }
+
         resolvePackageContext(input[0]);
         install();
         configureSemanticMarkers();
@@ -137,9 +142,8 @@ See GitHub for the full license.
         resolvePackageContext(input[0]);
         versionType = VersionType::AT;
         disable();
-    } else if (command == "_path") {
-        std::cout << "/opt/upm/active/bin" << std::endl;
-        return 0;
+    } else if (command == "uninstall" || command == "remove") {
+        spdlog::info("Will fix later :)");
     } else {
         // Commands part of the help, but that aren't implemented yet are still unknown.
         // (read: they're not bugs, for the record :) )
@@ -270,7 +274,7 @@ bool Context::checkInstalled() {
 }
 
 std::string Context::getPrefix() {
-    fs::path root = "/opt/upm/packages";
+    fs::path root = Constants::UPM_ROOT / "packages";
 
     root /= package + "-" + (
         resolvedPackageVersion == "" ? packageVersion : resolvedPackageVersion
@@ -287,7 +291,7 @@ std::vector<fs::path> Context::getLuaLookupDirectory() {
 
     // Each subfolder of the lua folder represents one repository, though I'm not sure how I want to set that up yet.
     // It's primarily set up this way to open for less refactoring.
-    res.push_back("/opt/upm/lua/upm/");
+    res.push_back(Constants::UPM_ROOT / "lua/upm/");
 
 
     //if (!isRoot) {

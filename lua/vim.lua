@@ -60,7 +60,7 @@ function install()
             .. "--with-compiledby=\"Olivia (LunarWatcher/upm)\"")
 
     log.info("Preparing install...");
-    fs.make(directory .. "/src", "")
+    fs.make(directory .. "/src", "", nil, 1)
     log.info("Done.");
 end
 

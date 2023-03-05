@@ -97,16 +97,22 @@ int upmfilesystem_configure(lua_State* state) {
 
 int upmfilesystem_make(lua_State* state) {
     if (lua_gettop(state) < 2) {
-        return luaL_error(state, "Expected at least two arguments: <directory, arguments[, make command]>");
+        return luaL_error(state, "Expected at least two arguments: <directory, arguments[, make command or nil for default, [max jobs, -1 for uncapped]>");
     }
 
     std::string sourceDir = lua_tostring(state, 1);
     std::string arguments = lua_tostring(state, 2);
 
-    // TODO: make not only adjustable, but automatically set to the core count if not overridden
-    // -k seems to be necessary to silence "nothing to be done for ...".
-    // Not sure why that's an error to begin with? TODO: Fix
-    std::string make = lua_gettop(state) >= 3 ? lua_tostring(state, 3) : "make -j 8";
+    std::string make = lua_gettop(state) >= 3 && lua_isstring(state, 3) ? lua_tostring(state, 3) : "make";
+    int maxJobs = lua_gettop(state) >= 4 && lua_isinteger(state, 4) ? lua_tointeger(state, 4) : -1;
+
+    // TODO: get the system cap for threads
+    int hardwareThreads = 8;
+    // This calculates the number of threads to use, either capped by maxJobs (which, realistically, is either 1 or undefined)
+    int jobs = maxJobs > 0 ? std::min(maxJobs, hardwareThreads) : hardwareThreads;
+    spdlog::debug("Running {} with {} jobs", make, jobs);
+
+    make += " -j " + std::to_string(jobs);
 
     int status = WEXITSTATUS(std::system(("cd " + sourceDir + " && " + make + " " + arguments).c_str()));
     if (status != 0) {
