@@ -20,8 +20,8 @@ jobs:
         run: |
           mkdir build && cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release
-          make -j 4
+          make -j $(nproc)
       - name: Run tests
         run: |
           cd build
-          ./bin/tests
+          make test -j $(nproc)
