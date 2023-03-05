@@ -2,6 +2,7 @@
 
 #include "upm/Context.hpp"
 #include "upm/conf/Constants.hpp"
+#include <iostream>
 #include <spdlog/spdlog.h>
 
 #include <vector>
@@ -11,7 +12,7 @@ namespace upm {
 
 bool Activators::recursiveUniversalUNIXLink() {
     static const std::vector<std::string> directories = {
-        "bin", "share", "lib", "include"
+        "bin", "share", "lib", "include", "etc"
     };
 
 
@@ -54,7 +55,7 @@ bool Activators::recursiveUniversalUNIXLink() {
             // This is semi-temporary 'til we get uninstallation in place
             fs::remove(target);
         }
-
+        fs::create_directories(target.parent_path());
         fs::create_symlink(source, target);
     }
     ctx.cfg.save();
@@ -65,9 +66,7 @@ bool Activators::recursiveUniversalUNIXLink() {
 // Util defs {{{
 std::vector<std::pair<fs::path, fs::path>> Activators::Utils::recursiveLink(const fs::path &source, const fs::path &dest, const std::string& fileName) {
     
-    if (fs::is_directory(source / fileName) && fs::exists(dest / fileName) && !fs::is_symlink(dest/fileName)) {
-        // If the file we're symlinking is a directory, the target exists, and it isn't a symlink, handle the directory recursively.
-        // TODO: sanity-check
+    if (fs::is_directory(source / fileName) && fileName != Context::inst->package) {
         std::vector<std::pair<fs::path, fs::path>> result;
         for (auto& path : fs::directory_iterator(source / fileName)) {
             std::string fn = path.path().lexically_relative(source / fileName);
@@ -76,6 +75,7 @@ std::vector<std::pair<fs::path, fs::path>> Activators::Utils::recursiveLink(cons
         }
         return result;
     } else {
+
         if (fs::exists(dest / fileName)) {
             if (!fs::is_symlink(dest / fileName)) {
                 spdlog::critical("Found existing file or non-symlinked directory at {}", (dest/fileName).string());
