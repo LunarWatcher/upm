@@ -97,7 +97,7 @@ std::vector<std::pair<fs::path, fs::path>> Activators::Utils::recursiveLink(cons
             if (!allowOverwrite) {
                 auto str = fs::read_symlink(dest/fileName).string();
                 // TODO: link in context to make this dynamic
-                if (str.find("/opt/upm") == std::string::npos) {
+                if (str.find(Constants::UPM_ROOT.string()) == std::string::npos) {
                     spdlog::critical("Found existing symlink at {}, but that points to a non-upm directory ({}).", 
                         (dest / fileName).string(), str);
                     throw std::runtime_error("Symlink exists, doesn't point to upm");
