@@ -14,7 +14,7 @@ namespace upm {
 namespace Activators {
 namespace Utils {
 
-extern std::vector<std::pair<fs::path, fs::path>> recursiveLink(const fs::path &source, const fs::path &dest, const std::string& fileName);
+extern std::vector<std::pair<fs::path, fs::path>> recursiveLink(const fs::path &source, const fs::path &dest, const std::string& fileName, const std::vector<std::string>& safeDirNames);
 
 }
 
@@ -22,7 +22,7 @@ extern std::vector<std::pair<fs::path, fs::path>> recursiveLink(const fs::path &
  * Universal activator for everything installing into the standard UNIX format; i.e. for packages where
  * <UPM_HOME>/packages/<package>/ contains bin, share, lib, and include.
  */
-extern bool recursiveUniversalUNIXLink();
+extern bool recursiveUniversalUNIXLink(std::vector<std::string>& safeDirNames);
 
 }
 

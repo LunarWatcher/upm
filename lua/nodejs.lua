@@ -60,7 +60,11 @@ function install()
     error("Compiling from source is not supported")
 end
 
+function apply()
+    activators.universalUNIX({ "node", "node_modules" })
+end
+
 return {
     install = install,
-    apply = activators.universalUNIX
+    apply = apply
 }
