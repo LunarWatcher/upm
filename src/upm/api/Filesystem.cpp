@@ -69,7 +69,7 @@ int upmfilesystem_installCopy(lua_State* state) {
     if (!fs::is_directory(dest)) fs::create_directories(dest);
 
     // At least recursive copying is easy now
-    fs::copy(source, dest, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
+    fs::copy(source, dest, fs::copy_options::recursive | fs::copy_options::overwrite_existing | fs::copy_options::copy_symlinks);
     return 0;
 }
 
