@@ -7,7 +7,7 @@ local vResolvers = require "vResolvers"
 
 function install()
 
-    local _, directory = git.clone("https://github.com/arzzen/git-quick-stats", "git-quick-stats", true);
+    local _, directory = git.clone("https://github.com/arzzen/git-quick-stats", "git-quick-stats", false);
     version = vResolvers.git(directory)
     ctx:checkInstalled()
 
