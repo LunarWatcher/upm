@@ -37,7 +37,10 @@ conan_cmake_install (PATH_OR_REFERENCE . BUILD missing SETTINGS ${settings})
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_subdirectory(stc)
+include(FetchContent)
+FetchContent_Declare(stc GIT_REPOSITORY https://github.com/LunarWatcher/stc)
+FetchContent_MakeAvailable(stc)
+ 
 add_subdirectory(src)
 add_subdirectory(tests EXCLUDE_FROM_ALL)
 
