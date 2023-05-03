@@ -72,9 +72,66 @@ void Context::resolvePackageContext(const std::string& rawVersion) {
     }
 }
 
+void Context::parseFlags() {
+    static std::map<char, std::string> shorthands = {
+        {'f', "force"}
+    };
+    static std::map<std::string, bool> argc = {
+        {"force", false}
+    };
+    enum State {
+        STATE_NEW,
+        STATE_VALUE
+    };
+    std::string k;
+    
+    State state = STATE_NEW;
+    for (auto& line : input) {
+        switch (state) {
+        case STATE_NEW: {
+            if (line.size() < 2) continue;
+            if (line.at(0) == '-') {
+                if (line.at(1) == '-') {
+                    if (line.size() == 2) {
+                        // too short to be valid
+                        continue;
+                    }
+                    auto parts = stc::string::split(line, '=', 1);
+                    k = parts[0].substr(2);
+
+                    if (parts.size() == 1) {
+                        if (argc[k] != false) {
+                            state = STATE_VALUE;
+                        } else {
+                            flags[k] = "true";
+                        }
+                    } else {
+                        flags[k] = parts[1];
+                    }
+                } else {
+                    // -f
+                    for (int i = 1; i < line.size(); ++i) {
+                        if (shorthands.find(line[i]) != shorthands.end()) {
+                            flags[shorthands.at(line[i])] = "true";
+                        }
+                    }
+
+                }
+            }
+        } break;
+        case STATE_VALUE: {
+            flags[k] = line;
+            state = STATE_NEW;
+        } break;
+        }
+    }
+
+}
+
 int Context::run() {
     std::string command = input[0];
     input.erase(input.begin());
+    parseFlags();
     
     if (command == "help") {
         std::cout << R"(Commands

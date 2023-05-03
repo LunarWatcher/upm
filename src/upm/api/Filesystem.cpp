@@ -126,6 +126,28 @@ int upmfilesystem_make(lua_State* state) {
     }
     return 0;
 }
+int upmfilesystem_makeInstallOnly(lua_State *state) {
+    std::string sourceDir = lua_tostring(state, 1);
+
+    std::string make = lua_gettop(state) >= 3 && lua_isstring(state, 3) ? lua_tostring(state, 3) : "make";
+    int maxJobs = lua_gettop(state) >= 4 && lua_isinteger(state, 4) ? lua_tointeger(state, 4) : -1;
+
+    // TODO: get the system cap for threads
+    int hardwareThreads = 8;
+    // This calculates the number of threads to use, either capped by maxJobs (which, realistically, is either 1 or undefined)
+    int jobs = maxJobs > 0 ? std::min(maxJobs, hardwareThreads) : hardwareThreads;
+    spdlog::debug("Running {} with {} jobs", make, jobs);
+
+    make += " -j " + std::to_string(jobs);
+
+
+    auto status = WEXITSTATUS(std::system(("cd " + sourceDir + " && " + make + " install ").c_str()));
+    if (status != 0) {
+        std::cout << "Status = " << status << std::endl;
+        return luaL_error(state, "Failed to install");
+    }
+    return 0;
+}
 
 int upmfilesystem_untar(lua_State* state) {
     fs::path source = luaL_checkstring(state, 1);
@@ -164,6 +186,7 @@ int luaopen_upmfilesystem(lua_State* state) {
         {"sharedLibInstalled", upmfilesystem_sharedLibInstalled},
         {"configure", upmfilesystem_configure},
         {"make", upmfilesystem_make},
+        {"makeInstallOnly", upmfilesystem_makeInstallOnly},
         {"untar", upmfilesystem_untar},
         {"installCopy", upmfilesystem_installCopy},
         {nullptr, nullptr}

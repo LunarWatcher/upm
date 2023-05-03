@@ -29,7 +29,11 @@ typedef struct {
 class Context {
 private:
     std::vector<std::string> input;
+
+    void parseFlags();
 public:
+    std::map<std::string, std::string> flags;
+
     static inline Context* inst = nullptr;
 
     const SysInfo sysInfo {

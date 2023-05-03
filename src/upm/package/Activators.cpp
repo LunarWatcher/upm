@@ -6,6 +6,7 @@
 #include <iostream>
 #include <spdlog/spdlog.h>
 
+#include <thread>
 #include <vector>
 #include <string>
 
@@ -49,6 +50,51 @@ bool Activators::recursiveUniversalUNIXLink(std::vector<std::string>& safeDirNam
             links.insert(links.end(), linksForDir.begin(), linksForDir.end());
         }
     }
+    spdlog::info("Built symlink tree. Checking for conflicts...");
+    bool good = true;
+    for (auto& [source, target] : links) {
+        if (fs::exists(target)) {
+            auto allowOverwrite = fs::is_directory(target) && (
+                fs::is_empty(target)
+                || std::find(safeDirNames.begin(), safeDirNames.end(), target.filename()) != safeDirNames.end()
+            );
+
+            if (!fs::is_symlink(target)
+                && (
+                    !allowOverwrite
+                    || !fs::is_directory(target)
+                )
+            ) {
+                spdlog::warn("Found existing file or non-symlinked directory at {}", target.string());
+                good = false;
+                continue;
+            }
+            if (!allowOverwrite) {
+                auto str = fs::read_symlink(target).string();
+                // TODO: link in context to make this dynamic
+                if (str.find(Constants::UPM_ROOT.string()) == std::string::npos) {
+                    spdlog::warn("Found existing symlink at {}, but that points to a non-upm directory ({}).", 
+                        target.string(), str);
+                    good = false;
+                    continue;
+                }
+            }
+        }
+    }
+
+    if (!good) {
+        if (ctx.flags["force"] == "true") {
+            spdlog::warn("Found symlink conflicts, but --force is passed. Install continues in 5 seconds. Press Ctrl-C to abort.");
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+        } else {
+            spdlog::error("One or more symlink conflicts exist. Pass `--force` to ignore.");
+            throw std::runtime_error("Symlink target(s) already exist.");
+        }
+    } else {
+        spdlog::info("No path conflicst detected.");
+    }
+
+    spdlog::info("Performing symlinks.");
     for (auto& [source, target] : links) {
         spdlog::info("Linking {} -> {}", target.string(), source.string());
         // TODO: use package.<package>.files instead, and add
@@ -79,31 +125,6 @@ std::vector<std::pair<fs::path, fs::path>> Activators::Utils::recursiveLink(cons
         return result;
     } else {
 
-        if (fs::exists(dest / fileName)) {
-            auto allowOverwrite = fs::is_directory(dest / fileName) && (
-                fs::is_empty(dest / fileName)
-                || std::find(safeDirNames.begin(), safeDirNames.end(), fileName) != safeDirNames.end()
-            );
-
-            if (!fs::is_symlink(dest / fileName)
-                && (
-                    !allowOverwrite
-                    || !fs::is_directory(dest / fileName)
-                )
-            ) {
-                spdlog::critical("Found existing file or non-symlinked directory at {}", (dest/fileName).string());
-                throw std::runtime_error("Intended target exists and isn't a symlink");
-            }
-            if (!allowOverwrite) {
-                auto str = fs::read_symlink(dest/fileName).string();
-                // TODO: link in context to make this dynamic
-                if (str.find(Constants::UPM_ROOT.string()) == std::string::npos) {
-                    spdlog::critical("Found existing symlink at {}, but that points to a non-upm directory ({}).", 
-                        (dest / fileName).string(), str);
-                    throw std::runtime_error("Symlink exists, doesn't point to upm");
-                }
-            }
-        }
         return {{source / fileName, dest / fileName}};
     }
 }
