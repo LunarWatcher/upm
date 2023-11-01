@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.6)
 project(upm)
 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 if (NOT CMAKE_BUILD_TYPE)
     # Make explicit flags redundant for release builds
     set(CMAKE_BUILD_TYPE Release)
@@ -11,35 +15,41 @@ endif()
 
 set (CMAKE_CXX_STANDARD 17)
 
-if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
-  message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
-  file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/0.18.1/conan.cmake"
-                "${CMAKE_BINARY_DIR}/conan.cmake"
-                TLS_VERIFY ON)
-endif()
-
 if(USE_LIBCPP)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
 endif()
 
-include(${CMAKE_BINARY_DIR}/conan.cmake)
 
-conan_cmake_configure (REQUIRES
-                        cpr/1.10.0
-                        nlohmann_json/3.11.2
-                        spdlog/1.10.0
-                        lua/5.4.4
-                        GENERATORS cmake)
-conan_cmake_autodetect (settings)
-conan_cmake_install (PATH_OR_REFERENCE . BUILD missing SETTINGS ${settings})
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(SPDLOG_FMT_EXTERNAL ON CACHE STRING "" FORCE)
+set(CURL_ZLIB ON CACHE STRING "" FORCE)
+set(LUA_TAG v5.4.6 CACHE STRING "" FORCE)
 
 include(FetchContent)
 FetchContent_Declare(stc GIT_REPOSITORY https://github.com/LunarWatcher/stc)
+FetchContent_Declare(cpr
+    GIT_REPOSITORY https://github.com/libcpr/cpr.git
+    GIT_TAG 1.10.0)
+FetchContent_Declare(nlohmann
+    GIT_REPOSITORY https://github.com/nlohmann/json
+    GIT_TAG v3.11.2)
+FetchContent_Declare(spdlog
+    GIT_REPOSITORY https://github.com/gabime/spdlog
+    GIT_TAG v1.11.0)
+FetchContent_Declare(lua-cmake
+    GIT_REPOSITORY https://github.com/LunarWatcher/lua-cmake/
+)
+FetchContent_Declare(fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+    GIT_TAG 9.1.0)
+
 FetchContent_MakeAvailable(stc)
+FetchContent_MakeAvailable(fmt)
+FetchContent_MakeAvailable(cpr)
+FetchContent_MakeAvailable(nlohmann)
+FetchContent_MakeAvailable(spdlog)
+FetchContent_MakeAvailable(lua-cmake)
  
 add_subdirectory(src)
 add_subdirectory(tests EXCLUDE_FROM_ALL)

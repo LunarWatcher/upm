@@ -86,6 +86,16 @@ int git_pull(lua_State* state) {
     return 0;
 }
 
+int git_fetch(lua_State *state) {
+    std::string repo = luaL_checkstring(state, 1);
+
+    int res = std::system(fmt::format("cd {} && git fetch", repo).c_str());
+    if (res != 0) {
+        return luaL_error(state, "Failed to fetch");
+    }
+    return 0;
+}
+
 int luaopen_git(lua_State* state) {
     static const luaL_Reg functions[] = {
         {"clone", git_clone},

@@ -24,13 +24,15 @@ set (SOURCE_FILES
     upm/api/json/JSON.cpp
 
     upm/api/io/LogAPI.cpp
+
+    upm/api/util/ArgHelper.cpp
     # }}}
 )
 
-add_library(upm_sources ${SOURCE_FILES})
-target_include_directories(upm_sources PUBLIC ./ ${CONAN_INCLUDE_DIRS})
+add_library(upm_sources STATIC ${SOURCE_FILES})
 
-target_link_libraries(upm_sources ${CONAN_LIBS} stc)
+target_link_libraries(upm_sources PUBLIC stc cpr::cpr nlohmann_json::nlohmann_json spdlog::spdlog lua::lib)
+target_include_directories(upm_sources PUBLIC .)
 
 add_executable(upm upm/Main.cpp)
 target_link_libraries(upm upm_sources)
@@ -45,6 +47,6 @@ add_custom_target(luascripts
 add_dependencies(upm luascripts)
 
 install(TARGETS upm DESTINATION bin)
-install(DIRECTORY ${CMAKE_BINARY_DIR}/lua DESTINATION .)
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lua DESTINATION .)
 
 # vim:ft=cmake

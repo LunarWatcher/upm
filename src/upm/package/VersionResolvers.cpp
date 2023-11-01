@@ -13,6 +13,7 @@ std::string VersionResolvers::git(const std::string &repoPath, bool vPrefix) {
     std::string version = Context::inst->packageVersion;
     int statusCode = 0;
     std::string res;
+    // This is arguably not safe, but not sure how to escape it. 
     auto cd = "cd " + repoPath + " && ";
 
     switch (Context::inst->versionType) {

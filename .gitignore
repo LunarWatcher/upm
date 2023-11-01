@@ -1,6 +1,9 @@
 thirdparty
-build
+build/
+build2/
+dist/
 .cache
+compile_commands.json
 
 env/
 

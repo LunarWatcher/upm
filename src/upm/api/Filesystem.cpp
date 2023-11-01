@@ -5,9 +5,11 @@
 
 #include "lua.h"
 #include "upm/api/Constants.hpp"
+#include "upm/api/util/ArgHelper.hpp"
 
 #include <cstdlib>
 #include <stc/FS.hpp>
+#include <stc/Fmt.hpp>
 #include <stc/Environment.hpp>
 #include <stc/StringUtil.hpp>
 
@@ -18,6 +20,28 @@ int upmfilesystem_exists(lua_State* state) {
         return luaL_error(state, "Need an argument");
     }
 
+
+    auto type = luaL_optinteger(state, 2, upm::filesystem::TYPE_ANY);
+
+    auto path = fs::path(luaL_checklstring(state, 1, nullptr));
+    switch (type) {
+    case upm::filesystem::TYPE_ANY:
+        lua_pushboolean(state,
+            fs::exists(path));
+        break;
+    case upm::filesystem::TYPE_DIRECTORY:
+        lua_pushboolean(state,
+            fs::is_directory(path));
+        break;
+    case upm::filesystem::TYPE_FILE:
+        // Not sure if is_regular_file is good enough. Using exists && !is_directory _might_ be better, but
+        // I'm not sure
+        lua_pushboolean(state,
+            fs::is_regular_file(path));
+        break;
+    default:
+        return luaL_error(state, "You supplied an invalid value for the type. Please use fs.TYPE_ANY, fs.TYPE_DIRECTORY, or fs.TYPE_FILE");
+    }
     lua_pushboolean(state,
         fs::exists(fs::path(luaL_checklstring(state, 1, nullptr)))
     );
@@ -92,6 +116,45 @@ int upmfilesystem_configure(lua_State* state) {
 
     if (result != 0)
         return luaL_error(state, "Configure failed.");
+    return 0;
+}
+
+int upmfilesystem_cmake(lua_State *state) {
+    std::string path = luaL_checkstring(state, 1);
+
+    upm::Context& ctx = *upm::Context::inst;
+
+    // TODO: separate out to a utility function
+    // (and maybe do some fancy template trickery?)
+    std::map<std::string, std::optional<upm::ArgHelper::LuaField>> args;
+    if (lua_gettop(state) >= 2) {
+        luaL_checktype(state, 2, LUA_TTABLE);
+        args = upm::ArgHelper::parseTable(state, 2, {
+            {"prefixCommand", typeid(std::string)},
+            {"buildType", typeid(std::string)},
+        });
+    } 
+
+    auto command = fmt::format(
+        "cd {} && mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE={} -D{}={} ..",
+        path,
+        std::get<std::string>(args["buildType"].value_or("RELEASE")),
+        std::get<std::string>(args["prefixCommand"].value_or("CMAKE_INSTALL_PREFIX")),
+        ctx.getPrefix()
+    );
+
+    int result = WEXITSTATUS(std::system(command.c_str()));
+    if (result != 0) {
+        return luaL_error(state, "CMake failed.");
+    }
+
+    result = WEXITSTATUS(std::system(fmt::format("cd {} && cd build && cmake --build . --target install", path).c_str()));
+    if (result != 0) {
+        return luaL_error(state, "Install failed.");
+    }
+
+
+
     return 0;
 }
 
@@ -186,6 +249,7 @@ int luaopen_upmfilesystem(lua_State* state) {
         {"sharedLibInstalled", upmfilesystem_sharedLibInstalled},
         {"configure", upmfilesystem_configure},
         {"make", upmfilesystem_make},
+        {"cmake", upmfilesystem_cmake},
         {"makeInstallOnly", upmfilesystem_makeInstallOnly},
         {"untar", upmfilesystem_untar},
         {"installCopy", upmfilesystem_installCopy},
@@ -193,6 +257,15 @@ int luaopen_upmfilesystem(lua_State* state) {
     };
 
     luaL_newlib(state, functions);
+
+    lua_pushnumber(state, upm::filesystem::TYPE_ANY);
+    lua_setfield(state, -2, "TYPE_ANY");
+
+    lua_pushnumber(state, upm::filesystem::TYPE_DIRECTORY);
+    lua_setfield(state, -2, "TYPE_DIRECTORY");
+
+    lua_pushnumber(state, upm::filesystem::TYPE_ANY);
+    lua_setfield(state, -2, "TYPE_FILE");
 
     return 1;
 }
