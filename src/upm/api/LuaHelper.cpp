@@ -54,11 +54,20 @@ LuaHelper::~LuaHelper() {
 }
 
 void LuaHelper::runFile(const std::string& fn) {
-
-    if (luaL_dofile(state, fn.c_str()) != 0) {
-        std::cerr << "Failed to load lua file: " << lua_tostring(state, -1) << std::endl;
-        throw std::runtime_error("exec failed");
+    if (luaCache.find(fn) == luaCache.end()) {
+        if (luaL_dofile(state, fn.c_str()) != 0) {
+            std::cerr << "Failed to load lua file: " << lua_tostring(state, -1) << std::endl;
+            throw std::runtime_error("exec failed");
+        }
+        auto r = luaL_ref(state, LUA_REGISTRYINDEX);
+        if (r == LUA_REFNIL) {
+            throw std::runtime_error("Unexpected arguments received");
+        }
+        luaCache[fn] = r;
+    } else {
+        spdlog::debug("Loading functions from {} from cache", fn);
     }
+    lua_rawgeti(state, LUA_REGISTRYINDEX, luaCache[fn]);
 }
 
 void LuaHelper::runFileForResult(const std::string& fn, int nRes, std::vector<int> types) {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lua.hpp>
+#include <map>
 extern "C" {
 #include "lualib.h"
 }
@@ -12,6 +13,8 @@ namespace upm {
 class LuaHelper {
 private:
     lua_State* state;
+
+    std::map<std::string, int> luaCache;
 public:
     LuaHelper();
     ~LuaHelper();

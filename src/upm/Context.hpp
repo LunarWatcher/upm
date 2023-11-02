@@ -49,6 +49,8 @@ public:
         "darwin", "x64"
 #elif defined MACOS && defined __arm__
         "darwin", "arm64"
+#elif defined(_WIN32)
+#error "Invalid OS"
 #else
         "UNK", "UNK"
 #warning Unknown operating system and CPU configuration. Binary scripts may be unable to function properly.

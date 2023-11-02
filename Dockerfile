@@ -15,3 +15,4 @@ RUN apt update && apt install -y libxt6 libgtk-3-0 libpango-1.0-0 libcairo2 liba
 # Copy the cwd state
 COPY . /app
 WORKDIR /app
+ENV SPDLOG_LEVEL=debug
