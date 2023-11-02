@@ -38,7 +38,7 @@ bool Activators::recursiveUniversalUNIXLink(std::vector<std::string>& safeDirNam
             // folders are required
             continue;
         }
-        fs::path destPath   = Constants::APPLY_ROOT / dir;
+        fs::path destPath = Constants::APPLY_ROOT / dir;
         if (!fs::exists(destPath)) {
             fs::create_directories(destPath);
         }

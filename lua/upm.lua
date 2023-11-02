@@ -1,9 +1,7 @@
-local network = require "upmnetwork"
-local exec = require "upmexec"
 local fs = require "upmfs"
 local vResolvers = require "vResolvers"
-local log = require "upmlog"
 local git = require "git";
+local activators = require "activators"
 
 local function install()
     local _, directory = git.clone(
@@ -22,7 +20,8 @@ local function install()
 end
 
 local function apply()
-
+    local upm = ctx["prefix"] .. "/bin/upm";
+    activators.activateSingle(upm, "bin/upm");
 end
 
 return {

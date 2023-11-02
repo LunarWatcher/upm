@@ -49,13 +49,8 @@ add_dependencies(upm luascripts)
 
 
 install(TARGETS upm DESTINATION bin)
-#install(TARGETS spdlog lua zlib libcurl DESTINATION lib)
-#install(TARGETS fmt EXPORT libfmt DESTINATION lib)
-#install(TARGETS cpr EXPORT libcpr DESTINATION lib)
-
 
 install(DIRECTORY ${CMAKE_BINARY_DIR}/lua DESTINATION .)
-#install(DIRECTORY ${CMAKE_BINARY_DIR}/bin DESTINATION bin)
 install(DIRECTORY ${CMAKE_BINARY_DIR}/lib DESTINATION .)
 
 # vim:ft=cmake
