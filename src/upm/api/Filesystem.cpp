@@ -8,6 +8,7 @@
 #include "upm/api/util/ArgHelper.hpp"
 
 #include <cstdlib>
+#include <filesystem>
 #include <stc/FS.hpp>
 #include <stc/Fmt.hpp>
 #include <stc/Environment.hpp>
@@ -45,6 +46,12 @@ int upmfilesystem_exists(lua_State* state) {
     lua_pushboolean(state,
         fs::exists(fs::path(luaL_checklstring(state, 1, nullptr)))
     );
+
+    return 1;
+}
+
+int upmfilesystem_pwd(lua_State* L) {
+    lua_pushstring(L, fs::current_path().string().c_str());;
 
     return 1;
 }
@@ -132,12 +139,15 @@ int upmfilesystem_cmake(lua_State *state) {
         args = upm::ArgHelper::parseTable(state, 2, {
             {"prefixCommand", typeid(std::string)},
             {"buildType", typeid(std::string)},
+            {"cd", typeid(bool)},
         });
     } 
+    //spdlog::debug("cd = {}", std::get<bool>(args["cd"].value_or(true)));
+
 
     auto command = fmt::format(
-        "cd {} && mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE={} -D{}={} ..",
-        path,
+        "{}cmake .. -DCMAKE_BUILD_TYPE={} -D{}={}",
+        std::get<bool>(args["cd"].value_or(true)) ? fmt::format("cd {} && mkdir -p build && cd build && ", path) : "",
         std::get<std::string>(args["buildType"].value_or("RELEASE")),
         std::get<std::string>(args["prefixCommand"].value_or("CMAKE_INSTALL_PREFIX")),
         ctx.getPrefix()
@@ -148,12 +158,14 @@ int upmfilesystem_cmake(lua_State *state) {
         return luaL_error(state, "CMake failed.");
     }
 
-    result = WEXITSTATUS(std::system(fmt::format("cd {} && cd build && cmake --build . --target install", path).c_str()));
+    result = WEXITSTATUS(std::system(
+            (
+                (std::get<bool>(args["cd"].value_or(true)) ? fmt::format("cd {} && cd build && ", path) : "")
+                + "cmake --build . --target install"
+    ).c_str()));
     if (result != 0) {
         return luaL_error(state, "Install failed.");
     }
-
-
 
     return 0;
 }
@@ -253,6 +265,7 @@ int luaopen_upmfilesystem(lua_State* state) {
         {"makeInstallOnly", upmfilesystem_makeInstallOnly},
         {"untar", upmfilesystem_untar},
         {"installCopy", upmfilesystem_installCopy},
+        {"pwd", upmfilesystem_pwd},
         {nullptr, nullptr}
     };
 

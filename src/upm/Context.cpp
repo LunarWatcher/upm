@@ -201,6 +201,8 @@ See GitHub for the full license.
         disable();
     } else if (command == "uninstall" || command == "remove") {
         spdlog::info("Will fix later :)");
+    } else if (command == "_install_self") {
+
     } else {
         // Commands part of the help, but that aren't implemented yet are still unknown.
         // (read: they're not bugs, for the record :) )
@@ -344,6 +346,11 @@ std::vector<fs::path> Context::getLuaLookupDirectory() {
 #ifdef UPM_DEBUG
     // If built as debug, make sure ./lua is included first in the search path.
     res.push_back("./lua/upm");
+#else
+    if (flags.find("install_self") != flags.end() && package == "upm") {
+        spdlog::debug("Installing self; injecting cwd as a lookup path");
+        res.push_back("./lua/upm");
+    }
 #endif
 
     // Each subfolder of the lua folder represents one repository, though I'm not sure how I want to set that up yet.

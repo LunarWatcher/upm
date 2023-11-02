@@ -20,6 +20,7 @@ inline auto constexpr TYPE_FILE = 2;
 extern "C" {
 
 extern int upmfilesystem_exists(lua_State* state);
+extern int upmfilesystem_pwd(lua_State* L);
 extern int upmfilesystem_sharedLibInstalled(lua_State* state);
 extern int upmfilesystem_installCopy(lua_State* state);
 

@@ -16,9 +16,7 @@ int git_clone(lua_State* state) {
     bool clean = lua_gettop(state) >= 3 ? lua_toboolean(state, 3) : false;
     bool absPath = lua_gettop(state) >= 4 ? lua_toboolean(state, 4) : false;
     fs::path p = absPath ? dest : ("/tmp/upm/" + dest);
-    // TODO: we'll want to change the directories to differentiate between root and users. Maybe
-    // append getuid or whatever to the path for good measure? Want to avoid permissions as much
-    // as possible.
+
     if (fs::exists(p)) {
         if (clean) {
             spdlog::info("Already cloned. Reset policy forces cache deletion...");

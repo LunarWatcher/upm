@@ -1,6 +1,7 @@
 // I regret these filenames
 #include "Context.hpp"
 #include "Constants.hpp"
+#include "lua.h"
 #include "upm/Context.hpp"
 #include "LuaHelper.hpp"
 
@@ -33,6 +34,13 @@ int context_index(lua_State* state) {
         lua_pushstring(state, (*data)->resolvedPackageVersion.c_str());
     } else if (name == "prefix") {
         lua_pushstring(state, (*data)->getPrefix().c_str());
+    } else if (name == "options") {
+        lua_newtable(state);
+
+        for (auto& [flag, value] : (**data).flags) {
+            lua_pushstring(state, value.c_str());
+            lua_setfield(state, -2, flag.c_str());
+        }
     } else {
         // Note for future self: this is to allow function resolution from the metatable.
         luaL_getmetatable(state, MT_Context);
