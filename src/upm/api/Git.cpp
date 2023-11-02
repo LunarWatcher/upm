@@ -43,7 +43,7 @@ int git_clone(lua_State* state) {
         return luaL_error(state, "Clone failed.");
     }
 
-    spdlog::info("Successfully cloned {}", repo);
+    spdlog::info("Successfully cloned {} to {}", repo, p.string());
     lua_pushboolean(state, true);
     // TODO: this line also needs to be tweaked when adding the UID
     lua_pushstring(state, p.string().c_str());

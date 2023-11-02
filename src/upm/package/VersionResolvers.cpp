@@ -73,7 +73,13 @@ std::string VersionResolvers::git(const std::string &repoPath, bool vPrefix) {
         }
         spdlog::info("Resolved package to version {}", resolvedVersion);
         return resolvedVersion;
-    } else throw std::runtime_error("Git failed to return an appropriate status code. stdout: " + res);
+    } else {
+        if (version == "latest") {
+            throw std::runtime_error("Git failed to return an appropriate status code. This is likely due to no tags existing. Try again with a different version spec");
+        } else {
+            throw std::runtime_error("Git failed to return an appropriate status code. Does the version exist? stdout: " + res);
+        }
+    }
 }
 
 }
