@@ -29,9 +29,10 @@ set (SOURCE_FILES
     # }}}
 )
 
+
 add_library(upm_sources STATIC ${SOURCE_FILES})
 
-target_link_libraries(upm_sources PUBLIC stc cpr::cpr nlohmann_json::nlohmann_json spdlog::spdlog lua::lib)
+target_link_libraries(upm_sources PUBLIC stc cpr::cpr fmt::fmt nlohmann_json::nlohmann_json spdlog::spdlog lua::lib)
 target_include_directories(upm_sources PUBLIC .)
 
 add_executable(upm upm/Main.cpp)
@@ -46,7 +47,15 @@ add_custom_target(luascripts
 
 add_dependencies(upm luascripts)
 
+
 install(TARGETS upm DESTINATION bin)
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lua DESTINATION .)
+#install(TARGETS spdlog lua zlib libcurl DESTINATION lib)
+#install(TARGETS fmt EXPORT libfmt DESTINATION lib)
+#install(TARGETS cpr EXPORT libcpr DESTINATION lib)
+
+
+install(DIRECTORY ${CMAKE_BINARY_DIR}/lua DESTINATION .)
+#install(DIRECTORY ${CMAKE_BINARY_DIR}/bin DESTINATION bin)
+install(DIRECTORY ${CMAKE_BINARY_DIR}/lib DESTINATION .)
 
 # vim:ft=cmake

@@ -20,11 +20,17 @@ if(USE_LIBCPP)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
 endif()
 
+# Required to preserve lookup stuff
+list(APPEND CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(SPDLOG_FMT_EXTERNAL ON CACHE STRING "" FORCE)
 set(CURL_ZLIB ON CACHE STRING "" FORCE)
 set(LUA_TAG v5.4.6 CACHE STRING "" FORCE)
+set(FMT_INSTALL OFF CACHE STRING "" FORCE)
+set(SPDLOG_INSTALL OFF CACHE STRING "" FORCE)
+set(CURL_INSTALL OFF CACHE STRING "" FORCE)
+
 
 include(FetchContent)
 FetchContent_Declare(stc GIT_REPOSITORY https://github.com/LunarWatcher/stc)
@@ -46,10 +52,15 @@ FetchContent_Declare(fmt
 
 FetchContent_MakeAvailable(stc)
 FetchContent_MakeAvailable(fmt)
-FetchContent_MakeAvailable(cpr)
+#FetchContent_MakeAvailable(cpr)
 FetchContent_MakeAvailable(nlohmann)
 FetchContent_MakeAvailable(spdlog)
 FetchContent_MakeAvailable(lua-cmake)
+FetchContent_GetProperties(cpr)
+if (NOT cpr_POPULATED)
+    FetchContent_Populate(cpr)
+    add_subdirectory(${cpr_SOURCE_DIR} ${cpr_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
  
 add_subdirectory(src)
 add_subdirectory(tests EXCLUDE_FROM_ALL)

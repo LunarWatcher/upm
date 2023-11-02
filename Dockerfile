@@ -10,7 +10,7 @@
 FROM ubuntu:latest
 # This includes a subset of dependencies. Various apps have various dependencies, but this aims to cover
 # some core dependencies. Any other deps need to be installed in the container on-demand
-RUN apt update && apt install -y libxt6 libgtk-3-0 libpango-1.0-0 libcairo2 libatk1.0-0 git python3 python3-dev gcc g++ libncurses-dev make cmake libssl-dev
+RUN apt update && apt install -y libxt6 libgtk-3-0 libpango-1.0-0 libcairo2 libatk1.0-0 git python3 python3-dev gcc g++ libncurses-dev make cmake libssl-dev python3 python3-pip
 
 # Copy the cwd state
 COPY . /app
