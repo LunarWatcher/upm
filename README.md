@@ -4,49 +4,27 @@ Package manager manager and SDK manager, because someone had to make the 15th st
 
 [![xkcd: standards][1]][1]
 
----
+## Requirements
 
-## What?
+A C++17 compiler, and Linux or MacOS, and access to `tar` with a few specs (see the tar section). 
 
-Installs shit so you don't have to. This is, in essence, a gigantic automation project (and an excuse for me to get acquainted with the Lua C API, but that's a different story).
-
-## Like?
-
-Whatever has been set up.
-
-## How?
-
-Through a combination of GitHub repositories, automatic redirection, and good 'ol fashioned manual link following. And of course lists for when absolutely everything else fails.
-
-## Requirements?
-
-A C++17 compiler, and Linux or MacOS, and access to `tar` with a few specs (see the tar section). Note that MacOS will have weaker support, because I don't have access to any Mac machines. Please consider contributing to the project if you have access to a Mac.
+Note that MacOS will have weaker support, because I don't have access to any Mac machines. Please consider contributing to the project if you have access to a Mac and want to use upm.
 
 General UNIXes beyond Linux and MacOS will have varying support, for the same reason MacOS doesn't have full support: I don't have those operating systems, and testing them is a slow and annoying process that I don't want to spend my time on.
 
+### Additional libraries (Linux)
 
-### Tar (temporary; see #20)
+* `libssl-dev`
+
+
+### Tar
 
 * Supports `--strip-components`
-* Supports automatic tar type detection*
+* Supports automatic tar type detection
 
-\*: may be dropped if it turns out there's a lot of tars that support `--strip-components`, but somehow not automatic type detection. Feedback needed.
+### Package dependencies
 
-## Initial lineup
-
-The plan for the time being, in no particular order, is:
-
-
-* [ ] CMake
-* [ ] Python + pip (bundled) 
-* [x] Node + npm (bundle), replacing the 5 node version managers recommended by npm's npm package (Node/NPM needs to die in a fire)
-* [x] Vim
-* [ ] ssh/sshd
-* [ ] Config for custom packages, that may or may not be completely unrelated to package managers and SDKs
-
-However, an important point here is to also allow uninstalling. This isn't something that's easily done when installing manually, because it some times installs dependencies in a bunch of different places. This is primarily true for makefile-based programs.
-
-That said, this project may evolve into a glorified "unstable apt" that sources the newest packages, instead of whatever ancient version retrieved when the dinosaurs were still around, that the repos push. We'll see how far this rabbit hole goes.
+Certain packages may have other dependencies. If such a dependency is required, and the build doesn't self-manage dependencies, it'll trigger an error if it isn't found. 
 
 ## How does it work?
 
@@ -64,5 +42,38 @@ There are a few reasons for this, and there are probably many more than the reas
     1. Relative bin path: #1 has to be set beyond the shell, complicating installation
     2. Absolute bin path: The desktop file has to be modified, either by the install process or the user to function, at least if the install location is unexpected.
 4. **man pages**: Many packages include man pages, and these also require a variable addition.
+
+## Installing upm
+
+### Using a utility script
+
+Upm provides an installer utlity that runs all the required compile commands automatically. Also note that the script does **not** handle dependency install. You need to manually get the dependencies before running.
+
+**Note:** it's always recommended to read through scripts before running them.
+
+```bash
+sh -c "$(wget -O- https://raw.githubusercontent.com/LunarWatcher/upm/master/tools/install.sh)"
+```
+
+### Manually
+
+```bash
+# Clone the repo
+git clone https://github.com/LunarWatcher/upm
+# cd and and build the bootstrap
+cd upm
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release 
+make -j $(nproc)
+# Have the upm bootstrap install itself
+sudo ./bin/upm install upm@nightly --install_self=true
+```
+
+After this, you can delete the cloned repo. When upm later updates itself, the repo will be automatically re-cloned under /tmp for building.
+
+### Updating upm
+
+When upm has been installed, upm can update itself. Simply run `sudo upm upgrade upm@nightly` (or another tag if you prefer), and it'll fetch itself.
 
 [1]: https://imgs.xkcd.com/comics/standards.png
