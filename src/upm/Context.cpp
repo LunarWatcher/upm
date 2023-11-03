@@ -135,21 +135,17 @@ int Context::run() {
     
     if (command == "help") {
         std::cout << R"(Commands
-    help                    Shows this helpful message
-    install                 Installs one or more packages
-    uninstall, remove       Uninstalls one or more packages
-    upgrade                 Upgrades a package.
-    apply                   Applies a specific version of a package
-    deactivate, disable     Deactivates a package
-    list                    Lists installed packages, along with installed versions.
+    help					Shows this helpful message
+    install					Installs one or more packages
+    uninstall, remove		Uninstalls one or more packages
+    upgrade					Upgrades a package.
+    apply					Applies a specific version of a package
+    deactivate, disable		Deactivates a package
+    list					Lists installed packages, along with installed versions.
+    version					Shows information about the currently installed version of upm
 
 Since upm allows multiple installed versions of certain programs,
 install and uninstall may require a version to work.
-
-# Upgrading versioned packages
-Dependent on issues #1, #4, #6 (read: TBD)
-
-# Updating upm
 
 # License
 
@@ -201,8 +197,14 @@ See GitHub for the full license.
         disable();
     } else if (command == "uninstall" || command == "remove") {
         spdlog::info("Will fix later :)");
-    } else if (command == "_install_self") {
-
+    } else if (command == "version") {
+        std::cout << "upm version " << 
+#ifdef UPM_VERSION
+            UPM_VERSION
+#else
+            "unknown"
+#endif
+            << std::endl;
     } else {
         // Commands part of the help, but that aren't implemented yet are still unknown.
         // (read: they're not bugs, for the record :) )

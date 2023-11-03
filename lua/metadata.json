@@ -1,0 +1,5 @@
+{
+    "source": "https://github.com/LunarWatcher/upm",
+    "updatable": false,
+    "description": "upm's primary package repository. Updates alongside upm (this will change in the future)"
+}

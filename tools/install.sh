@@ -16,17 +16,17 @@ sudo mkdir -p /opt/upm
 echo "Cloning repository..."
 git clone --recursive https://github.com/LunarWatcher/upm /tmp/upm/_bootstrap
 if [ $? -ne 0 ]; then
-    echo "Failed to clone. If it already exists, remove /opt/upm/_sources and try again."
+    echo "Failed to clone. If it already exists, remove /tmp/upm/_sources and try again."
     echo "Also note that you can update upm from within itself. This script is not meant for updates."
     exit -1
 fi
 
+mkdir /tmp/upm/
 cd /tmp/upm/_bootstrap
 
 echo "Checkout build directory"
 mkdir -p build && cd build
 # Bootstrap build
 cmake .. -DCMAKE_BUILD_TYPE=Release && make -j $(nproc)
-sudo make install -j $(nproc)
-# Make upm install itself
-./bin/upm install upm@nightly
+
+sudo ./bin/upm install upm@nightly --install_self=true
