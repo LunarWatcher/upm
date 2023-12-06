@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 CMAKE_VERSION=$(cmake --version)
 
