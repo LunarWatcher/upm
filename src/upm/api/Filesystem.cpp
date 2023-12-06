@@ -10,9 +10,10 @@
 #include <cstdlib>
 #include <filesystem>
 #include <stc/FS.hpp>
-#include <stc/Fmt.hpp>
 #include <stc/Environment.hpp>
 #include <stc/StringUtil.hpp>
+
+#include "fmt/format.h"
 
 extern "C" {
 
