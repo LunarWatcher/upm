@@ -5,7 +5,10 @@ set (SOURCE_FILES
 
     upm/package/Activators.cpp
     upm/package/VersionResolvers.cpp
+
     upm/util/Version.cpp
+    upm/util/syscompat/Nproc.cpp
+
     upm/conf/Config.cpp
 
     upm/input/Parser.cpp

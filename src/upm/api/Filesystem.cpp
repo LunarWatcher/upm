@@ -6,6 +6,7 @@
 #include "lua.h"
 #include "upm/api/Constants.hpp"
 #include "upm/api/util/ArgHelper.hpp"
+#include "upm/util/syscompat/Nproc.hpp"
 
 #include <cstdlib>
 #include <filesystem>
@@ -183,13 +184,22 @@ int upmfilesystem_make(lua_State* state) {
     int maxJobs = lua_gettop(state) >= 4 && lua_isinteger(state, 4) ? lua_tointeger(state, 4) : -1;
 
     // TODO: get the system cap for threads
-    int hardwareThreads = 8;
-    // This calculates the number of threads to use, either capped by maxJobs (which, realistically, is either 1 or undefined)
+    int hardwareThreads = upm::util::getHardwareConcurrency();
+    // This calculates the number of threads to use, either capped by maxJobs (which, realistically, is either 1 or undefined),
+    // or using the number of system threads
+    //
+    // This does force the number under hardwareThreads (min 1), but that's fine. There are apparently some advantages to running with more
+    // threads than the hardware supports because of IO limits (though that advice was old, so fuck knows how NVMe affects that),
+    // but this is an edge-case I don't feel like supporting.
     int jobs = maxJobs > 0 ? std::min(maxJobs, hardwareThreads) : hardwareThreads;
     spdlog::debug("Running {} with {} jobs", make, jobs);
 
     make += " -j " + std::to_string(jobs);
 
+    // Looking back at this, this definitely opens for some vulnerabilities. Not sure how to best mitigate that though.
+    // Also fairly low-risk, given that the lua scripts already execute in a non-sandboxed environment, so the scripts
+    // have already been privilege escalated by the time this kicks in.
+    // /shrug though
     int status = WEXITSTATUS(std::system(("cd " + sourceDir + " && " + make + " " + arguments).c_str()));
     if (status != 0) {
         std::cout << "Status = " << status << std::endl;

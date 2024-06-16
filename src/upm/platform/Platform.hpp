@@ -3,7 +3,7 @@
 #ifdef _WIN32
 #error "Windows isn't supported"
 #elif defined __APPLE__
-#warning "MacOS has very limited support at this time. Please consider contributing to make Mac support better."
+#warning "MacOS has very limited support at this time. Please consider contributing to make Mac support better, or switching to a real OS."
 #define MACOS
 #elif defined __linux__
 #define LINUX
