@@ -43,32 +43,37 @@ void Context::resolvePackageContext(const std::string& rawVersion) {
         package = rawVersion;
         packageVersion = "latest";
         versionType = VersionType::AT;
-        return;
     } else if (at != 1 && approx != 1) {
         spdlog::error("{} doesn't follow any of the supported version formats", rawVersion);
         // Both @ and ~, and we throw.
         throw std::runtime_error("Invalid version format");
-    }
-    // We split by whichever thing exists
-
-    if (at != 0) {
-        auto split = stc::string::split(rawVersion, "@", 1);
-        if (split.size() != 2 || split[1].size() == 0) {
-            spdlog::error("Invalid format: {} (expected @<version> or ~<version>)", rawVersion);
-            throw std::runtime_error("Failed to extract version.");
-        }
-        package = split[0];
-        packageVersion = split[1];
-        versionType = VersionType::AT;
     } else {
-        auto split = stc::string::split(rawVersion, "~", 1);
-        if (split.size() != 2 || split[1].size() == 0) {
-            spdlog::error("Invalid format: {} (expected @<version> or ~<version>)", rawVersion);
-            throw std::runtime_error("Failed to extract version.");
+        // We split by whichever thing exists
+
+        if (at != 0) {
+            auto split = stc::string::split(rawVersion, "@", 1);
+            if (split.size() != 2 || split[1].size() == 0) {
+                spdlog::error("Invalid format: {} (expected @<version> or ~<version>)", rawVersion);
+                throw std::runtime_error("Failed to extract version.");
+            }
+            package = split[0];
+            packageVersion = split[1];
+            versionType = VersionType::AT;
+        } else {
+            auto split = stc::string::split(rawVersion, "~", 1);
+            if (split.size() != 2 || split[1].size() == 0) {
+                spdlog::error("Invalid format: {} (expected @<version> or ~<version>)", rawVersion);
+                throw std::runtime_error("Failed to extract version.");
+            }
+            package = split[0];
+            packageVersion = split[1];
+            versionType = VersionType::APPROX;
         }
-        package = split[0];
-        packageVersion = split[1];
-        versionType = VersionType::APPROX;
+    }
+
+    // Shove the install_self flag in by default when modifying upm to avoid issues with 
+    if (package == "upm") {
+        this->flags["install_self"] = "true";
     }
 }
 
