@@ -16,7 +16,7 @@ bool Activators::recursiveUniversalUNIXLink(std::vector<std::string>& safeDirNam
     static const std::vector<std::string> directories = {
         "bin", "share", "lib", "include", "etc"
     };
-
+    static const std::vector<std::string> ignoreFiles = { "mimeinfo.cache" };
 
     auto& ctx = *Context::inst;
     safeDirNames.push_back(ctx.package);
@@ -46,7 +46,9 @@ bool Activators::recursiveUniversalUNIXLink(std::vector<std::string>& safeDirNam
             // returns the path relative to sourcePath
             // TODO: see if calling .path() is unnecessary
             std::string fn = path.path().lexically_relative(sourcePath);
-            auto linksForDir = Utils::recursiveLink(sourcePath, destPath, fn, safeDirNames);
+            if (std::find(ignoreFiles.begin(), ignoreFiles.end(), fn) != ignoreFiles.end()) { continue; }
+            spdlog::debug("filename: {}", fn);
+            auto linksForDir = Utils::recursiveLink(sourcePath, destPath, fn, safeDirNames, ignoreFiles);
             links.insert(links.end(), linksForDir.begin(), linksForDir.end());
         }
     }
@@ -91,7 +93,7 @@ bool Activators::recursiveUniversalUNIXLink(std::vector<std::string>& safeDirNam
             throw std::runtime_error("Symlink target(s) already exist.");
         }
     } else {
-        spdlog::info("No path conflicst detected.");
+        spdlog::info("No path conflicts detected.");
     }
 
     spdlog::info("Performing symlinks.");
@@ -113,17 +115,32 @@ bool Activators::recursiveUniversalUNIXLink(std::vector<std::string>& safeDirNam
 }
 
 // Util defs {{{
-std::vector<std::pair<fs::path, fs::path>> Activators::Utils::recursiveLink(const fs::path &source, const fs::path &dest, const std::string& fileName, const std::vector<std::string>& safeDirNames) {
+std::vector<std::pair<fs::path, fs::path>> Activators::Utils::recursiveLink(
+        const fs::path &source,
+        const fs::path &dest,
+        const std::string& fileName,
+        const std::vector<std::string>& safeDirNames,
+        const std::vector<std::string>& ignoreFiles
+) {
     
     if (fs::is_directory(source / fileName) && std::find(safeDirNames.begin(), safeDirNames.end(), fileName) == safeDirNames.end()) {
         std::vector<std::pair<fs::path, fs::path>> result;
         for (auto& path : fs::directory_iterator(source / fileName)) {
             std::string fn = path.path().lexically_relative(source / fileName);
-            auto newVec = recursiveLink(source / fileName, dest / fileName, fn, safeDirNames);
+            if (std::find(ignoreFiles.begin(), ignoreFiles.end(), fn) != ignoreFiles.end()) { 
+                spdlog::debug("{} is ignored and will not be linked", fn);
+                continue; 
+            }
+
+            auto newVec = recursiveLink(source / fileName, dest / fileName, fn, safeDirNames, ignoreFiles);
             result.insert(result.end(), newVec.begin(), newVec.end());
         }
         return result;
     } else {
+        if (std::find(ignoreFiles.begin(), ignoreFiles.end(), fileName) != ignoreFiles.end()) { 
+            spdlog::debug("{} is ignored and will not be linked", fileName);
+            return {};
+        }
 
         return {{source / fileName, dest / fileName}};
     }

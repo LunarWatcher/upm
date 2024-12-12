@@ -14,7 +14,13 @@ namespace upm {
 namespace Activators {
 namespace Utils {
 
-extern std::vector<std::pair<fs::path, fs::path>> recursiveLink(const fs::path &source, const fs::path &dest, const std::string& fileName, const std::vector<std::string>& safeDirNames);
+extern std::vector<std::pair<fs::path, fs::path>> recursiveLink(
+    const fs::path &source,
+    const fs::path &dest,
+    const std::string& fileName,
+    const std::vector<std::string>& safeDirNames,
+    const std::vector<std::string>& ignoredFiles = {}
+);
 
 }
 
