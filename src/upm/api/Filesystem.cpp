@@ -4,7 +4,6 @@
 #include "upm/Context.hpp"
 
 #include "lua.h"
-#include "upm/api/Constants.hpp"
 #include "upm/api/util/ArgHelper.hpp"
 #include "upm/util/syscompat/Nproc.hpp"
 
@@ -13,8 +12,6 @@
 #include <stc/FS.hpp>
 #include <stc/Environment.hpp>
 #include <stc/StringUtil.hpp>
-
-#include "fmt/format.h"
 
 extern "C" {
 
