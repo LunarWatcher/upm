@@ -1,6 +1,5 @@
 #include "Git.hpp"
 
-#include <stc/FS.hpp>
 #include <stc/Environment.hpp>
 #include <spdlog/spdlog.h>
 
@@ -15,12 +14,12 @@ int git_clone(lua_State* state) {
     std::string dest = luaL_checklstring(state, 2, nullptr);
     bool clean = (lua_gettop(state) >= 3 ? lua_toboolean(state, 3) : 0) != 0;
     bool absPath = (lua_gettop(state) >= 4 ? lua_toboolean(state, 4) : 0) != 0;
-    fs::path p = absPath ? dest : ("/tmp/upm/" + dest);
+    std::filesystem::path p = absPath ? dest : ("/tmp/upm/" + dest);
 
-    if (fs::exists(p)) {
+    if (std::filesystem::exists(p)) {
         if (clean) {
             spdlog::info("Already cloned. Reset policy forces cache deletion...");
-            if (fs::remove_all(p) == 0u) {
+            if (std::filesystem::remove_all(p) == 0u) {
                 return luaL_error(state, ("Failed to delete " + p.string()).c_str());
             }
         } else {

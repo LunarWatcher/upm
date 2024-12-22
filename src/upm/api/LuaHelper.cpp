@@ -13,7 +13,7 @@
 #include "stdfunc/Activators.hpp"
 #include "stdfunc/VersionResolvers.hpp"
 
-#include <stc/FS.hpp>
+#include <filesystem>
 
 #include <iostream>
 
@@ -26,7 +26,7 @@ LuaHelper::LuaHelper() {
     // but I'll eventually make a lock-based system for execution, similar
     // to how apt does it, to prevent this from happening.
     // Not sure how I'd go about it, however.
-    fs::create_directory("/tmp/upm");
+    std::filesystem::create_directory("/tmp/upm");
 
     state = luaL_newstate();
 }

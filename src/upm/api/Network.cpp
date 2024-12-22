@@ -3,8 +3,7 @@
 #include "lua.h"
 #include "lua.hpp"
 
-#include <iostream>
-#include <stc/FS.hpp>
+#include <filesystem>
 #include <cpr/cpr.h>
 
 // Do I really need this twice?
@@ -44,9 +43,9 @@ int upmnetwork_download(lua_State* state) {
     
 
     auto name = url.substr(url.rfind('/') + 1);
-    fs::path tmpDir = fs::temp_directory_path();
-    fs::path p = tmpDir / ("upm/" + name);
-    if (fs::exists(p)) {
+    std::filesystem::path tmpDir = std::filesystem::temp_directory_path();
+    std::filesystem::path p = tmpDir / ("upm/" + name);
+    if (std::filesystem::exists(p)) {
         spdlog::info("Cache entry found at {}.", p.string());
         lua_pushinteger(state, 200);
         lua_pushstring(state, p.string().c_str());

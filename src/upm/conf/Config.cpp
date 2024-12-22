@@ -12,7 +12,7 @@ namespace upm {
 Config::Config(Context* ctx) : ctx(ctx) {
     confPath = Constants::UPM_ROOT / ".upmrc";
 
-    if (!fs::exists(confPath)) {
+    if (!std::filesystem::exists(confPath)) {
         spdlog::debug("No config found at " + confPath.string());
         return;
     }
@@ -28,7 +28,7 @@ Config::~Config() {
 }
 
 void Config::save() {
-    if (this->confPath.empty() || fs::is_directory(this->confPath)) {
+    if (this->confPath.empty() || std::filesystem::is_directory(this->confPath)) {
         spdlog::warn("No confPath set; cannot save");
         return;
     }

@@ -165,8 +165,8 @@ See GitHub for the full license.
             return -1;
         }
 
-        if (!fs::is_directory(Constants::UPM_ROOT)) {
-            fs::create_directories(Constants::UPM_ROOT);
+        if (!std::filesystem::is_directory(Constants::UPM_ROOT)) {
+            std::filesystem::create_directories(Constants::UPM_ROOT);
         }
 
         resolvePackageContext(input[0]);
@@ -284,10 +284,10 @@ void Context::disable() {
     }
     for (auto& sourceDest : *it) {
         auto symlinkDest = sourceDest.at("target");
-        fs::path castPath = fs::path(symlinkDest.get<std::string>());
+        std::filesystem::path castPath = std::filesystem::path(symlinkDest.get<std::string>());
         if (isGoodSymlink(castPath)) {
             spdlog::info("Unlinking {}", castPath.string());
-            fs::remove(castPath);
+            std::filesystem::remove(castPath);
         } else {
             spdlog::error("Skipped bad entry: {}", castPath.string());
         }
@@ -325,7 +325,7 @@ std::string Context::locateFile(const std::string& packageName) {
     for (auto& dir : dirs) {
         // TODO: this is where alias cache lookup goes
         auto path = dir / (packageName + ".lua");
-        if (fs::is_regular_file(path)) {
+        if (std::filesystem::is_regular_file(path)) {
             return path;
         }
     }
@@ -334,13 +334,13 @@ std::string Context::locateFile(const std::string& packageName) {
 
 bool Context::checkInstalled() {
     auto prefix = getPrefix();
-    bool isInstalled = fs::is_directory(prefix);
+    bool isInstalled = std::filesystem::is_directory(prefix);
     // TODO: use isInstalled + config to check whether or not the existing directory should be removed
     return isInstalled;
 }
 
 std::string Context::getPrefix() {
-    fs::path root = Constants::UPM_ROOT / "packages";
+    std::filesystem::path root = Constants::UPM_ROOT / "packages";
 
     root /= package + "-" + (
         resolvedPackageVersion.empty() ? packageVersion : resolvedPackageVersion
@@ -348,8 +348,8 @@ std::string Context::getPrefix() {
     return root.string();
 }
 
-std::vector<fs::path> Context::getLuaLookupDirectory() {
-    std::vector<fs::path> res;
+std::vector<std::filesystem::path> Context::getLuaLookupDirectory() {
+    std::vector<std::filesystem::path> res;
 #ifdef UPM_DEBUG
     // If built as debug, make sure ./lua is included first in the search path.
     res.push_back("./lua/upm");

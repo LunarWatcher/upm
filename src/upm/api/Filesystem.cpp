@@ -9,7 +9,6 @@
 
 #include <cstdlib>
 #include <filesystem>
-#include <stc/FS.hpp>
 #include <stc/Environment.hpp>
 #include <stc/StringUtil.hpp>
 
@@ -23,34 +22,34 @@ int upmfilesystem_exists(lua_State* state) {
 
     auto type = luaL_optinteger(state, 2, upm::filesystem::TYPE_ANY);
 
-    auto path = fs::path(luaL_checklstring(state, 1, nullptr));
+    auto path = std::filesystem::path(luaL_checklstring(state, 1, nullptr));
     switch (type) {
     case upm::filesystem::TYPE_ANY:
         lua_pushboolean(state,
-            static_cast<int>(fs::exists(path)));
+            static_cast<int>(std::filesystem::exists(path)));
         break;
     case upm::filesystem::TYPE_DIRECTORY:
         lua_pushboolean(state,
-            static_cast<int>(fs::is_directory(path)));
+            static_cast<int>(std::filesystem::is_directory(path)));
         break;
     case upm::filesystem::TYPE_FILE:
         // Not sure if is_regular_file is good enough. Using exists && !is_directory _might_ be better, but
         // I'm not sure
         lua_pushboolean(state,
-            static_cast<int>(fs::is_regular_file(path)));
+            static_cast<int>(std::filesystem::is_regular_file(path)));
         break;
     default:
         return luaL_error(state, "You supplied an invalid value for the type. Please use fs.TYPE_ANY, fs.TYPE_DIRECTORY, or fs.TYPE_FILE");
     }
     lua_pushboolean(state,
-        static_cast<int>(fs::exists(fs::path(luaL_checklstring(state, 1, nullptr))))
+        static_cast<int>(std::filesystem::exists(std::filesystem::path(luaL_checklstring(state, 1, nullptr))))
     );
 
     return 1;
 }
 
 int upmfilesystem_pwd(lua_State* L) {
-    lua_pushstring(L, fs::current_path().string().c_str());;
+    lua_pushstring(L, std::filesystem::current_path().string().c_str());;
 
     return 1;
 }
@@ -94,13 +93,13 @@ int upmfilesystem_sharedLibInstalled(lua_State* state) {
 }
 
 int upmfilesystem_installCopy(lua_State* state) {
-    fs::path source = luaL_checkstring(state, 1);
-    fs::path dest = upm::Context::inst->getPrefix();
-    if (!fs::is_directory(dest)) { fs::create_directories(dest);
+    std::filesystem::path source = luaL_checkstring(state, 1);
+    std::filesystem::path dest = upm::Context::inst->getPrefix();
+    if (!std::filesystem::is_directory(dest)) { std::filesystem::create_directories(dest);
 }
 
     // At least recursive copying is easy now
-    fs::copy(source, dest, fs::copy_options::recursive | fs::copy_options::overwrite_existing | fs::copy_options::copy_symlinks);
+    std::filesystem::copy(source, dest, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing | std::filesystem::copy_options::copy_symlinks);
     return 0;
 }
 
@@ -235,7 +234,7 @@ int upmfilesystem_makeInstallOnly(lua_State *state) {
 
 // TODO: Replace with libarchive
 int upmfilesystem_untar(lua_State* state) {
-    fs::path source = luaL_checkstring(state, 1);
+    std::filesystem::path source = luaL_checkstring(state, 1);
     if (auto pos = source.string().find("/tmp/"); pos != 0) {
         throw std::runtime_error("Invalid path; must be a path to /tmp/");
     }
@@ -255,7 +254,7 @@ int upmfilesystem_untar(lua_State* state) {
     tarArg += " -C " + dest.string();
     upm::filesystem::logger->info("Unpacking {} to {}...", source.string(), dest.string());
 
-    fs::create_directories(dest);
+    std::filesystem::create_directories(dest);
     auto res = std::system(("tar " + tarArg).c_str());
     if (res != 0) {
         return luaL_error(state, "Failed to untar");

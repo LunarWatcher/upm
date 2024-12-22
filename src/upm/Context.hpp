@@ -124,7 +124,7 @@ public:
     bool checkInstalled();
 
     std::string getPrefix();
-    std::vector<fs::path> getLuaLookupDirectory();
+    std::vector<std::filesystem::path> getLuaLookupDirectory();
 
     std::string locateFile(const std::string& packageName);
 

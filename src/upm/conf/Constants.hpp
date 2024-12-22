@@ -1,11 +1,11 @@
 #pragma once
 
+#include <filesystem>
 #include <memory>
 #include <vector>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
-#include "stc/FS.hpp"
 
 namespace upm::Constants {
 static inline std::vector<spdlog::sink_ptr> sinks = {
@@ -15,7 +15,7 @@ static inline std::vector<spdlog::sink_ptr> sinks = {
 
 const static auto inline logger = std::make_shared<spdlog::logger>("upm", sinks.begin(), sinks.end());
 
-const static fs::path UPM_ROOT("/opt/upm/");
-const static fs::path APPLY_ROOT("/usr/local/");
+const static std::filesystem::path UPM_ROOT("/opt/upm/");
+const static std::filesystem::path APPLY_ROOT("/usr/local/");
 
 }

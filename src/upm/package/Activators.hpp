@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stc/FS.hpp>
+#include <filesystem>
 #include <string>
 #include <utility>
 #include <vector>
@@ -14,9 +14,9 @@ namespace upm {
 namespace Activators {
 namespace Utils {
 
-extern std::vector<std::pair<fs::path, fs::path>> recursiveLink(
-    const fs::path &source,
-    const fs::path &dest,
+extern std::vector<std::pair<std::filesystem::path, std::filesystem::path>> recursiveLink(
+    const std::filesystem::path &source,
+    const std::filesystem::path &dest,
     const std::string& fileName,
     const std::vector<std::string>& safeDirNames,
     const std::vector<std::string>& ignoredFiles = {}

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "nlohmann/json.hpp"
-#include "stc/Environment.hpp"
+#include <filesystem>
 
 namespace upm {
 
@@ -9,7 +9,7 @@ class Context;
 class Config {
 private:
     Context* ctx;
-    fs::path confPath;
+    std::filesystem::path confPath;
     
     void setup();
 public:

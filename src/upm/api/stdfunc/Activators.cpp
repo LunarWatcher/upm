@@ -38,7 +38,7 @@ int activators_activateSingle(lua_State *L) {
     std::string qualifiedDest = dest[0] != '/' ? "/usr/local/" + dest : dest;
 
 
-    if (!fs::exists(src)) {
+    if (!std::filesystem::exists(src)) {
         return luaL_error(L, (src + "doesn't exist").c_str());
     }
     spdlog::info("Linking {} -> {}", src, qualifiedDest);
@@ -50,11 +50,11 @@ int activators_activateSingle(lua_State *L) {
         }
     );
 
-    if (fs::exists(qualifiedDest)) {
-        fs::remove_all(qualifiedDest);
+    if (std::filesystem::exists(qualifiedDest)) {
+        std::filesystem::remove_all(qualifiedDest);
     }
 
-    fs::create_symlink(src, qualifiedDest);
+    std::filesystem::create_symlink(src, qualifiedDest);
 
     ctx.cfg.save();
 
