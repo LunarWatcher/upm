@@ -35,6 +35,8 @@ set (SOURCE_FILES
 
 add_library(upm_sources STATIC ${SOURCE_FILES})
 
+target_compile_options(upm_sources PUBLIC -DUPM_VERSION="${UPM_VERSION}")
+
 target_link_libraries(upm_sources PUBLIC stc cpr::cpr fmt::fmt nlohmann_json::nlohmann_json spdlog::spdlog lua::lib)
 target_include_directories(upm_sources PUBLIC .)
 
