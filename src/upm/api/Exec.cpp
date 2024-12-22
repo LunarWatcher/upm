@@ -17,7 +17,7 @@ int upmexec_exec(lua_State* state) {
     int f = std::system(command.c_str());
     int ok = 0;
     if (lua_gettop(state) >= 2) {
-        ok = luaL_checkinteger(state, 2);
+        ok = (int) luaL_checkinteger(state, 2);
     }
     if (f != ok) {
         upm::exec::logger->error("Failed to run {}", command);

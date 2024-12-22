@@ -27,23 +27,23 @@ int upmfilesystem_exists(lua_State* state) {
     switch (type) {
     case upm::filesystem::TYPE_ANY:
         lua_pushboolean(state,
-            fs::exists(path));
+            static_cast<int>(fs::exists(path)));
         break;
     case upm::filesystem::TYPE_DIRECTORY:
         lua_pushboolean(state,
-            fs::is_directory(path));
+            static_cast<int>(fs::is_directory(path)));
         break;
     case upm::filesystem::TYPE_FILE:
         // Not sure if is_regular_file is good enough. Using exists && !is_directory _might_ be better, but
         // I'm not sure
         lua_pushboolean(state,
-            fs::is_regular_file(path));
+            static_cast<int>(fs::is_regular_file(path)));
         break;
     default:
         return luaL_error(state, "You supplied an invalid value for the type. Please use fs.TYPE_ANY, fs.TYPE_DIRECTORY, or fs.TYPE_FILE");
     }
     lua_pushboolean(state,
-        fs::exists(fs::path(luaL_checklstring(state, 1, nullptr)))
+        static_cast<int>(fs::exists(fs::path(luaL_checklstring(state, 1, nullptr))))
     );
 
     return 1;
@@ -63,13 +63,13 @@ int upmfilesystem_sharedLibInstalled(lua_State* state) {
     // Should preserve the cache.
     static std::string cache = stc::syscommand("ldconfig -p");
 
-    std::string libs = "";
-    bool errorIfMissing = lua_toboolean(state, 1);
+    std::string libs;
+    bool errorIfMissing = lua_toboolean(state, 1) != 0;
     for (int i = 2; i <= lua_gettop(state); ++i) {
         std::string lib = luaL_checklstring(state, i, nullptr);
         if (cache.find(lib) == std::string::npos) {
             upm::filesystem::logger->info("{}: missing", lib);
-            if (libs.size() != 0) {
+            if (!libs.empty()) {
                 libs += ", ";
             }
             libs += lib;
@@ -79,7 +79,7 @@ int upmfilesystem_sharedLibInstalled(lua_State* state) {
 
     }
 
-    if (libs != "") {
+    if (!libs.empty()) {
         upm::filesystem::logger->error("Failed to find system libraries: {}", libs); 
         if (errorIfMissing) {
             return luaL_error(state, "libraries missing");
@@ -87,7 +87,7 @@ int upmfilesystem_sharedLibInstalled(lua_State* state) {
     } else {
         upm::filesystem::logger->debug("All shared libraries OK.");
     }
-    lua_pushboolean(state, libs == "");
+    lua_pushboolean(state, static_cast<int>(libs.empty()));
 
 
     return 1;
@@ -96,7 +96,8 @@ int upmfilesystem_sharedLibInstalled(lua_State* state) {
 int upmfilesystem_installCopy(lua_State* state) {
     fs::path source = luaL_checkstring(state, 1);
     fs::path dest = upm::Context::inst->getPrefix();
-    if (!fs::is_directory(dest)) fs::create_directories(dest);
+    if (!fs::is_directory(dest)) { fs::create_directories(dest);
+}
 
     // At least recursive copying is easy now
     fs::copy(source, dest, fs::copy_options::recursive | fs::copy_options::overwrite_existing | fs::copy_options::copy_symlinks);
@@ -120,8 +121,9 @@ int upmfilesystem_configure(lua_State* state) {
                               + " && " + configure + " " + arguments
                               + " --prefix=" + ctx.getPrefix()).c_str()));
 
-    if (result != 0)
+    if (result != 0) {
         return luaL_error(state, "Configure failed.");
+}
     return 0;
 }
 
@@ -177,18 +179,17 @@ int upmfilesystem_make(lua_State* state) {
     std::string sourceDir = lua_tostring(state, 1);
     std::string arguments = lua_tostring(state, 2);
 
-    std::string make = lua_gettop(state) >= 3 && lua_isstring(state, 3) ? lua_tostring(state, 3) : "make";
-    int maxJobs = lua_gettop(state) >= 4 && lua_isinteger(state, 4) ? lua_tointeger(state, 4) : -1;
+    std::string make = lua_gettop(state) >= 3 && (lua_isstring(state, 3) != 0) ? lua_tostring(state, 3) : "make";
+    long long maxJobs = lua_gettop(state) >= 4 && (lua_isinteger(state, 4) != 0) ? lua_tointeger(state, 4) : -1;
 
-    // TODO: get the system cap for threads
-    int hardwareThreads = upm::util::getHardwareConcurrency();
+    long long hardwareThreads = upm::util::getHardwareConcurrency();
     // This calculates the number of threads to use, either capped by maxJobs (which, realistically, is either 1 or undefined),
     // or using the number of system threads
     //
     // This does force the number under hardwareThreads (min 1), but that's fine. There are apparently some advantages to running with more
     // threads than the hardware supports because of IO limits (though that advice was old, so fuck knows how NVMe affects that),
     // but this is an edge-case I don't feel like supporting.
-    int jobs = maxJobs > 0 ? std::min(maxJobs, hardwareThreads) : hardwareThreads;
+    long long jobs = maxJobs > 0 ? std::min(maxJobs, hardwareThreads) : hardwareThreads;
     spdlog::debug("Running {} with {} jobs", make, jobs);
 
     make += " -j " + std::to_string(jobs);
@@ -212,13 +213,13 @@ int upmfilesystem_make(lua_State* state) {
 int upmfilesystem_makeInstallOnly(lua_State *state) {
     std::string sourceDir = lua_tostring(state, 1);
 
-    std::string make = lua_gettop(state) >= 3 && lua_isstring(state, 3) ? lua_tostring(state, 3) : "make";
-    int maxJobs = lua_gettop(state) >= 4 && lua_isinteger(state, 4) ? lua_tointeger(state, 4) : -1;
+    std::string make = lua_gettop(state) >= 3 && (lua_isstring(state, 3) != 0) ? lua_tostring(state, 3) : "make";
+    long long maxJobs = lua_gettop(state) >= 4 && (lua_isinteger(state, 4) != 0) ? lua_tointeger(state, 4) : -1;
 
     // TODO: get the system cap for threads
-    int hardwareThreads = 8;
+    long long hardwareThreads = upm::util::getHardwareConcurrency();
     // This calculates the number of threads to use, either capped by maxJobs (which, realistically, is either 1 or undefined)
-    int jobs = maxJobs > 0 ? std::min(maxJobs, hardwareThreads) : hardwareThreads;
+    long long jobs = maxJobs > 0 ? std::min(maxJobs, hardwareThreads) : hardwareThreads;
     spdlog::debug("Running {} with {} jobs", make, jobs);
 
     make += " -j " + std::to_string(jobs);
@@ -232,19 +233,20 @@ int upmfilesystem_makeInstallOnly(lua_State *state) {
     return 0;
 }
 
+// TODO: Replace with libarchive
 int upmfilesystem_untar(lua_State* state) {
     fs::path source = luaL_checkstring(state, 1);
-    if (auto pos = source.string().find("/tmp/"); pos == std::string::npos || pos != 0) {
+    if (auto pos = source.string().find("/tmp/"); pos != 0) {
         throw std::runtime_error("Invalid path; must be a path to /tmp/");
     }
-    int stripComponents = luaL_optinteger(state, 2, -1);
+    long long stripComponents = luaL_optinteger(state, 2, -1);
     
     auto dest = source;
     dest.replace_extension().replace_extension();
-    if (auto pos = dest.string().find("/tmp/"); pos == std::string::npos || pos != 0) {
+    if (auto pos = dest.string().find("/tmp/"); pos != 0) {
         throw std::runtime_error("Fatal: resolved destination path is not a /tmp/ path");
     }
-    std::string tarArg = "";
+    std::string tarArg;
     if (stripComponents > 0) {
         tarArg += "--strip-components " + std::to_string(stripComponents);
     }

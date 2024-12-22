@@ -3,10 +3,6 @@
 #include "Constants.hpp"
 #include "lua.h"
 #include "upm/Context.hpp"
-#include "LuaHelper.hpp"
-
-#include <iostream>
-
 
 extern "C" {
 
@@ -89,7 +85,7 @@ int luaopen_context(lua_State* state) {
 
     //luaL_newlib(state, functions);
 
-    auto udata = (upm::Context**) lua_newuserdata(state, sizeof(upm::Context*));
+    auto** udata = (upm::Context**) lua_newuserdata(state, sizeof(upm::Context*));
     *udata = upm::Context::inst;
 
     luaL_setmetatable(state, MT_Context);

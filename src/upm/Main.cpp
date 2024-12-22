@@ -3,8 +3,6 @@
 
 #include "Context.hpp"
 
-// TODO: merge into stc (haven't I already?)
-
 int main(int argc, const char* argv[]) {
 
     spdlog::set_pattern("[%^%l%$] %v");
@@ -18,7 +16,7 @@ int main(int argc, const char* argv[]) {
             arguments.push_back(argv[i]);
         }
     }
-    if (arguments.size() == 0) {
+    if (arguments.empty()) {
         arguments.push_back("help");
     }
 

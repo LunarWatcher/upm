@@ -2,7 +2,6 @@
 
 #include "upm/api/LuaHelper.hpp"
 #include "upm/conf/Config.hpp"
-#include "upm/util/Version.hpp"
 #include "upm/platform/Platform.hpp"
 #include <vector>
 #include <string>

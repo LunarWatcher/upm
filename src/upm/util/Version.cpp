@@ -7,7 +7,8 @@
 namespace upm {
 
 Version::Version(const std::string& rawVersion) : version(rawVersion.at(0) == 'v' ? rawVersion.substr(1) : rawVersion) {
-    std::sregex_token_iterator it(version.begin(), version.end(), COMPONENT_SPLIT, -1), end;
+    std::sregex_token_iterator it(version.begin(), version.end(), COMPONENT_SPLIT, -1);
+    std::sregex_token_iterator end;
     while (it != end) {
         components.push_back(*it);
         it++;
@@ -21,7 +22,8 @@ const std::string& Version::getVersion() {
 bool Version::componentEquals(const Version& b, size_t idx) {
     // TODO: cache in the class itself
     std::vector<std::string>
-        aComp = stc::string::split(version, "."),
+        aComp = stc::string::split(version, ".");
+    std::vector<std::string>
         bComp = stc::string::split(b.version, ".");
 
     if (idx >= aComp.size()) {
@@ -49,7 +51,8 @@ bool operator!=(const Version &a, const Version &b) {
 
 bool operator>(const Version& a, const Version& b) {
     std::vector<std::string>
-        aComp = stc::string::split(a.getVersion(), "."),
+        aComp = stc::string::split(a.getVersion(), ".");
+    std::vector<std::string>
         bComp = stc::string::split(b.getVersion(), ".");
 
     for (int i = 0; i < std::max(aComp.size(), bComp.size()); ++i) {
@@ -58,7 +61,8 @@ bool operator>(const Version& a, const Version& b) {
 
         if (aBit > bBit) {
             return true;
-        } else if (aBit < bBit) return false;
+        } else if (aBit < bBit) { return false;
+}
     }
     return false;
 }

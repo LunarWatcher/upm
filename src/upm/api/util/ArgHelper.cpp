@@ -9,7 +9,7 @@ namespace upm {
 std::map<std::string, std::optional<ArgHelper::LuaField>> ArgHelper::parseTable(lua_State* state, int idx, const std::map<std::string, std::type_index>& fields) {
     std::map<std::string, std::optional<LuaField>> res;
 
-    for (auto& [key, type] : fields) {
+    for (const auto& [key, type] : fields) {
         std::optional<LuaField> field = std::nullopt;
 
         lua_getfield(state, idx, key.c_str());

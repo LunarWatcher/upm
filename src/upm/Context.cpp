@@ -2,18 +2,12 @@
 
 #include <filesystem>
 #include <iostream>
-#include <algorithm>
 
-#include "stc/Environment.hpp"
 #include "stc/StringUtil.hpp"
 
 #include "upm/util/PathUtils.hpp"
 #include "upm/conf/Constants.hpp"
 
-// not even sure if this matters, I'm sure there's an include somewhere else
-// that fails the Windows build, that's built earlier in the translation unit.
-// Maybe
-// Idk
 #ifdef _WIN32
 #error "Windows isn't supported because of a lack of a universal binary dir."
 #else
@@ -22,7 +16,7 @@
 
 namespace upm {
 
-Context::Context(const std::vector<std::string>& cmd) : input(cmd), isRoot(!getuid()), cfg(this) {
+Context::Context(const std::vector<std::string>& cmd) : input(cmd), isRoot(getuid() == 0), cfg(this) {
     Context::inst = this;
     if (!isRoot) {
         throw std::runtime_error("upm must be run as root");
@@ -32,10 +26,14 @@ Context::Context(const std::vector<std::string>& cmd) : input(cmd), isRoot(!getu
 }
 
 void Context::resolvePackageContext(const std::string& rawVersion) {
-    int at = 0, approx = 0;
-    for (auto& character : rawVersion) {
-        if (character == '@') ++at;
-        else if (character == '~') ++approx;
+    int at = 0;
+    int approx = 0;
+    for (const auto& character : rawVersion) {
+        if (character == '@') {
+            ++at;
+        } else if (character == '~') {
+            ++approx;
+        }
     }
 
     if (at == 0 && approx == 0) {
@@ -52,7 +50,7 @@ void Context::resolvePackageContext(const std::string& rawVersion) {
 
         if (at != 0) {
             auto split = stc::string::split(rawVersion, "@", 1);
-            if (split.size() != 2 || split[1].size() == 0) {
+            if (split.size() != 2 || split[1].empty()) {
                 spdlog::error("Invalid format: {} (expected @<version> or ~<version>)", rawVersion);
                 throw std::runtime_error("Failed to extract version.");
             }
@@ -61,7 +59,7 @@ void Context::resolvePackageContext(const std::string& rawVersion) {
             versionType = VersionType::AT;
         } else {
             auto split = stc::string::split(rawVersion, "~", 1);
-            if (split.size() != 2 || split[1].size() == 0) {
+            if (split.size() != 2 || split[1].empty()) {
                 spdlog::error("Invalid format: {} (expected @<version> or ~<version>)", rawVersion);
                 throw std::runtime_error("Failed to extract version.");
             }
@@ -94,7 +92,9 @@ void Context::parseFlags() {
     for (auto& line : input) {
         switch (state) {
         case STATE_NEW: {
-            if (line.size() < 2) continue;
+            if (line.size() < 2) {
+                continue;
+            }
             if (line.at(0) == '-') {
                 if (line.at(1) == '-') {
                     if (line.size() == 2) {
@@ -105,7 +105,7 @@ void Context::parseFlags() {
                     k = parts[0].substr(2);
 
                     if (parts.size() == 1) {
-                        if (argc[k] != false) {
+                        if (argc[k]) {
                             state = STATE_VALUE;
                         } else {
                             flags[k] = "true";
@@ -160,7 +160,7 @@ See GitHub for the full license.
     https://github.com/LunarWatcher/upm/blob/master/LICENSE
 )" << std::endl;
     } else if (command == "install") {
-        if (input.size() < 1) {
+        if (input.empty()) {
             spdlog::error("What package?");
             return -1;
         }
@@ -180,7 +180,7 @@ See GitHub for the full license.
         apply();
         spdlog::info("{} activated", package);
     } else if (command == "apply") {
-        if (input.size() < 1) {
+        if (input.empty()) {
             spdlog::error("What package?");
             return -1;
         }
@@ -189,11 +189,11 @@ See GitHub for the full license.
             return -1;
         }
         resolvePackageContext(input[0]);
-        spdlog::info("Resolved version to {}", resolvedPackageVersion == "" ? packageVersion : resolvedPackageVersion);
+        spdlog::info("Resolved version to {}", resolvedPackageVersion.empty() ? packageVersion : resolvedPackageVersion);
         apply();
         spdlog::info("Successfully activated " + package);
     } else if (command == "deactivate" || command == "disable") {
-        if (input.size() < 1) {
+        if (input.empty()) {
             spdlog::error("What package?");
             return -1;
         }
@@ -230,7 +230,7 @@ void Context::apply() {
 }
 
 void Context::configureSemanticMarkers() {
-    if (resolvedPackageVersion == "") {
+    if (resolvedPackageVersion.empty()) {
         // No version resolution, no marker resolution for you
         return;
     }
@@ -300,7 +300,7 @@ void Context::disable() {
 
 void Context::runFile(const std::string& targetFun) {
     auto res = locateFile(this->package);
-    if (res == "") {
+    if (res.empty()) {
         throw std::runtime_error("Failed to find a Lua file for " + this->package);
     }
 
@@ -310,7 +310,7 @@ void Context::runFile(const std::string& targetFun) {
         throw std::runtime_error("Must define a function for " + targetFun);
     }
     if (lua_pcall(helper.getState(), 0, 0, 0) != LUA_OK) {
-        if (lua_isstring(*helper, -1)) {
+        if (lua_isstring(*helper, -1) != 0) {
             spdlog::error(lua_tostring(*helper, -1));
         } else {
             helper.dump();
@@ -343,7 +343,7 @@ std::string Context::getPrefix() {
     fs::path root = Constants::UPM_ROOT / "packages";
 
     root /= package + "-" + (
-        resolvedPackageVersion == "" ? packageVersion : resolvedPackageVersion
+        resolvedPackageVersion.empty() ? packageVersion : resolvedPackageVersion
     );
     return root.string();
 }
@@ -363,11 +363,6 @@ std::vector<fs::path> Context::getLuaLookupDirectory() {
     // Each subfolder of the lua folder represents one repository, though I'm not sure how I want to set that up yet.
     // It's primarily set up this way to open for less refactoring.
     res.push_back(Constants::UPM_ROOT / "lua/upm/");
-
-
-    //if (!isRoot) {
-        //// TODO: set up per-user stuff
-    //}
 
     return res;
 }

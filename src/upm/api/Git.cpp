@@ -13,19 +13,19 @@ int git_clone(lua_State* state) {
 
     std::string repo = luaL_checklstring(state, 1, nullptr);
     std::string dest = luaL_checklstring(state, 2, nullptr);
-    bool clean = lua_gettop(state) >= 3 ? lua_toboolean(state, 3) : false;
-    bool absPath = lua_gettop(state) >= 4 ? lua_toboolean(state, 4) : false;
+    bool clean = (lua_gettop(state) >= 3 ? lua_toboolean(state, 3) : 0) != 0;
+    bool absPath = (lua_gettop(state) >= 4 ? lua_toboolean(state, 4) : 0) != 0;
     fs::path p = absPath ? dest : ("/tmp/upm/" + dest);
 
     if (fs::exists(p)) {
         if (clean) {
             spdlog::info("Already cloned. Reset policy forces cache deletion...");
-            if (!fs::remove_all(p)) {
+            if (fs::remove_all(p) == 0u) {
                 return luaL_error(state, ("Failed to delete " + p.string()).c_str());
             }
         } else {
             spdlog::info("Cached clone found; reset policy doesn't require re-cloning");
-            lua_pushboolean(state, false);
+            lua_pushboolean(state, 0);
             // There has to be a better way to push this rather than doing it in two separate places.
             // Probably organized my code awfully, lmao
             // For good measure;
@@ -42,7 +42,7 @@ int git_clone(lua_State* state) {
     }
 
     spdlog::info("Successfully cloned {} to {}", repo, p.string());
-    lua_pushboolean(state, true);
+    lua_pushboolean(state, 1);
     // TODO: this line also needs to be tweaked when adding the UID
     lua_pushstring(state, p.string().c_str());
     return 2;
@@ -53,7 +53,7 @@ int git_checkout(lua_State* state) {
     std::string checkoutObj = luaL_checkstring(state, 2);
     bool masterMainFutureProofing = true;
     if (lua_gettop(state) >= 3) {
-        masterMainFutureProofing = lua_toboolean(state, 3);
+        masterMainFutureProofing = (lua_toboolean(state, 3) != 0);
     }
 
     std::string cd = "cd " + repoLoc + " && ";

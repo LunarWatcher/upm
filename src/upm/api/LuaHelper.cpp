@@ -111,7 +111,7 @@ void LuaHelper::dump(lua_State* state) {
                 std::cout << lua_tostring(state, i) << std::endl;
                 break;
             case LUA_TBOOLEAN:
-                std::cout << (lua_toboolean(state, i) ? "true" : "false") << std::endl;
+                std::cout << ((lua_toboolean(state, i) != 0) ? "true" : "false") << std::endl;
                 break;
             case LUA_TNIL:
                 std::cout << "nil" << std::endl;

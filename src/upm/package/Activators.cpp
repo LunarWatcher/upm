@@ -31,7 +31,7 @@ bool Activators::recursiveUniversalUNIXLink(std::vector<std::string>& safeDirNam
 
 
     std::vector<std::pair<fs::path, fs::path>> links;
-    for (auto& dir : directories) {
+    for (const auto& dir : directories) {
         fs::path sourcePath = prefix / dir;
         if (!fs::exists(sourcePath)) {
             // Skip non-existent folders. These are just part of the standard, but not all the
@@ -42,7 +42,7 @@ bool Activators::recursiveUniversalUNIXLink(std::vector<std::string>& safeDirNam
         if (!fs::exists(destPath)) {
             fs::create_directories(destPath);
         }
-        for (auto& path : fs::directory_iterator(sourcePath)) {
+        for (const auto& path : fs::directory_iterator(sourcePath)) {
             // returns the path relative to sourcePath
             // TODO: see if calling .path() is unnecessary
             std::string fn = path.path().lexically_relative(sourcePath);
@@ -125,7 +125,7 @@ std::vector<std::pair<fs::path, fs::path>> Activators::Utils::recursiveLink(
     
     if (fs::is_directory(source / fileName) && std::find(safeDirNames.begin(), safeDirNames.end(), fileName) == safeDirNames.end()) {
         std::vector<std::pair<fs::path, fs::path>> result;
-        for (auto& path : fs::directory_iterator(source / fileName)) {
+        for (const auto& path : fs::directory_iterator(source / fileName)) {
             std::string fn = path.path().lexically_relative(source / fileName);
             if (std::find(ignoreFiles.begin(), ignoreFiles.end(), fn) != ignoreFiles.end()) { 
                 spdlog::debug("{} is ignored and will not be linked", fn);

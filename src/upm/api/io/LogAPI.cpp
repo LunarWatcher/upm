@@ -1,7 +1,6 @@
 #include "LogAPI.hpp"
 
 #include <sstream>
-#include <string>
 
 #include "spdlog/spdlog.h"
 
@@ -15,7 +14,7 @@ int upmlog_log(lua_State* state) {
     auto level = UPMLOG_INFO;
     std::stringstream ss;
     int cont = 2;
-    if (lua_isinteger(state, 1)) {
+    if (lua_isinteger(state, 1) != 0) {
         // Level, message, ...
         level = lua_tointeger(state, 1);
         if (argc < 2) {
@@ -37,7 +36,7 @@ int upmlog_log(lua_State* state) {
             ss << " nil";
             break;
         case LUA_TBOOLEAN:
-            ss << " " << (lua_toboolean(state, i) ? "true" : "false"); 
+            ss << " " << ((lua_toboolean(state, i) != 0) ? "true" : "false"); 
             break;
         case LUA_TSTRING:
             ss << " " << lua_tostring(state, i);
@@ -66,6 +65,8 @@ int upmlog_log(lua_State* state) {
         break;
     case UPMLOG_ERROR:
         spdlog::error(fmt);
+        break;
+    default:
         break;
     }
 

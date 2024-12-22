@@ -17,19 +17,19 @@ void upmjson_parseInternal(lua_State* state, const nlohmann::json& json) {
     } else if (json.is_string()) {
         lua_pushstring(state, json.get<std::string>().c_str());
     } else if (json.is_boolean()) {
-        lua_pushboolean(state, json.get<bool>());
+        lua_pushboolean(state, static_cast<int>(json.get<bool>()));
     } else if (json.is_array()) {
         lua_newtable(state);
 
         int index = 0;
-        for (auto& value : json) {
+        for (const auto& value : json) {
             upmjson_parseInternal(state, value);
             lua_seti(state, -2, ++index);
         }
     } else if (json.is_object()) {
         lua_newtable(state);
 
-        for (auto& [k, v] : json.items()) {
+        for (const auto& [k, v] : json.items()) {
             upmjson_parseInternal(state, v);
             luaL_checktype(state, -2, LUA_TTABLE);
             lua_setfield(state, -2, k.c_str()); // step[k] = v

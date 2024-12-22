@@ -15,9 +15,27 @@ jobs:
       - name: Build
         run: |
           mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DTEST_THREADS=$(nproc)
           make -j $(nproc)
       - name: Run tests
         run: |
           cd build
           make test -j $(nproc)
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+        with:
+          submodules: true
+      - name: Install clangd
+        run: |
+          sudo apt install -y clang-tidy
+      - name: Build
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DTEST_THREADS=$(nproc) -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+          make -j $(nproc)
+      - name: Lint
+        run: |
+          clang-tidy src/**/*.hpp src/**/*.cpp --warnings-as-errors=\*

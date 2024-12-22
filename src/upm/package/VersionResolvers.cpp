@@ -37,15 +37,17 @@ std::string VersionResolvers::git(const std::string &repoPath, bool vPrefix) {
             // Unlike nightly, this doesn't have a fallback to refer to the latest
             // commit, because this tag is specifically for 
         } else {
-            if (vPrefix && version[0] != 'v') version = "v" + version;
+            if (vPrefix && version[0] != 'v') { version = "v" + version;
+}
             res = stc::syscommand(cd + "git tag -l " + version, &statusCode);
-            if (res == "\n" || res == "") {
+            if (res == "\n" || res.empty()) {
                 statusCode = 1;
             }
         }
         break;
     case VersionType::APPROX:
-        if (vPrefix && version[0] != 'v') version = "v" + version;
+        if (vPrefix && version[0] != 'v') { version = "v" + version;
+}
         // the star doesn't have to be escaped in plain sh, but there isn't necessarily a guarantee
         // sh is the runner.
         // This ensures compatibility on the off chance /bin/sh isn't the runner for `popen`
@@ -67,7 +69,7 @@ std::string VersionResolvers::git(const std::string &repoPath, bool vPrefix) {
             resolvedVersion = resolvedVersion.substr(0, index);
         }
         Context::inst->resolvedPackageVersion = resolvedVersion;
-        stc::syscommand((cd + "git checkout " + resolvedVersion).c_str(), &statusCode);
+        stc::syscommand(cd + "git checkout " + resolvedVersion, &statusCode);
         if (statusCode != 0) {
             throw std::runtime_error("Failed to checkout " + resolvedVersion);
         }

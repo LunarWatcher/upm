@@ -14,7 +14,7 @@ extern int upm::util::getHardwareConcurrency() {
         spdlog::warn("Failed to get hardware concurrency. Defaulting to 1");
         return 1;
     }
-    return procs;
+    return (int) procs;
 #else
 #warning "Nproc compat is not implemented for your system. Please consider contributing a patch. Defaulting to 1 instead"
     return 1;
