@@ -158,6 +158,7 @@ int upmfilesystem_cmake(lua_State *state) {
         return luaL_error(state, "CMake failed.");
     }
 
+    // TODO: -j $(nproc)
     result = WEXITSTATUS(std::system(
             (
                 (std::get<bool>(args["cd"].value_or(true)) ? fmt::format("cd {} && cd build && ", path) : "")
