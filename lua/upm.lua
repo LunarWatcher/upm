@@ -14,7 +14,8 @@ local function install()
         log.debug("Cloning from GitHub");
         _, directory = git.clone(
             "https://github.com/LunarWatcher/upm",
-            "upm"
+            "upm",
+            true
         );
     end
 
