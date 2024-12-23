@@ -89,7 +89,8 @@ public:
     Context(const std::vector<std::string>& cmd);
 
     void resolvePackageContext(const std::string& package);
-    void runFile(const std::string& targetFun);
+
+    void loadPackage();
 
     /**
      * Utility function for dealing with the install process. This does not deal with any specific installation systems,

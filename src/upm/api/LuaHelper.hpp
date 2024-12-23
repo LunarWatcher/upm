@@ -28,7 +28,7 @@ public:
      * No changes are made to the filename to fit various upm conventions, as other parts of the code deal
      * with this.
      */
-    void runFile(const std::string& fn);
+    void loadPackage(const std::string& packageName, const std::string& fn);
 
     /**
      * Identical to runFile, but with additional validation for the return results.
@@ -36,7 +36,11 @@ public:
      * Note that this method throws, and does not clean up the stack first. The programmer is responsible for clearing the stack
      * of anything that shouldn't be there.
      */
-    void runFileForResult(const std::string& fn, int nRes, std::vector<int> types);
+    void invoke(const std::string& packageName, const std::string& func);
+
+    /**
+     * Utility function primarily for tests; runs the provided string
+     */
     void runString(const std::string& script);
 
     void dump();

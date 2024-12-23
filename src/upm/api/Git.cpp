@@ -1,4 +1,5 @@
 #include "Git.hpp"
+#include "upm/util/String.hpp"
 
 #include <stc/Environment.hpp>
 #include <spdlog/spdlog.h>
@@ -10,11 +11,13 @@ int git_clone(lua_State* state) {
         return luaL_error(state, "Expected 2 arguments");
     }
 
-    std::string repo = luaL_checklstring(state, 1, nullptr);
+    std::string repo = upm::String::escapeShellArg(luaL_checklstring(state, 1, nullptr));
     std::string dest = luaL_checklstring(state, 2, nullptr);
     bool clean = (lua_gettop(state) >= 3 ? lua_toboolean(state, 3) : 0) != 0;
     bool absPath = (lua_gettop(state) >= 4 ? lua_toboolean(state, 4) : 0) != 0;
     std::filesystem::path p = absPath ? dest : ("/tmp/upm/" + dest);
+
+    spdlog::debug("Dest. path: {}", p.string());
 
     if (std::filesystem::exists(p)) {
         if (clean) {
@@ -23,7 +26,9 @@ int git_clone(lua_State* state) {
                 return luaL_error(state, ("Failed to delete " + p.string()).c_str());
             }
         } else {
-            spdlog::info("Cached clone found; reset policy doesn't require re-cloning");
+            spdlog::info("Cached clone found; reset policy doesn't require re-cloning. Running git fetch for good measure");
+
+            int _ = std::system(("cd " + p.string() + " && git fetch").c_str());
             lua_pushboolean(state, 0);
             // There has to be a better way to push this rather than doing it in two separate places.
             // Probably organized my code awfully, lmao
@@ -48,8 +53,8 @@ int git_clone(lua_State* state) {
 }
 
 int git_checkout(lua_State* state) {
-    std::string repoLoc = luaL_checkstring(state, 1);
-    std::string checkoutObj = luaL_checkstring(state, 2);
+    std::string repoLoc = upm::String::escapeShellArg(luaL_checkstring(state, 1));
+    std::string checkoutObj = upm::String::escapeShellArg(luaL_checkstring(state, 2));
     bool masterMainFutureProofing = true;
     if (lua_gettop(state) >= 3) {
         masterMainFutureProofing = (lua_toboolean(state, 3) != 0);
@@ -74,7 +79,7 @@ int git_checkout(lua_State* state) {
 }
 
 int git_pull(lua_State* state) {
-    std::string repo = luaL_checkstring(state, 1);
+    std::string repo = upm::String::escapeShellArg(luaL_checkstring(state, 1));
 
     int res = std::system(("cd " + repo + " && git pull $(git remote) $(git rev-parse --abbref-rev HEAD)").c_str());
     if (res != 0) {
@@ -84,7 +89,7 @@ int git_pull(lua_State* state) {
 }
 
 int git_fetch(lua_State *state) {
-    std::string repo = luaL_checkstring(state, 1);
+    std::string repo = upm::String::escapeShellArg(luaL_checkstring(state, 1));
 
     int res = std::system(fmt::format("cd {} && git fetch", repo).c_str());
     if (res != 0) {

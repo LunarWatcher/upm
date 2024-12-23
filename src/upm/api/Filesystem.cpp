@@ -189,7 +189,7 @@ int upmfilesystem_make(lua_State* state) {
     // threads than the hardware supports because of IO limits (though that advice was old, so fuck knows how NVMe affects that),
     // but this is an edge-case I don't feel like supporting.
     long long jobs = maxJobs > 0 ? std::min(maxJobs, hardwareThreads) : hardwareThreads;
-    spdlog::debug("Running {} with {} jobs", make, jobs);
+    spdlog::debug("Running {} with {} jobs (detected hardware threads: {})", make, jobs, hardwareThreads);
 
     make += " -j " + std::to_string(jobs);
 

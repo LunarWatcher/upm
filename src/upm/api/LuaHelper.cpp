@@ -53,8 +53,8 @@ LuaHelper::~LuaHelper() {
     lua_close(state);
 }
 
-void LuaHelper::runFile(const std::string& fn) {
-    if (luaCache.find(fn) == luaCache.end()) {
+void LuaHelper::loadPackage(const std::string& package, const std::string& fn) {
+    if (luaCache.find(package) == luaCache.end()) {
         if (luaL_dofile(state, fn.c_str()) != 0) {
             std::cerr << "Failed to load lua file: " << lua_tostring(state, -1) << std::endl;
             throw std::runtime_error("exec failed");
@@ -63,30 +63,30 @@ void LuaHelper::runFile(const std::string& fn) {
         if (r == LUA_REFNIL) {
             throw std::runtime_error("Unexpected arguments received");
         }
-        luaCache[fn] = r;
+        luaCache[package] = r;
     } else {
-        spdlog::debug("Loading functions from {} from cache", fn);
+        spdlog::debug("Loading functions for {} from cache", package);
     }
-    lua_rawgeti(state, LUA_REGISTRYINDEX, luaCache[fn]);
 }
 
-void LuaHelper::runFileForResult(const std::string& fn, int nRes, std::vector<int> types) {
-    runFile(fn);
-    if (lua_gettop(state) != nRes) {
-        throw std::runtime_error("Wrong number of arguments returned; expected "
-                                 + std::to_string(nRes)
-                                 + ", got "
-                                 + std::to_string(lua_gettop(state)));
-    }
+void LuaHelper::invoke(const std::string& package, const std::string& func) {
+    lua_rawgeti(state, LUA_REGISTRYINDEX, luaCache.at(package));
 
-    for (int i = 1; i <= nRes; ++i) {
-        auto type = types.at(i - 1);
-        if  (type == LUA_TNONE) {
-            continue;
-        } else if (lua_type(state, i) != type) {
-            throw std::runtime_error("Illegal argument returned at index " + std::to_string(i));
-        }
+    lua_getfield(state, -1, func.c_str());
+
+    if (lua_isnil(state, -1)) {
+        spdlog::error("{} does not define {}", package, func);
+        throw std::runtime_error("Invalid command for file");
     }
+    if (lua_pcall(state, 0, 0, 0) != LUA_OK) {
+        if (lua_isstring(state, -1) != 0) {
+            spdlog::error(lua_tostring(state, -1));
+        } else {
+            dump();
+        }
+        throw std::runtime_error("A critical Lua failure occurred.");
+    }
+    lua_pop(state, lua_gettop(state));
 }
 
 void LuaHelper::runString(const std::string& script) {

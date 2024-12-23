@@ -69,10 +69,8 @@ void Context::resolvePackageContext(const std::string& rawVersion) {
         }
     }
 
-    // Shove the install_self flag in by default when modifying upm to avoid issues with 
-    if (package == "upm") {
-        this->flags["install_self"] = "true";
-    }
+    loadPackage();
+
 }
 
 void Context::parseFlags() {
@@ -169,6 +167,7 @@ See GitHub for the full license.
             std::filesystem::create_directories(Constants::UPM_ROOT);
         }
 
+
         resolvePackageContext(input[0]);
         install();
         configureSemanticMarkers();
@@ -221,12 +220,12 @@ See GitHub for the full license.
 }
 
 void Context::install() {
-    runFile("install");
+    helper.invoke(package, "install");
 }
 
 void Context::apply() {
     resolveSemanticMarkers();
-    runFile("apply");
+    helper.invoke(package, "apply");
 }
 
 void Context::configureSemanticMarkers() {
@@ -298,26 +297,10 @@ void Context::disable() {
     spdlog::info("Successfully disabled " + package);
 }
 
-void Context::runFile(const std::string& targetFun) {
-    auto res = locateFile(this->package);
-    if (res.empty()) {
-        throw std::runtime_error("Failed to find a Lua file for " + this->package);
-    }
+void Context::loadPackage() {
+    auto fn = locateFile(this->package);
+    helper.loadPackage(this->package, fn);
 
-    helper.runFileForResult(res, 1, {LUA_TTABLE});
-    lua_getfield(helper.getState(), -1, targetFun.c_str());
-    if (lua_isnil(helper.getState(), -1)) {
-        throw std::runtime_error("Must define a function for " + targetFun);
-    }
-    if (lua_pcall(helper.getState(), 0, 0, 0) != LUA_OK) {
-        if (lua_isstring(*helper, -1) != 0) {
-            spdlog::error(lua_tostring(*helper, -1));
-        } else {
-            helper.dump();
-        }
-        throw std::runtime_error("A critical Lua failure occurred.");
-    }
-    lua_pop(helper.getState(), lua_gettop(helper.getState()));
 }
 
 std::string Context::locateFile(const std::string& packageName) {
