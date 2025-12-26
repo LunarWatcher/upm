@@ -12,6 +12,9 @@ jobs:
       - uses: actions/checkout@main
         with:
           submodules: true
+      - name: Deps
+        run: |
+          sudo apt install libcurlpp-dev
       - name: Build
         run: |
           mkdir build && cd build
@@ -31,6 +34,9 @@ jobs:
       - name: Install clangd
         run: |
           sudo apt install -y clang-tidy
+      - name: Deps
+        run: |
+          sudo apt install libcurlpp-dev
       - name: Build
         run: |
           mkdir build && cd build
