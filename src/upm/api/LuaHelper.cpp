@@ -1,7 +1,6 @@
 #include "LuaHelper.hpp"
 
 #include "Network.hpp"
-#include "Exec.hpp"
 #include "Filesystem.hpp"
 #include "Context.hpp"
 #include "Git.hpp"
@@ -36,7 +35,6 @@ void LuaHelper::init() {
     luaL_openlibs(state);
     // Load custom library functions
     registerLibrary("upmnetwork", luaopen_upmnetwork);
-    registerLibrary("upmexec", luaopen_upmexec);
     registerLibrary("upmfs", luaopen_upmfilesystem);
     registerLibrary("context", luaopen_context);
     registerLibrary("json", luaopen_upmjson);

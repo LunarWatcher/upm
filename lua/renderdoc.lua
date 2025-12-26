@@ -1,6 +1,5 @@
 local git = require "git"
 local network = require "upmnetwork"
-local exec = require "upmexec"
 local fs = require "upmfs"
 local log = require "upmlog"
 local activators = require "activators"
