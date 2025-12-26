@@ -8,7 +8,6 @@ set (SOURCE_FILES
 
     upm/util/Version.cpp
     upm/util/String.cpp
-    upm/util/syscompat/Nproc.cpp
 
     upm/conf/Config.cpp
 
@@ -38,7 +37,7 @@ add_library(upm_sources STATIC ${SOURCE_FILES})
 
 target_compile_options(upm_sources PUBLIC -DUPM_VERSION="${UPM_VERSION}")
 
-target_link_libraries(upm_sources PUBLIC stc cpr::cpr fmt::fmt nlohmann_json::nlohmann_json spdlog::spdlog lua::lib)
+target_link_libraries(upm_sources PUBLIC stc cpr::cpr nlohmann_json::nlohmann_json spdlog::spdlog lua::lib)
 target_include_directories(upm_sources PUBLIC .)
 
 add_executable(upm upm/Main.cpp)

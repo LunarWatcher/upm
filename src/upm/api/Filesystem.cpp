@@ -4,13 +4,14 @@
 #include "upm/Context.hpp"
 
 #include "lua.h"
+#include "upm/api/Constants.hpp"
 #include "upm/api/util/ArgHelper.hpp"
-#include "upm/util/syscompat/Nproc.hpp"
 
 #include <cstdlib>
 #include <filesystem>
 #include <stc/Environment.hpp>
 #include <stc/StringUtil.hpp>
+#include <stc/unix/Process.hpp>
 
 extern "C" {
 
@@ -110,19 +111,33 @@ int upmfilesystem_configure(lua_State* state) {
     }
 
     std::string relativeSourceDir = lua_tostring(state, 1);
-    std::string arguments = lua_tostring(state, 2);
+    if (!lua_istable(state, 2)) {
+        return luaL_typeerror(state, 2, "string array");
+    }
+    auto userArgs = upm::ArgHelper::parseStringList(state, 2);
 
     std::string configure = lua_gettop(state) >= 3 ? lua_tostring(state, 3) : "./configure";
 
+    std::string configPath = std::filesystem::path(relativeSourceDir) / configure;
     upm::Context& ctx = *upm::Context::inst;
 
-    int result = WEXITSTATUS(std::system(("cd " + relativeSourceDir
-                              + " && " + configure + " " + arguments
-                              + " --prefix=" + ctx.getPrefix()).c_str()));
-
+    std::vector<std::string> command {
+        configPath, "--prefix=" + ctx.getPrefix()
+    };
+    command.insert(command.end(), userArgs.begin(), userArgs.end());
+    stc::Unix::Process p {
+        command,
+        stc::Unix::Environment {
+            .workingDirectory = relativeSourceDir
+        },
+        stc::Unix::Config {
+            .verboseUserOutput = true
+        }
+    };
+    auto result = p.block();
     if (result != 0) {
         return luaL_error(state, "Configure failed.");
-}
+    }
     return 0;
 }
 
@@ -131,39 +146,55 @@ int upmfilesystem_cmake(lua_State *state) {
 
     upm::Context& ctx = *upm::Context::inst;
 
-    // TODO: separate out to a utility function
-    // (and maybe do some fancy template trickery?)
     std::map<std::string, std::optional<upm::ArgHelper::LuaField>> args;
     if (lua_gettop(state) >= 2) {
         luaL_checktype(state, 2, LUA_TTABLE);
         args = upm::ArgHelper::parseTable(state, 2, {
-            {"prefixCommand", typeid(std::string)},
             {"buildType", typeid(std::string)},
             {"cd", typeid(bool)},
         });
     } 
     //spdlog::debug("cd = {}", std::get<bool>(args["cd"].value_or(true)));
 
+    auto buildDir = std::filesystem::path{path} / "build";
 
-    auto command = fmt::format(
-        "{}cmake .. -DCMAKE_BUILD_TYPE={} -D{}={}",
-        std::get<bool>(args["cd"].value_or(true)) ? fmt::format("cd {} && mkdir -p build && cd build && ", path) : "",
-        std::get<std::string>(args["buildType"].value_or("RELEASE")),
-        std::get<std::string>(args["prefixCommand"].value_or("CMAKE_INSTALL_PREFIX")),
-        ctx.getPrefix()
+    stc::Unix::Environment env;
+
+    if (std::get<bool>(args.at("cd").value_or(true))) {
+        env.workingDirectory = buildDir;
+        std::filesystem::create_directories(buildDir);
+    }
+
+    std::vector<std::string> command = {
+        "/usr/bin/env", "cmake", "..",
+            // TODO: I think CMake can handle splitting these apart
+            "-DCMAKE_BUILD_TYPE=" + std::get<std::string>(args["buildType"].value_or("Release")),
+            "-DCMAKE_INSTALL_PREFIX=" + ctx.getPrefix()
+    };
+    stc::Unix::Process build(
+        command,
+        env,
+        stc::Unix::Config {
+            .verboseUserOutput = true
+        }
     );
 
-    int result = WEXITSTATUS(std::system(command.c_str()));
+    int result = build.block();
     if (result != 0) {
         return luaL_error(state, "CMake failed.");
     }
 
+    stc::Unix::Process install(
+        {
+            "cmake", "--build", ".", "--target", "install"
+        },
+        env,
+        stc::Unix::Config {
+            .verboseUserOutput = true
+        }
+    );
     // TODO: -j $(nproc)
-    result = WEXITSTATUS(std::system(
-            (
-                (std::get<bool>(args["cd"].value_or(true)) ? fmt::format("cd {} && cd build && ", path) : "")
-                + "cmake --build . --target install"
-    ).c_str()));
+    result = install.block();
     if (result != 0) {
         return luaL_error(state, "Install failed.");
     }
@@ -177,12 +208,14 @@ int upmfilesystem_make(lua_State* state) {
     }
 
     std::string sourceDir = lua_tostring(state, 1);
-    std::string arguments = lua_tostring(state, 2);
+    if (!lua_istable(state, 2)) {
+        return luaL_typeerror(state, 2, "string array");
+    }
+    auto arguments = upm::ArgHelper::parseStringList(state, 2);
 
-    std::string make = lua_gettop(state) >= 3 && (lua_isstring(state, 3) != 0) ? lua_tostring(state, 3) : "make";
-    long long maxJobs = lua_gettop(state) >= 4 && (lua_isinteger(state, 4) != 0) ? lua_tointeger(state, 4) : -1;
+    long long maxJobs = lua_gettop(state) >= 3 && (lua_isinteger(state, 3) != 0) ? lua_tointeger(state, 3) : -1;
 
-    long long hardwareThreads = upm::util::getHardwareConcurrency();
+    long long hardwareThreads = std::thread::hardware_concurrency();
     // This calculates the number of threads to use, either capped by maxJobs (which, realistically, is either 1 or undefined),
     // or using the number of system threads
     //
@@ -190,42 +223,87 @@ int upmfilesystem_make(lua_State* state) {
     // threads than the hardware supports because of IO limits (though that advice was old, so fuck knows how NVMe affects that),
     // but this is an edge-case I don't feel like supporting.
     long long jobs = maxJobs > 0 ? std::min(maxJobs, hardwareThreads) : hardwareThreads;
-    spdlog::debug("Running {} with {} jobs (detected hardware threads: {})", make, jobs, hardwareThreads);
+    spdlog::debug("Running with {} jobs (detected hardware threads: {})", jobs, hardwareThreads);
 
-    make += " -j " + std::to_string(jobs);
+    std::vector<std::string> command = {
+        "/usr/bin/env", "make", "-j", std::to_string(jobs),
+    };
 
+    command.insert(
+        command.end(),
+        arguments.begin(),
+        arguments.end()
+    );
     // Looking back at this, this definitely opens for some vulnerabilities. Not sure how to best mitigate that though.
     // Also fairly low-risk, given that the lua scripts already execute in a non-sandboxed environment, so the scripts
     // have already been privilege escalated by the time this kicks in.
     // /shrug though
-    int status = WEXITSTATUS(std::system(("cd " + sourceDir + " && " + make + " " + arguments).c_str()));
+    stc::Unix::Process build{
+        command,
+        stc::Unix::Environment {
+            .workingDirectory = sourceDir
+        },
+        stc::Unix::Config {
+            .verboseUserOutput = true
+        }
+    };
+    auto status = build.block();
     if (status != 0) {
         std::cout << "Status = " << status << std::endl;
         return luaL_error(state, "Failed to make");
     }
-    status = WEXITSTATUS(std::system(("cd " + sourceDir + " && " + make + " install").c_str()));
+    stc::Unix::Process install {
+        { 
+            "/usr/bin/env", "make", "-j", std::to_string(jobs),
+            "install"
+        },
+        stc::Unix::Environment {
+            .workingDirectory = sourceDir
+        },
+        stc::Unix::Config {
+            .verboseUserOutput = true
+        }
+    };
+    status = install.block();
     if (status != 0) {
         std::cout << "Status = " << status << std::endl;
         return luaL_error(state, "Failed to install");
     }
     return 0;
 }
+
 int upmfilesystem_makeInstallOnly(lua_State *state) {
     std::string sourceDir = lua_tostring(state, 1);
 
-    std::string make = lua_gettop(state) >= 3 && (lua_isstring(state, 3) != 0) ? lua_tostring(state, 3) : "make";
-    long long maxJobs = lua_gettop(state) >= 4 && (lua_isinteger(state, 4) != 0) ? lua_tointeger(state, 4) : -1;
+    upm::Context** data = static_cast<upm::Context**>(luaL_checkudata(state, 2, MT_Context));
+    if (data == nullptr) {
+        return luaL_error(state, "Context was not passed to makeInstallOnly");
+    }
 
-    // TODO: get the system cap for threads
-    long long hardwareThreads = upm::util::getHardwareConcurrency();
+    long long maxJobs = lua_gettop(state) >= 3 && (lua_isinteger(state, 3) != 0) ? lua_tointeger(state, 3) : -1;
+
+    long long hardwareThreads = std::thread::hardware_concurrency();
     // This calculates the number of threads to use, either capped by maxJobs (which, realistically, is either 1 or undefined)
     long long jobs = maxJobs > 0 ? std::min(maxJobs, hardwareThreads) : hardwareThreads;
-    spdlog::debug("Running {} with {} jobs", make, jobs);
+    spdlog::debug("Running make with {} jobs", jobs);
 
-    make += " -j " + std::to_string(jobs);
+    std::vector<std::string> arguments = {
+        "/usr/bin/env", "make", "install", "-j", std::to_string(jobs)
+    };
 
+    arguments.push_back("PREFIX=" + (**data).getPrefix());
 
-    auto status = WEXITSTATUS(std::system(("cd " + sourceDir + " && " + make + " install ").c_str()));
+    stc::Unix::Process p(
+        arguments,
+        stc::Unix::Environment {
+            .workingDirectory = sourceDir
+        },
+        stc::Unix::Config {
+            .verboseUserOutput = true
+        }
+    );
+
+    auto status = p.block();
     if (status != 0) {
         std::cout << "Status = " << status << std::endl;
         return luaL_error(state, "Failed to install");

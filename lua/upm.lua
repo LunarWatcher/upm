@@ -30,6 +30,7 @@ end
 
 local function apply()
     local upm = ctx["prefix"] .. "/bin/upm";
+    -- TODO: there's no reason for activateSingle to not take context as an argument
     activators.activateSingle(upm, "bin/upm");
     activators.activateSingle(ctx["prefix"] .. "/lua", "/opt/upm/lua")
 end

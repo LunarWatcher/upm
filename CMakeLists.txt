@@ -13,7 +13,7 @@ if (NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUPM_DEBUG=1")
 endif()
 
-set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD 20)
 
 if(USE_LIBCPP)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
@@ -25,12 +25,13 @@ list(APPEND CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
 #list(APPEND CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(SPDLOG_FMT_EXTERNAL ON CACHE STRING "" FORCE)
-set(CURL_ZLIB ON CACHE STRING "" FORCE)
+set(SPDLOG_FMT_EXTERNAL OFF CACHE STRING "" FORCE)
+set(SPDLOG_USE_STD_FORMAT ON CACHE STRING "" FORCE)
 set(LUA_TAG v5.4.6 CACHE STRING "" FORCE)
 set(FMT_INSTALL OFF CACHE STRING "" FORCE)
 set(SPDLOG_INSTALL OFF CACHE STRING "" FORCE)
 set(CURL_INSTALL OFF CACHE STRING "" FORCE)
+set(CPR_USE_SYSTEM_CURL ON CACHE STRING "" FORCE)
 
 
 include(FetchContent)
@@ -39,7 +40,7 @@ FetchContent_Declare(stc
 )
 FetchContent_Declare(cpr
     GIT_REPOSITORY https://github.com/libcpr/cpr.git
-    GIT_TAG 1.11.1
+    GIT_TAG 1.14.1
 )
 FetchContent_Declare(nlohmann
     GIT_REPOSITORY https://github.com/nlohmann/json
@@ -47,18 +48,13 @@ FetchContent_Declare(nlohmann
 )
 FetchContent_Declare(spdlog
     GIT_REPOSITORY https://github.com/gabime/spdlog
-    GIT_TAG v1.15.0
+    GIT_TAG v1.16.0
 )
 FetchContent_Declare(lua-cmake
     GIT_REPOSITORY https://github.com/LunarWatcher/lua-cmake/
 )
-FetchContent_Declare(fmt
-    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-    GIT_TAG 11.0.2
-)
 
 FetchContent_MakeAvailable(stc)
-FetchContent_MakeAvailable(fmt)
 FetchContent_MakeAvailable(nlohmann)
 FetchContent_MakeAvailable(spdlog)
 FetchContent_MakeAvailable(lua-cmake)

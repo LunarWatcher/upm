@@ -3,8 +3,7 @@ add_executable(tests
     src/TestRunner.cpp
     src/VersionTest.cpp
     src/StringTest.cpp
-
-    src/MetaTests.cpp
+    src/LuaHelperTests.cpp
 )
 Include(FetchContent)
 
@@ -15,7 +14,7 @@ endif()
 FetchContent_Declare(
   Catch2
   GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG v3.7.1)
+    GIT_TAG v3.11.0)
 
 FetchContent_MakeAvailable(Catch2)
 

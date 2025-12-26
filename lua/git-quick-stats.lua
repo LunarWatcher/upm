@@ -11,7 +11,7 @@ function install()
     ctx:checkInstalled()
 
     log.info("Running make...")
-    fs.makeInstallOnly(directory, "", "make PREFIX=" .. ctx["prefix"], -1)
+    fs.makeInstallOnly(directory, ctx, -1)
     log.info("Done.")
 end
 

@@ -1,8 +1,10 @@
 #include "ArgHelper.hpp"
+#include "lauxlib.h"
 #include "lua.h"
+#include <iostream>
 #include <optional>
 #include <stdexcept>
-#include <iostream>
+#include <vector>
 
 namespace upm {
 
@@ -32,6 +34,49 @@ std::map<std::string, std::optional<ArgHelper::LuaField>> ArgHelper::parseTable(
     }
 
     return res;
+}
+
+std::vector<ArgHelper::LuaField> ArgHelper::parseList(lua_State* state, int idx) {
+    auto length = luaL_len(state, idx);
+
+    std::vector<ArgHelper::LuaField> out;
+    for (lua_Integer i = 1; i <= length; ++i) {
+        lua_rawgeti(state, idx, i); // +1 on the stack
+
+        if (lua_isstring(state, -1)) {
+            out.push_back(luaL_checkstring(state, -1));
+        } else if (lua_isinteger(state, -1)) {
+            out.push_back(luaL_checkinteger(state, -1));
+        } else {
+            throw std::runtime_error("Passed invalid type to list");
+        }
+
+        lua_pop(state, 1); // pop lua_rawgeti
+    }
+
+    return out;
+}
+
+// TODO: this function (but not the previous one) should be templated 
+std::vector<std::string> ArgHelper::parseStringList(lua_State* state, int idx) {
+    auto length = luaL_len(state, idx);
+
+    std::vector<std::string> out;
+    for (lua_Integer i = 1; i <= length; ++i) {
+        lua_rawgeti(state, idx, i); // +1 on the stack
+        // TODO: can this call work with meta methods too? rawgeti bypasses them, so this
+        // function isn't fully universal
+
+        if (lua_isstring(state, -1)) {
+            out.push_back(luaL_checkstring(state, -1));
+        } else {
+            throw std::runtime_error("Passed invalid type to string array");
+        }
+
+        lua_pop(state, 1); // pop lua_rawgeti
+    }
+
+    return out;
 }
 
 }

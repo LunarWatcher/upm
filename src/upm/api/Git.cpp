@@ -91,7 +91,7 @@ int git_pull(lua_State* state) {
 int git_fetch(lua_State *state) {
     std::string repo = upm::String::escapeShellArg(luaL_checkstring(state, 1));
 
-    int res = std::system(fmt::format("cd {} && git fetch", repo).c_str());
+    int res = std::system(std::format("cd {} && git fetch", repo).c_str());
     if (res != 0) {
         return luaL_error(state, "Failed to fetch");
     }

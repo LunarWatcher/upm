@@ -6,15 +6,16 @@ Package manager manager and SDK manager, because someone had to make the 15th st
 
 ## Requirements
 
-A C++17 compiler, and Linux or MacOS, and access to `tar` with a few specs (see the tar section). 
+A C++17 compiler, Linux, and access to `tar` with a few specs (see the tar section). 
 
-Note that MacOS will have weaker support, because I don't have access to any Mac machines. Please consider contributing to the project if you have access to a Mac and want to use upm.
+macOS and other UNIXes may work, but do not receive first party support.
 
-General UNIXes beyond Linux and MacOS will have varying support, for the same reason MacOS doesn't have full support: I don't have those operating systems, and testing them is a slow and annoying process that I don't want to spend my time on.
+### Additional libraries 
 
-### Additional libraries (Linux)
+The package names are based on Debian. Other distros need different libraries.
 
 * `libssl-dev`
+* `libcurlpp-dev`
 
 
 ### Tar
