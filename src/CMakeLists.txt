@@ -7,7 +7,6 @@ set (SOURCE_FILES
     upm/package/VersionResolvers.cpp
 
     upm/util/Version.cpp
-    upm/util/String.cpp
 
     upm/conf/Config.cpp
 

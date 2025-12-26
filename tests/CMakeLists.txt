@@ -2,7 +2,6 @@ add_executable(tests
     src/JSONAPITest.cpp
     src/TestRunner.cpp
     src/VersionTest.cpp
-    src/StringTest.cpp
     src/LuaHelperTests.cpp
 )
 Include(FetchContent)

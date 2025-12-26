@@ -1,5 +1,5 @@
 #include "Git.hpp"
-#include "upm/util/String.hpp"
+#include "stc/unix/Process.hpp"
 
 #include <stc/Environment.hpp>
 #include <spdlog/spdlog.h>
@@ -11,7 +11,8 @@ int git_clone(lua_State* state) {
         return luaL_error(state, "Expected 2 arguments");
     }
 
-    std::string repo = upm::String::escapeShellArg(luaL_checklstring(state, 1, nullptr));
+    // TODO: it'll probably be more safe to check the length before shoving it into a string
+    std::string repo = luaL_checklstring(state, 1, nullptr);
     std::string dest = luaL_checklstring(state, 2, nullptr);
     bool clean = (lua_gettop(state) >= 3 ? lua_toboolean(state, 3) : 0) != 0;
     bool absPath = (lua_gettop(state) >= 4 ? lua_toboolean(state, 4) : 0) != 0;
@@ -29,6 +30,10 @@ int git_clone(lua_State* state) {
             spdlog::info("Cached clone found; reset policy doesn't require re-cloning. Running git fetch for good measure");
 
             int _ = std::system(("cd " + p.string() + " && git fetch").c_str());
+            stc::Unix::Process {
+                std::vector<std::string> { "/usr/bin/env", "git", "fetch" },
+                stc::Unix::Environment { .workingDirectory = p }
+            }.block();
             lua_pushboolean(state, 0);
             // There has to be a better way to push this rather than doing it in two separate places.
             // Probably organized my code awfully, lmao
@@ -38,8 +43,9 @@ int git_clone(lua_State* state) {
             return 2;
         }
     }
-
-    int status = std::system(("git clone " + repo + " " + p.string()).c_str());
+    auto status = stc::Unix::Process {
+        { "/usr/bin/env", "git", "clone", repo, p.string() },
+    }.block();
     if (status != 0) {
         spdlog::info("Failed to run `git clone {}`", repo);
         return luaL_error(state, "Clone failed.");
@@ -53,20 +59,34 @@ int git_clone(lua_State* state) {
 }
 
 int git_checkout(lua_State* state) {
-    std::string repoLoc = upm::String::escapeShellArg(luaL_checkstring(state, 1));
-    std::string checkoutObj = upm::String::escapeShellArg(luaL_checkstring(state, 2));
+    std::string repoLoc = luaL_checkstring(state, 1);
+    std::string checkoutObj = luaL_checkstring(state, 2);
     bool masterMainFutureProofing = true;
     if (lua_gettop(state) >= 3) {
         masterMainFutureProofing = (lua_toboolean(state, 3) != 0);
     }
 
-    std::string cd = "cd " + repoLoc + " && ";
-    int status = std::system((cd +  "git checkout " + checkoutObj).c_str());
+    auto status = stc::Unix::Process {
+        { "/usr/bin/env", "git", "checkout", checkoutObj },
+            stc::Unix::Environment {
+                .workingDirectory = repoLoc
+            }
+    }.block();
     if (status != 0) {
         if (checkoutObj == "master" && masterMainFutureProofing) {
-            status = std::system((cd + "git checkout main").c_str());
+            status = stc::Unix::Process {
+                { "/usr/bin/env", "git", "checkout", "main" },
+                stc::Unix::Environment {
+                    .workingDirectory = repoLoc
+                }
+            }.block();
         } else if (checkoutObj == "main" && masterMainFutureProofing) {
-            status = std::system((cd + "git checkout master").c_str());
+            status = stc::Unix::Process {
+                { "/usr/bin/env", "git", "checkout", "master" },
+                stc::Unix::Environment {
+                    .workingDirectory = repoLoc
+                }
+            }.block();
         } else {
             return luaL_error(state, "Failed to run checkout.");
         }
@@ -79,9 +99,16 @@ int git_checkout(lua_State* state) {
 }
 
 int git_pull(lua_State* state) {
-    std::string repo = upm::String::escapeShellArg(luaL_checkstring(state, 1));
-
-    int res = std::system(("cd " + repo + " && git pull $(git remote) $(git rev-parse --abbref-rev HEAD)").c_str());
+    std::string repo = luaL_checkstring(state, 1);
+    // TODO: can this be separated from the shell entirely? Not super happy with this solution, but I think the
+    // alternative is too verbose. Might be worth investigating if there's process additions that make sense to inline
+    // it, but I'm not sure what that would look like
+    auto res = stc::Unix::Process {
+        { "/usr/bin/env", "bash", "-c", "git pull $(git remote) $(git rev-parse --abbref-rev HEAD)"},
+        stc::Unix::Environment {
+            .workingDirectory = repo
+        }
+    }.block();
     if (res != 0) {
         return luaL_error(state, "Failed to pull");
     }
@@ -89,9 +116,13 @@ int git_pull(lua_State* state) {
 }
 
 int git_fetch(lua_State *state) {
-    std::string repo = upm::String::escapeShellArg(luaL_checkstring(state, 1));
-
-    int res = std::system(std::format("cd {} && git fetch", repo).c_str());
+    std::string repo = luaL_checkstring(state, 1);
+    auto res = stc::Unix::Process {
+        { "/usr/bin/env", "git", "fetch" },
+        stc::Unix::Environment {
+            .workingDirectory = repo
+        }
+    }.block();
     if (res != 0) {
         return luaL_error(state, "Failed to fetch");
     }
