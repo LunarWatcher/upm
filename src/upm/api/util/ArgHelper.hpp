@@ -9,7 +9,7 @@
 #include <vector>
 
 namespace upm::ArgHelper {
-using LuaField = std::variant<std::string, long long, double, bool>;
+using LuaField = std::variant<std::string, lua_Integer, double, bool>;
 
 extern std::map<std::string, std::optional<LuaField>> parseTable(lua_State* state, int idx, const std::map<std::string, std::type_index>& fields);
 extern std::vector<ArgHelper::LuaField> parseList(lua_State* state, int idx);

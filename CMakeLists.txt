@@ -19,6 +19,7 @@ if(USE_LIBCPP)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
 endif()
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
 # Required to preserve lookup stuff
 list(APPEND CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
@@ -31,7 +32,11 @@ set(LUA_TAG v5.4.6 CACHE STRING "" FORCE)
 set(FMT_INSTALL OFF CACHE STRING "" FORCE)
 set(SPDLOG_INSTALL OFF CACHE STRING "" FORCE)
 set(CURL_INSTALL OFF CACHE STRING "" FORCE)
-set(CPR_USE_SYSTEM_CURL ON CACHE STRING "" FORCE)
+# For whatever fucking reason, if this is set to ON, there's a mystery segfault from the network module that cannot be traced.
+# gdb says corrupt stack. The request does not seem to complete, and the bug is traced back to cpr::~Session.
+# I do wonder if this is related to the build directory being dirty rather than an issue with system curl, but I cannot be
+# bothered. This is why I build things; at least I know it works.
+set(CPR_USE_SYSTEM_CURL OFF CACHE STRING "" FORCE)
 
 
 include(FetchContent)

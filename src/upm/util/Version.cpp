@@ -55,7 +55,7 @@ bool operator>(const Version& a, const Version& b) {
     std::vector<std::string>
         bComp = stc::string::split(b.getVersion(), ".");
 
-    for (int i = 0; i < std::max(aComp.size(), bComp.size()); ++i) {
+    for (size_t i = 0; i < std::max(aComp.size(), bComp.size()); ++i) {
         auto aBit = i >= aComp.size() ? 0 : std::stoi(aComp[i]);
         auto bBit = i >= bComp.size() ? 0 : std::stoi(bComp[i]);
 

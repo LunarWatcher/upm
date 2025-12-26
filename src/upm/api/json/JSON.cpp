@@ -1,9 +1,6 @@
 #include "JSON.hpp"
 
-#include "upm/api/Constants.hpp"
-#include "upm/api/LuaHelper.hpp"
-
-#include <iostream>
+#include <lua.hpp>
 
 extern "C" {
 

@@ -29,7 +29,6 @@ int git_clone(lua_State* state) {
         } else {
             spdlog::info("Cached clone found; reset policy doesn't require re-cloning. Running git fetch for good measure");
 
-            int _ = std::system(("cd " + p.string() + " && git fetch").c_str());
             stc::Unix::Process {
                 std::vector<std::string> { "/usr/bin/env", "git", "fetch" },
                 stc::Unix::Environment { .workingDirectory = p }
@@ -104,7 +103,7 @@ int git_pull(lua_State* state) {
     // alternative is too verbose. Might be worth investigating if there's process additions that make sense to inline
     // it, but I'm not sure what that would look like
     auto res = stc::Unix::Process {
-        { "/usr/bin/env", "bash", "-c", "git pull $(git remote) $(git rev-parse --abbref-rev HEAD)"},
+        { "/usr/bin/env", "bash", "-c", "git pull $(git remote) $(git rev-parse --abbrev-ref HEAD)"},
         stc::Unix::Environment {
             .workingDirectory = repo
         }

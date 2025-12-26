@@ -1,9 +1,9 @@
 #include "VersionResolvers.hpp"
 
-#include <fstream>
 #include "upm/Context.hpp"
 #include "stc/Environment.hpp"
 #include <unistd.h>
+#include <spdlog/spdlog.h>
 
 namespace upm {
 

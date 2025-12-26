@@ -6,7 +6,7 @@ extern "C" {
 #include "lualib.h"
 }
 
-#include "Network.hpp"
+#include <string>
 
 namespace upm {
 

@@ -15,7 +15,7 @@ macOS and other UNIXes may work, but do not receive first party support.
 The package names are based on Debian. Other distros need different libraries.
 
 * `libssl-dev`
-* `libcurlpp-dev`
+* meson (required for libcurl)
 
 
 ### Tar

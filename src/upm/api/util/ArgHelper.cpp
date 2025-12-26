@@ -1,14 +1,19 @@
 #include "ArgHelper.hpp"
-#include "lauxlib.h"
-#include "lua.h"
-#include <iostream>
+#include "lua.hpp"
 #include <optional>
 #include <stdexcept>
 #include <vector>
 
 namespace upm {
 
-std::map<std::string, std::optional<ArgHelper::LuaField>> ArgHelper::parseTable(lua_State* state, int idx, const std::map<std::string, std::type_index>& fields) {
+std::map<std::string, std::optional<ArgHelper::LuaField>> ArgHelper::parseTable(
+    lua_State* state,
+    int idx,
+    const std::map<std::string, std::type_index>& fields
+) {
+    if (state == nullptr) {
+        throw std::runtime_error("Bad girl");
+    }
     std::map<std::string, std::optional<LuaField>> res;
 
     for (const auto& [key, type] : fields) {
@@ -37,16 +42,25 @@ std::map<std::string, std::optional<ArgHelper::LuaField>> ArgHelper::parseTable(
 }
 
 std::vector<ArgHelper::LuaField> ArgHelper::parseList(lua_State* state, int idx) {
+    if (state == nullptr) {
+        throw std::runtime_error("Bad girl");
+    }
+
     auto length = luaL_len(state, idx);
 
-    std::vector<ArgHelper::LuaField> out;
+    std::vector<ArgHelper::LuaField> out{};
+    out.reserve(length);
     for (lua_Integer i = 1; i <= length; ++i) {
         lua_rawgeti(state, idx, i); // +1 on the stack
 
         if (lua_isstring(state, -1)) {
-            out.push_back(luaL_checkstring(state, -1));
+            size_t len;
+            auto cstr = luaL_checklstring(state, -1, &len);
+            out.push_back(std::string(cstr, len));
         } else if (lua_isinteger(state, -1)) {
-            out.push_back(luaL_checkinteger(state, -1));
+            // Context: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=114592 - this does admittedly say it's a GCC14 bug
+            // (if I'm reading the bug tracker right), but it's the _exact_ same situation. Just ignore it for now
+            out.push_back(luaL_checkinteger(state, -1)); // This produces a bogus -Wmaybe-uninitialized warning under GCC13. It can be ignored
         } else {
             throw std::runtime_error("Passed invalid type to list");
         }

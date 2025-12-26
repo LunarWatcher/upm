@@ -8,7 +8,7 @@ local vResolvers = require "vResolvers"
 function install()
 
     -- very preliminary code
-    
+
     -- The easy option here is to use the git repo to get the latest version.
     -- This also makes it easier to sort out compilation in the future.
     local _, gitDir = git.clone("https://github.com/baldurk/renderdoc", "renderdoc")
@@ -30,9 +30,9 @@ function install()
         local url = "https://renderdoc.org/stable/" .. tostring(stripV)
             .. "/renderdoc_" .. tostring(stripV) .. ".tar.gz";
         log.info("Downloading renderdoc from", url)
-        status, filePath = network.download(url);
+        local _, filePath = network.download(url);
         if (filePath ~= nil) then
-            dest = fs.untar(filePath, 1)
+            local dest = fs.untar(filePath, 1)
             fs.installCopy(dest)
         else
             error("Failed to download binary tarball.")

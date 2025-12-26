@@ -2,12 +2,6 @@
 
 #include <lua.hpp>
 
-#include "upm/conf/Constants.hpp"
-
-namespace upm { namespace network {
-const auto logger = std::make_shared<spdlog::logger>("upm:network", Constants::sinks.begin(), Constants::sinks.end());
-}}
-
 // externs are required for name mangling and All That Fun Crap:tm:
 // Can I use namespaces with this though?
 extern "C" {

@@ -113,7 +113,7 @@ void Context::parseFlags() {
                     }
                 } else {
                     // -f
-                    for (int i = 1; i < line.size(); ++i) {
+                    for (size_t i = 1; i < line.size(); ++i) {
                         if (shorthands.find(line[i]) != shorthands.end()) {
                             flags[shorthands.at(line[i])] = "true";
                         }

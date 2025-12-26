@@ -23,7 +23,8 @@ local function install()
             -- 1 in its native array.
             version = obj[1]["version"]
         else
-            for i = 1, len(obj) do
+            -- TODO: #obj?
+            for i = 1, string.len(obj) do
                 if (obj[i]["lts"] == true) then
                     version = obj[i]["version"]
                     break;

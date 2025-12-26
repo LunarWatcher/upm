@@ -1,9 +1,8 @@
 #include "Filesystem.hpp"
 
-#include "lauxlib.h"
 #include "upm/Context.hpp"
 
-#include "lua.h"
+#include "lua.hpp"
 #include "upm/api/Constants.hpp"
 #include "upm/api/util/ArgHelper.hpp"
 
@@ -19,7 +18,6 @@ int upmfilesystem_exists(lua_State* state) {
     if (lua_gettop(state) < 1) {
         return luaL_error(state, "Need an argument");
     }
-
 
     auto type = luaL_optinteger(state, 2, upm::filesystem::TYPE_ANY);
 
@@ -50,7 +48,7 @@ int upmfilesystem_exists(lua_State* state) {
 }
 
 int upmfilesystem_pwd(lua_State* L) {
-    lua_pushstring(L, std::filesystem::current_path().string().c_str());;
+    lua_pushstring(L, std::filesystem::current_path().string().c_str());
 
     return 1;
 }
@@ -324,17 +322,26 @@ int upmfilesystem_untar(lua_State* state) {
     if (auto pos = dest.string().find("/tmp/"); pos != 0) {
         throw std::runtime_error("Fatal: resolved destination path is not a /tmp/ path");
     }
-    std::string tarArg;
+    std::vector<std::string> command {
+        "/usr/bin/env", "tar",
+            "-xf", source.string(),
+            "-C", dest.string()
+    };
     if (stripComponents > 0) {
-        tarArg += "--strip-components " + std::to_string(stripComponents);
+        command.push_back("--strip-components"); 
+        command.push_back(std::to_string(stripComponents));
     }
 
-    tarArg += " -xf " + source.string();
-    tarArg += " -C " + dest.string();
     upm::filesystem::logger->info("Unpacking {} to {}...", source.string(), dest.string());
 
     std::filesystem::create_directories(dest);
-    auto res = std::system(("tar " + tarArg).c_str());
+    auto res = stc::Unix::Process {
+        command, 
+        std::nullopt,
+        stc::Unix::Config {
+            .verboseUserOutput = true
+        },
+    }.block();
     if (res != 0) {
         return luaL_error(state, "Failed to untar");
     }

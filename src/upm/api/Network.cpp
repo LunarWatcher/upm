@@ -1,7 +1,8 @@
 #include "Network.hpp"
 #include "lauxlib.h"
-#include "lua.h"
 #include "lua.hpp"
+#include "spdlog/spdlog.h"
+#include <string>
 
 #include <filesystem>
 #include <cpr/cpr.h>
@@ -14,10 +15,19 @@ int upmnetwork_request(lua_State* state) {
         return luaL_error(state, "Need an argument");
     }
 
-    std::string url = luaL_checklstring(state, 1, nullptr);
-    upm::network::logger->debug("Requesting {}", url);
+    size_t len;
+    auto rawUrl = luaL_checklstring(state, 1, &len);
+    if (rawUrl == nullptr) {
+        return luaL_typeerror(state, 1, "got null string");
+    }
+    std::string url { rawUrl, len };
+    spdlog::debug("Requesting {}", url);
 
-    auto response = cpr::Get(cpr::Url(url));
+    auto response = cpr::Get(
+        cpr::Url{url}
+    );
+
+    spdlog::debug(response.status_code);
 
     lua_newtable(state);
     lua_pushstring(state, response.text.c_str());
@@ -39,7 +49,7 @@ int upmnetwork_download(lua_State* state) {
 
     std::string url = luaL_checklstring(state, 1, nullptr);
 
-    upm::network::logger->info("Downloading {}...", url);
+    spdlog::info("Downloading {}...", url);
     
 
     auto name = url.substr(url.rfind('/') + 1);

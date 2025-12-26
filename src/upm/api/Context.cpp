@@ -1,7 +1,7 @@
 // I regret these filenames
 #include "Context.hpp"
 #include "Constants.hpp"
-#include "lua.h"
+#include "lua.hpp"
 #include "upm/Context.hpp"
 
 extern "C" {

@@ -1,10 +1,10 @@
 #include "Activators.hpp"
 
-#include "lauxlib.h"
-#include "lua.h"
+#include "lua.hpp"
 #include "upm/Context.hpp"
 #include "upm/package/Activators.hpp"
 #include <filesystem>
+#include <spdlog/spdlog.h>
 
 extern "C" {
 
@@ -18,7 +18,7 @@ int activators_universalUNIX(lua_State* state) {
 
         while (lua_next(state, tableIdx) != 0) {
             std::string value = luaL_checkstring(state, -1);
-safeDirNames.push_back(value);
+            safeDirNames.push_back(value);
             lua_pop(state, 1);
         }
 
